@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="18dp"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:text="Calculator"
+        android:textColor="@color/black"
+        android:textFontWeight="800"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!--        个人主页-->
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="15dp"
+        android:src="@drawable/settings_user"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!--        输入体重    -->
+    <TextView
+        android:id="@+id/input_text_weight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        android:fontFamily="@font/font_regular"
+        android:text="Weight"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <EditText
+        android:id="@+id/input_weight"
+        android:layout_width="152dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/input_background"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:inputType="number"
+        android:maxLength="6"
+        android:text="140.00"
+        android:textSize="30sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_text_weight" />
+
+    <!--        输入身高     -->
+    <TextView
+        android:id="@+id/input_text_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        android:fontFamily="@font/font_regular"
+        android:text="Height"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideline_vertical"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <EditText
+        android:id="@+id/input_height"
+        android:layout_width="152dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/input_background"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:inputType="number"
+        android:maxLength="5"
+        android:text="170.0"
+        android:textSize="30sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_text_height" />
+
+    <EditText
+        android:id="@+id/input_height_ft"
+        android:layout_width="65dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="7dp"
+        android:background="@drawable/input_background"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:inputType="number"
+        android:maxLength="2"
+        android:text="1'"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toStartOf="@id/input_height_in"
+        app:layout_constraintTop_toBottomOf="@id/input_text_height" />
+
+    <EditText
+        android:id="@+id/input_height_in"
+        android:layout_width="80dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/input_background"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:inputType="number"
+        android:maxLength="4"
+        android:text="17''"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_text_height" />
+
+
+    <!--        体重切换单位    -->
+    <!-- 两个均分文字按钮 -->
+    <LinearLayout
+        android:id="@+id/input_weight_switch"
+        android:layout_width="152dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/select_background"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="@+id/input_weight"
+        app:layout_constraintTop_toBottomOf="@+id/input_weight">
+
+        <TextView
+            android:id="@+id/switch_weight_lb"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:alpha="0.3"
+            android:fontFamily="@font/montserrat_extrabold"
+            android:gravity="center"
+            android:text="lb"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/switch_weight_kg"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:alpha="0.3"
+            android:fontFamily="@font/montserrat_extrabold"
+            android:gravity="center"
+            android:text="kg"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!--         选中白色滑动块 -->
+    <TextView
+        android:id="@+id/selector_thumb_weight"
+        android:layout_width="76dp"
+        android:layout_height="36dp"
+        android:background="@drawable/thumb_background"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:text="lb"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@id/input_weight_switch"
+        app:layout_constraintTop_toTopOf="@id/input_weight_switch" />
+
+
+    <!--        身高切换单位    -->
+    <!-- 两个均分文字按钮 -->
+    <LinearLayout
+        android:id="@+id/input_height_switch"
+        android:layout_width="152dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="90dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/select_background"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/input_text_height">
+
+        <TextView
+            android:id="@+id/switch_height_ft"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:alpha="0.3"
+            android:fontFamily="@font/montserrat_extrabold"
+            android:gravity="center"
+            android:text="ft·in"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/switch_height_cm"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:alpha="0.3"
+            android:fontFamily="@font/montserrat_extrabold"
+            android:gravity="center"
+            android:text="cm"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!--         选中白色滑动块 -->
+    <TextView
+        android:id="@+id/selector_thumb_height"
+        android:layout_width="76dp"
+        android:layout_height="36dp"
+        android:background="@drawable/thumb_background"
+        android:fontFamily="@font/font_extrabold"
+        android:gravity="center"
+        android:text="ft·in"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/input_height_switch"
+        app:layout_constraintTop_toTopOf="@+id/input_height_switch" />
+
+
+    <!--        Time-->
+    <TextView
+        android:id="@+id/guide_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="250dp"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center"
+        android:text="Time"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/input_time_1"
+        android:layout_width="152dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/input_background"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:inputType="number"
+        android:text="June 25,2026"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guide_time" />
+
+    <TextView
+        android:id="@+id/input_time_2"
+        android:layout_width="152dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/input_background"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:inputType="number"
+        android:text="Afternoon"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guide_time" />
+
+    <!--        Age-->
+    <TextView
+        android:id="@+id/guide_age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="380dp"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center"
+        android:text="Age"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/input_age"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/input_background"
+        android:orientation="horizontal"
+
+        android:clipToPadding="false"
+        android:paddingHorizontal="120dp"
+
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        app:layout_constraintEnd_toEndOf="@id/input_time_2"
+        app:layout_constraintStart_toStartOf="@id/input_time_1"
+        app:layout_constraintTop_toBottomOf="@id/guide_age" />
+
+    <!--        性别-->
+
+    <!-- 男性卡片 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardMale"
+        android:layout_width="150dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="15dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="2dp"
+        app:layout_constraintStart_toStartOf="@id/input_age"
+        app:layout_constraintTop_toBottomOf="@id/input_age">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <!-- 性别图标 -->
+            <ImageView
+                android:id="@+id/ivMaleIcon"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/ic_male"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 文字 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ivMaleIcon"
+                android:layout_marginTop="1dp"
+                android:text="Male"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivMaleIcon" />
+
+            <!-- 右上角对勾 -->
+            <ImageView
+                android:id="@+id/ivMaleCheck"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_check_circle_blue"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- 女性卡片 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardFemale"
+        android:layout_width="150dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="15dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="2dp"
+        app:layout_constraintEnd_toEndOf="@id/input_age"
+        app:layout_constraintTop_toBottomOf="@id/input_age">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/ivFemaleIcon"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/ic_female"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ivFemaleIcon"
+                android:layout_marginTop="1dp"
+                android:text="Female"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivFemaleIcon" />
+
+            <ImageView
+                android:id="@+id/ivFemaleCheck"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_check_circle_blue"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+</androidx.constraintlayout.widget.ConstraintLayout>
