@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bottom_sheet_rounded_bg">
+
+    <!-- 标题 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DATE"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- 三列滚轮容器：月 | 日 | 年 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <!-- 月份列：Jan~Dec -->
+            <NumberPicker
+                android:id="@+id/np_month"
+                android:layout_width="0dp"
+                android:layout_height="160dp"
+                android:layout_weight="1"
+                />
+
+            <!-- 日期列：1~31 -->
+            <NumberPicker
+                android:id="@+id/np_day"
+                android:layout_width="0dp"
+                android:layout_height="160dp"
+                android:layout_weight="1"/>
+
+            <!-- 年份列 -->
+            <NumberPicker
+                android:id="@+id/np_year"
+                android:layout_width="0dp"
+                android:layout_height="160dp"
+                android:layout_weight="1"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 底部按钮栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="32dp">
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="CANCEL"
+            android:backgroundTint="#EEEEEE"
+            android:textColor="#000000"/>
+
+        <Button
+            android:id="@+id/btn_done"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="DONE"
+            android:backgroundTint="#2962FF"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
+</LinearLayout>

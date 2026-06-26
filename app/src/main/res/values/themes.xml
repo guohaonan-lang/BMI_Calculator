@@ -8,4 +8,10 @@
     <style name="Theme.BMICalculator" parent="Base.Theme.BMICalculator" >
 <!--        <item name="fontFamily" fontFamily="@font/montserrat_extrabold"/>-->
     </style>
+
+
+    <style name="BottomDialogStyle" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+<!--        <item name="android:windowAnimationStyle">@style/BottomAnim</item>-->
+    </style>
 </resources>
