@@ -1,22 +1,23 @@
 package com.example.bmicalculator.ui
 
-import android.app.Dialog
-import android.content.Context
+import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
-import android.text.format.Time
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.view.MotionEvent
 import android.widget.Button
-import android.widget.NumberPicker
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.bigkoo.pickerview.adapter.ArrayWheelAdapter
+import com.contrarywind.view.WheelView
 import com.example.bmicalculator.R
 import com.example.bmicalculator.adapter.InputAgeAdapter
 import com.example.bmicalculator.databinding.ActivityDataInputBinding
@@ -27,7 +28,12 @@ import java.util.Calendar
 class DataInputActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDataInputBinding
 
-    private var data : BmiEntity = BmiEntity(1,140.00f,65.00f,33f,25,0,436,5325325)
+    private var selectMonth: String = "June"
+    private var selectDay: String = "21"
+    private var selectYear: String = "2018"
+    private lateinit var dayinput: TextView
+    private lateinit var timeinput: TextView
+    private var data: BmiEntity = BmiEntity(1, 140.00f, 65.00f, 33f, 25, 0, 436, 5325325)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,96 +49,161 @@ class DataInputActivity : AppCompatActivity() {
         setupWeightAndHeight()
         setupTime()
         setupAgeRecyclerView()
+
+        binding.dataInputCalculate.setOnClickListener {
+            val intent = Intent(this, ResultActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun setupTime() {
-        var dayinput = binding.mergeDateInput.inputTime1
-        val timeinput = binding.mergeDateInput.inputTime2
+        dayinput = binding.mergeDateInput.inputTime1
+        timeinput = binding.mergeDateInput.inputTime2
 
         dayinput.setOnClickListener {
-            showDatePickerDialog(this) { month, day, year ->
-                // 这里是选中日期后的回调
-                val resultText = "$month $day, $year"
-                binding.mergeDateInput.inputTime1.text = resultText
-            }
+            showDatePickerBottomSheet()
+
         }
     }
 
-    fun showDatePickerDialog(context: Context, onSelect: (month: String, day: Int, year: Int) -> Unit) {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_date_picker, null)
-        val dialog = Dialog(context, R.style.BottomDialogStyle)
-        dialog.setContentView(dialogView)
+    // 打开日期选择弹窗入口（按钮点击调用此方法）
+    fun showDatePickerBottomSheet() {
+        val sheetDialog = BottomSheetDialog(this)
+        val rootView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_date_picker, null)
+        sheetDialog.setContentView(rootView)
 
-        // 绑定控件
-        val npMonth = dialogView.findViewById<NumberPicker>(R.id.np_month)
-        val npDay = dialogView.findViewById<NumberPicker>(R.id.np_day)
-        val npYear = dialogView.findViewById<NumberPicker>(R.id.np_year)
-        val btnCancel = dialogView.findViewById<Button>(R.id.btn_cancel)
-        val btnDone = dialogView.findViewById<Button>(R.id.btn_done)
+        val wheelMonth: WheelView = rootView.findViewById(R.id.wheel_month)
+        val wheelDay: WheelView = rootView.findViewById(R.id.wheel_day)
+        val wheelYear: WheelView = rootView.findViewById(R.id.wheel_year)
 
-        // 1. 初始化月份数据
-        val monthArr = arrayOf("Jan","Feb","Mar","Apr","May","June","July","Aug","Sep","Oct","Nov","Dec")
-        npMonth.minValue = 0
-        npMonth.maxValue = monthArr.size - 1
-        npMonth.displayedValues = monthArr
-        npMonth.wrapSelectorWheel = false
+        // 1. 基础常量数据源
+        val monthData = listOf(
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "June",
+            "July",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+        )
+        val yearData = (1970..2036).map { it.toString() }
+        // ===== 获取当前系统日期，计算对应滚轮下标 =====
+        val nowCalendar = Calendar.getInstance()
+        val currentYear = nowCalendar.get(Calendar.YEAR)
+        val currentMonth = nowCalendar.get(Calendar.MONTH) // 0=Jan 刚好和monthData下标对应
+        val currentDay = nowCalendar.get(Calendar.DAY_OF_MONTH)
 
-        // 2. 年份范围：2016~2022（截图示例区间，可自定义）
-        npYear.minValue = 2016
-        npYear.maxValue = 2030
-        npYear.wrapSelectorWheel = false
+        // 年份下标，偏移量 = 当前年 - 1970
+        val yearSelectIndex = currentYear - 1970
+        // 月份下标等于Calendar.MONTH
+        val monthSelectIndex = currentMonth
+        // 日期初始下标 = 当前日 - 1（列表从1开始，下标0对应1号）
+        val daySelectIndex = currentDay - 1
 
-        // 3. 联动逻辑：切换月份更新日期最大值
-        fun refreshDayMax(monthPos: Int, year: Int) {
-            val maxDay = when(monthPos) {
-                1 -> if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0) 29 else 28
-                0,2,4,6,7,9,11 -> 31
-                else -> 30
+        val boldTypeface: Typeface? = ResourcesCompat.getFont(this, R.font.font_bold_extrabold)
+
+        // 2. 局部通用初始化滚轮方法
+        fun initWheel(
+            wheel: WheelView,
+            dataList: List<String>,
+            selectIndex: Int,
+            typeface: Typeface?
+        ) {
+            wheel.adapter = ArrayWheelAdapter(dataList)
+            wheel.currentItem = selectIndex
+            wheel.setTypeface(typeface)
+            wheel.setCyclic(false)
+            wheel.setLineSpacingMultiplier(2f)
+            wheel.setAlphaGradient(true)
+            wheel.setOnTouchListener { v, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                        v.parent?.requestDisallowInterceptTouchEvent(true)
+                    }
+
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        v.parent?.requestDisallowInterceptTouchEvent(false)
+                        v.performClick()
+                    }
+                }
+                false
             }
-            npDay.minValue = 1
-            npDay.maxValue = maxDay
-        }
-        // 默认初始值
-        npDay.minValue = 1
-        npDay.maxValue = 31
-        npDay.wrapSelectorWheel = false
+            wheel.setTextSize(16f)
 
-        // 月份滚动监听
-        npMonth.setOnValueChangedListener { _, newVal, _ ->
-            refreshDayMax(newVal, npYear.value)
-        }
-        // 年份滚动监听
-        npYear.setOnValueChangedListener { _, newVal, _ ->
-            refreshDayMax(npMonth.value, newVal)
         }
 
-        // 按钮事件
-        btnCancel.setOnClickListener { dialog.dismiss() }
-        btnDone.setOnClickListener {
-            val selMonth = monthArr[npMonth.value]
-            val selDay = npDay.value
-            val selYear = npYear.value
-            onSelect(selMonth, selDay, selYear)
-            dialog.dismiss()
+        // ========== 核心：动态生成当月天数函数 ==========
+        fun getDayList(yearPos: Int, monthPos: Int): MutableList<String> {
+            val targetYear = yearData[yearPos].toInt()
+            // Calendar月份0=Jan，滚轮下标0正好对应Jan，不用偏移
+            val targetMonth = monthPos
+            val calendar = Calendar.getInstance()
+            calendar.set(targetYear, targetMonth, 1)
+            // 获取当月总天数
+            val maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+            // 生成 1~maxDay 字符串列表
+            return (1..maxDay).map { it.toString() }.toMutableList()
         }
 
-        val calendar = Calendar.getInstance()
-        val currentYear = calendar.get(Calendar.YEAR)
-        val currentMonthIdx = calendar.get(Calendar.MONTH)
-        val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
+        // 3. 初始化年份、月份滚轮
+        initWheel(wheelMonth, monthData, monthSelectIndex, boldTypeface)
+        initWheel(wheelYear, yearData, yearSelectIndex, boldTypeface)
 
-        val targetYear = currentYear.coerceIn(npYear.minValue, npYear.maxValue)
-        npMonth.value = currentMonthIdx
-        npYear.value = targetYear
-        refreshDayMax(currentMonthIdx, targetYear)
-        npDay.value = currentDay
+        // 4. 初始化日期（首次根据默认下标动态生成天数）
+        var dayList = getDayList(yearSelectIndex, monthSelectIndex)
+        initWheel(wheelDay, dayList, daySelectIndex, boldTypeface)
 
-        // 底部弹出样式
-        val window = dialog.window
-        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        window?.setGravity(Gravity.BOTTOM)
-        dialog.show()
+
+        // ========== 联动监听：切换月份/年份，自动刷新日期 ==========
+        // 月份切换监听
+        wheelMonth.setOnItemSelectedListener { _ ->
+            val yearCur = wheelYear.currentItem
+            val monthCur = wheelMonth.currentItem
+            dayList = getDayList(yearCur, monthCur)
+            // 刷新日期适配器
+            // 防止原来选中的天数超过当月最大天数，自动修正下标
+            Toast.makeText(this,"${wheelDay.currentItem} ${dayList.size}",Toast.LENGTH_SHORT).show()
+            if (wheelDay.currentItem >= dayList.size) {
+                wheelDay.currentItem = dayList.size - 1
+
+            }
+            wheelDay.adapter = ArrayWheelAdapter(dayList)
+            wheelDay.invalidate()
+            wheelDay.setTypeface(boldTypeface)
+        }
+
+        // 年份切换监听（闰年2月天数变化）
+        wheelYear.setOnItemSelectedListener { _ ->
+            val yearCur = wheelYear.currentItem
+            val monthCur = wheelMonth.currentItem
+            dayList = getDayList(yearCur, monthCur)
+            wheelDay.adapter = ArrayWheelAdapter(dayList)
+            if (wheelDay.currentItem >= dayList.size) {
+                wheelDay.currentItem = dayList.size - 1
+            }
+            wheelDay.setTypeface(boldTypeface)
+        }
+        rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog.dismiss() }
+        rootView.findViewById<Button>(R.id.btn_done).setOnClickListener {
+            selectMonth = monthData[wheelMonth.currentItem]
+            selectDay = dayList[wheelDay.currentItem]
+            selectYear = yearData[wheelYear.currentItem]
+
+            dayinput.text = selectMonth + " " + selectDay + ", " + selectYear
+            // 业务逻辑：回调日期
+            sheetDialog.dismiss()
+        }
+
+        sheetDialog.show()
+
     }
+
     private fun setupWeightAndHeight() {
         val edtWeight = binding.mergeDateInput.inputWeight
         val edtHeight = binding.mergeDateInput.inputHeight
@@ -146,9 +217,9 @@ class DataInputActivity : AppCompatActivity() {
 
     private fun setupAgeRecyclerView() {
         val ageRecyclerView = binding.mergeDateInput.inputAge
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         ageRecyclerView.layoutManager = layoutManager
-        val adapter = InputAgeAdapter(ageRecyclerView){
+        val adapter = InputAgeAdapter(ageRecyclerView) {
 
         }
         ageRecyclerView.adapter = adapter
@@ -167,7 +238,7 @@ class DataInputActivity : AppCompatActivity() {
                 val firstVisible = lm.findFirstVisibleItemPosition()
                 val lastVisible = lm.findLastVisibleItemPosition()
 
-                for (pos in firstVisible-1..lastVisible+1) {
+                for (pos in firstVisible - 1..lastVisible + 1) {
                     val itemView = lm.findViewByPosition(pos) ?: continue
                     val itemCenterX = itemView.left + itemView.width / 2f
                     val distance = kotlin.math.abs(itemCenterX - rvCenterX)

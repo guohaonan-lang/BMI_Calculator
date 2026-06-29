@@ -6,4 +6,13 @@
     <color name="background">#EAEAEE</color>
     <color name="gray">#F5F5F7</color>
 
+    <color name="grad1">#4343B8</color>
+    <color name="grad2">#1258E1</color>
+    <color name="grad3">#0099F2</color>
+    <color name="grad4">#54A529</color>
+    <color name="grad5">#FECD2E</color>
+    <color name="grad6">#FFA100</color>
+    <color name="grad7">#FF7137</color>
+    <color name="grad8">#D3333B</color>
+
 </resources>
