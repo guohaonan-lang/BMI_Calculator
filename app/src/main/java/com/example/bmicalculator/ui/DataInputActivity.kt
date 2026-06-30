@@ -104,6 +104,7 @@ class DataInputActivity : AppCompatActivity() {
             val intent = Intent(this, ResultActivity::class.java)
             intent.putExtra("BMI",bmiRecord)
             startActivity(intent)
+            finish()
         }
     }
     private fun getCustomTimeStamp(): Long {

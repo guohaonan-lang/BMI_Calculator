@@ -1,5 +1,6 @@
 package com.example.bmicalculator.ui
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
@@ -77,7 +78,19 @@ class ResultActivity : AppCompatActivity() {
         }
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+        setupBmiGardAndAssessment()
+        binding.resultSave.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finishAffinity()
+        }
     }
+
+    private fun setupBmiGardAndAssessment() {
+//        TODO("Not yet implemented")
+    }
+
     // 解析出 Morning/Afternoon/Evening/Night
     private fun getPeriodFromTimeStamp(timeStamp: Long): String {
         val calendar = Calendar.getInstance()
