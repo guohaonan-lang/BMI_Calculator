@@ -33,7 +33,7 @@ class SplashActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        window.navigationBarColor = "#3659CF".toColorInt() // 替换为您需要的颜色值
+        window.navigationBarColor = "#3659CF".toColorInt() //导航栏颜色
 
 
         // 确保在布局完全测量并绘制到屏幕后，再触发动画

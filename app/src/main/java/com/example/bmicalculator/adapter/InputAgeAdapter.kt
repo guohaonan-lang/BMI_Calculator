@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bmicalculator.R
 import com.example.bmicalculator.model.Age
@@ -18,7 +17,7 @@ class InputAgeAdapter(
 
     private val ageList: List<Age> = getFixedAgeList()
     // 当前选中下标
-    var selectedPosition = 0
+    var selectedPosition = 23
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val age = itemView.findViewById<TextView>(R.id.item_age_text)
@@ -39,7 +38,7 @@ class InputAgeAdapter(
         // 点击条目更新选中
         holder.itemView.setOnClickListener {
             updateSelectedPos(position)
-            onAgeSelect(selectedPosition)
+            onAgeSelect(ageList[selectedPosition].num)
             scrollItemToCenter(ageRecyclerView, position)
         }
     }

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
+    android:clickable="true"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 
@@ -57,7 +58,7 @@
         android:background="@drawable/input_background"
         android:fontFamily="@font/montserrat_extrabold"
         android:gravity="center"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:maxLength="6"
         android:text="140.00"
         android:textSize="30sp"
@@ -96,81 +97,69 @@
         app:layout_constraintTop_toBottomOf="@id/input_text_height" />
 
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/input_height_ft"
         android:layout_width="65dp"
         android:layout_height="70dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="7dp"
         android:background="@drawable/input_background"
+        android:fontFamily="@font/montserrat_extrabold"
         android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toStartOf="@id/input_height_in_g"
-        app:layout_constraintTop_toBottomOf="@id/input_text_height"
-        android:clickable="true">
+        android:inputType="number"
+        android:maxLength="2"
+        android:text="5"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toStartOf="@id/input_height_in"
+        app:layout_constraintTop_toBottomOf="@id/input_text_height" />
 
-        <EditText
-            android:id="@+id/input_height_ft"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:fontFamily="@font/montserrat_extrabold"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:text="1"
-            android:textSize="30sp" />
-
-        <!-- 右侧文字后缀 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/montserrat_extrabold"
-            android:gravity="center"
-            android:inputType="number"
-            android:text="'"
-            android:textColor="@color/black"
-            android:textSize="30sp"/>
-
-    </LinearLayout>
+    <!-- 右侧文字后缀 -->
+    <TextView
+        android:id="@+id/input_height_ft_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:text="'"
+        android:textColor="@color/black"
+        android:textSize="30sp"
+        android:layout_marginStart="-20dp"
+        app:layout_constraintStart_toEndOf="@id/input_height_ft"
+        app:layout_constraintTop_toTopOf="@id/input_height_ft"
+        app:layout_constraintBottom_toBottomOf="@id/input_height_ft"/>
 
 
-    <LinearLayout
-        android:id="@+id/input_height_in_g"
+    <EditText
+        android:id="@+id/input_height_in"
         android:layout_width="80dp"
         android:layout_height="70dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:background="@drawable/input_background"
+        android:fontFamily="@font/montserrat_extrabold"
         android:gravity="center"
-        android:orientation="horizontal"
+        android:inputType="number"
+        android:paddingRight="5dp"
+        android:maxLength="2"
+        android:text="10"
+        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/input_text_height"
-        android:clickable="true">
+        app:layout_constraintTop_toBottomOf="@id/input_text_height" />
 
-        <EditText
-            android:id="@+id/input_height_in"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/input_background"
-            android:fontFamily="@font/montserrat_extrabold"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="2"
-            android:text="17"
-            android:textSize="30sp" />
-
-        <!-- 右侧文字后缀 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/montserrat_extrabold"
-            android:gravity="center"
-            android:inputType="number"
-            android:text="''"
-            android:textColor="@color/black"
-            android:textSize="30sp"/>
-
-    </LinearLayout>
+    <!-- 右侧文字后缀 -->
+    <TextView
+        android:id="@+id/input_height_in_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat_extrabold"
+        android:gravity="center"
+        android:text="''"
+        android:textColor="@color/black"
+        android:textSize="30sp"
+        android:layout_marginStart="-25dp"
+        app:layout_constraintStart_toEndOf="@id/input_height_in"
+        app:layout_constraintTop_toTopOf="@id/input_height_in"
+        app:layout_constraintBottom_toBottomOf="@id/input_height_in"/>
 
     <!--        体重切换单位    -->
     <!-- 两个均分文字按钮 -->
@@ -214,6 +203,7 @@
         android:id="@+id/selector_thumb_weight"
         android:layout_width="76dp"
         android:layout_height="36dp"
+        android:layout_marginStart="0dp"
         android:background="@drawable/thumb_background"
         android:fontFamily="@font/montserrat_extrabold"
         android:gravity="center"
@@ -372,7 +362,8 @@
         app:cardCornerRadius="15dp"
         app:cardElevation="2dp"
         app:layout_constraintStart_toStartOf="@id/input_age"
-        app:layout_constraintTop_toBottomOf="@id/input_age">
+        app:layout_constraintTop_toBottomOf="@id/input_age"
+        android:alpha="0.7">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -388,10 +379,12 @@
                 android:src="@drawable/ic_male"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:alpha="0.7"/>
 
             <!-- 文字 -->
             <TextView
+                android:id="@+id/tvMale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/ivMaleIcon"
@@ -400,7 +393,8 @@
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivMaleIcon" />
+                app:layout_constraintTop_toBottomOf="@id/ivMaleIcon"
+                android:alpha="0.7"/>
 
             <!-- 右上角对勾 -->
             <ImageView
@@ -409,9 +403,10 @@
                 android:layout_height="18dp"
                 android:layout_margin="8dp"
                 android:src="@drawable/ic_check_circle_blue"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -426,7 +421,8 @@
         app:cardCornerRadius="15dp"
         app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="@id/input_age"
-        app:layout_constraintTop_toBottomOf="@id/input_age">
+        app:layout_constraintTop_toBottomOf="@id/input_age"
+        android:alpha="0.7">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -441,9 +437,11 @@
                 android:src="@drawable/ic_female"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:alpha="0.7"/>
 
             <TextView
+                android:id="@+id/tvFemale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/ivFemaleIcon"
@@ -452,7 +450,8 @@
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivFemaleIcon" />
+                app:layout_constraintTop_toBottomOf="@id/ivFemaleIcon"
+                android:alpha="0.7"/>
 
             <ImageView
                 android:id="@+id/ivFemaleCheck"
@@ -460,7 +459,7 @@
                 android:layout_height="18dp"
                 android:layout_margin="8dp"
                 android:src="@drawable/ic_check_circle_blue"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>

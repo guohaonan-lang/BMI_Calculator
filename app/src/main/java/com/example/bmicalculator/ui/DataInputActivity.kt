@@ -1,21 +1,30 @@
 package com.example.bmicalculator.ui
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Visibility
 import com.bigkoo.pickerview.adapter.ArrayWheelAdapter
 import com.contrarywind.view.WheelView
 import com.example.bmicalculator.R
@@ -23,17 +32,36 @@ import com.example.bmicalculator.adapter.InputAgeAdapter
 import com.example.bmicalculator.databinding.ActivityDataInputBinding
 import com.example.bmicalculator.model.BmiEntity
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import java.lang.System
 import java.util.Calendar
 
 class DataInputActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDataInputBinding
 
+    private var weight: Float = 140.00f
+    private var weightUnit = false
+
+    private var height: Float = 170.00f
+    private var heightFt: Int = 5
+    private var heightIn: Int = 7
+    private var heightUnit = false
     private var selectMonth: String = "June"
     private var selectDay: String = "21"
     private var selectYear: String = "2018"
-    private lateinit var dayinput: TextView
-    private lateinit var timeinput: TextView
-    private var data: BmiEntity = BmiEntity(1, 140.00f, 65.00f, 33f, 25, 0, 436, 5325325)
+    private var selectPeriod: String = "Morning"
+    private var age: Int = 25
+    private var gender: Int = 1
+    private var bmi = 0f
+
+    //XML控件
+    private lateinit var edtWeight: EditText
+    private lateinit var edtHeight: EditText
+
+    private lateinit var dayInput: TextView
+    private lateinit var timeInput: TextView
+    private lateinit var ageRecyclerView: RecyclerView
+
+    private lateinit var ageAdapter: InputAgeAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,25 +77,189 @@ class DataInputActivity : AppCompatActivity() {
         setupWeightAndHeight()
         setupTime()
         setupAgeRecyclerView()
+        setupConvertWeightAndHeight()
+        setupgender()
 
         binding.dataInputCalculate.setOnClickListener {
+            var weightKg = weight
+            if (!weightUnit) weightKg = weight * 0.45359237f
+
+            var heightM = height / 100f
+            if (!heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
+
+            bmi = weightKg / (heightM * heightM)
+
+
+            val bmiRecord = BmiEntity(
+                height = heightM * 100f,
+                weight = weightKg,
+                bmiValue = bmi,
+                age = age,
+                gender = gender,
+                createTime = System.currentTimeMillis(),
+                customTime = getCustomTimeStamp()
+            )
+
+
             val intent = Intent(this, ResultActivity::class.java)
+            intent.putExtra("BMI",bmiRecord)
             startActivity(intent)
-            finish()
+        }
+    }
+    private fun getCustomTimeStamp(): Long {
+        val monthMap = mapOf(
+            "Jan" to 0, "Feb" to 1, "Mar" to 2, "Apr" to 3, "May" to 4, "June" to 5,
+            "July" to 6, "Aug" to 7, "Sep" to 8, "Oct" to 9, "Nov" to 10, "Dec" to 11
+        )
+        val calendar = Calendar.getInstance()
+        calendar.set(
+            selectYear.toInt(),
+            monthMap[selectMonth] ?: 0,
+            selectDay.toInt(),
+            when(selectPeriod){
+                "Morning" -> 9
+                "Afternoon" -> 14
+                "Evening" -> 19
+                else -> 23 // Night
+            }, 0, 0
+        )
+        return calendar.timeInMillis
+    }
+
+    //选择性别
+    private fun setupgender() {
+        val male = binding.mergeDateInput.cardMale
+        val female = binding.mergeDateInput.cardFemale
+        male.setOnClickListener {
+            gender = 1
+            male.alpha = 1f
+            binding.mergeDateInput.tvMale.alpha = 1f
+            binding.mergeDateInput.ivMaleIcon.alpha = 1f
+            binding.mergeDateInput.ivMaleCheck.visibility = View.VISIBLE
+
+            female.alpha = 0.7f
+            binding.mergeDateInput.tvFemale.alpha = 0.7f
+            binding.mergeDateInput.ivFemaleIcon.alpha = 0.7f
+            binding.mergeDateInput.ivFemaleCheck.visibility = View.GONE
+
+        }
+        female.setOnClickListener {
+            gender = 0
+            male.alpha = 0.7f
+            binding.mergeDateInput.tvMale.alpha = 0.7f
+            binding.mergeDateInput.ivMaleIcon.alpha = 0.7f
+            binding.mergeDateInput.ivMaleCheck.visibility = View.GONE
+
+            female.alpha = 1f
+            binding.mergeDateInput.tvFemale.alpha = 1f
+            binding.mergeDateInput.ivFemaleIcon.alpha = 1f
+            binding.mergeDateInput.ivFemaleCheck.visibility = View.VISIBLE
         }
     }
 
-    private fun setupTime() {
-        dayinput = binding.mergeDateInput.inputTime1
-        timeinput = binding.mergeDateInput.inputTime2
+    //选择身高体重单位
+    private fun setupConvertWeightAndHeight() {
+        val lb = binding.mergeDateInput.switchWeightLb
+        val kg = binding.mergeDateInput.switchWeightKg
+        val cm = binding.mergeDateInput.switchHeightCm
+        val ft = binding.mergeDateInput.switchHeightFt
 
-        dayinput.setOnClickListener {
+        val density = resources.displayMetrics.density
+        val movePx = -(76 * density)
+
+        lb.setOnClickListener {
+            if (weightUnit) {
+                weightUnit = false
+
+                binding.mergeDateInput.selectorThumbWeight.animate()
+                    .translationX(0f)
+                    .withLayer()
+                    .start()
+
+                binding.mergeDateInput.selectorThumbWeight.setText("lb")
+                weight /= 0.4536f
+
+                val showText = String.format("%.2f", weight)
+                edtWeight.setText(showText)
+            }
+        }
+        kg.setOnClickListener {
+            if (!weightUnit) {
+                weightUnit = true
+                binding.mergeDateInput.selectorThumbWeight.animate()
+                    .translationX(-movePx)
+                    .withLayer()
+                    .start()
+                binding.mergeDateInput.selectorThumbWeight.setText("kg")
+                weight *= 0.4536f
+                // 保留两位小数
+                val showText = String.format("%.2f", weight)
+                edtWeight.setText(showText)
+            }
+        }
+
+        ft.setOnClickListener {
+            if (heightUnit) {
+                heightUnit = false
+                binding.mergeDateInput.selectorThumbHeight.animate()
+                    .translationX(0f)
+                    .withLayer()
+                    .start()
+                binding.mergeDateInput.selectorThumbHeight.text = "ft·in"
+
+                binding.mergeDateInput.inputHeight.visibility = View.GONE
+                binding.mergeDateInput.inputHeightFt.visibility = View.VISIBLE
+                binding.mergeDateInput.inputHeightIn.visibility = View.VISIBLE
+                binding.mergeDateInput.inputHeightFt1.visibility = View.VISIBLE
+                binding.mergeDateInput.inputHeightIn1.visibility = View.VISIBLE
+
+                val totalInch = (height / 2.54f).toInt()
+                heightFt = totalInch / 12
+                heightIn = totalInch % 12
+                binding.mergeDateInput.inputHeightFt.setText(heightFt.toString())
+                binding.mergeDateInput.inputHeightIn.setText(heightIn.toString())
+
+            }
+        }
+
+        cm.setOnClickListener {
+            if (!heightUnit) {
+                heightUnit = true
+                binding.mergeDateInput.selectorThumbHeight.animate()
+                    .translationX(-movePx)
+                    .withLayer()
+                    .start()
+                binding.mergeDateInput.selectorThumbHeight.text = "cm"
+
+                binding.mergeDateInput.inputHeight.visibility = View.VISIBLE
+                binding.mergeDateInput.inputHeightFt.visibility = View.GONE
+                binding.mergeDateInput.inputHeightIn.visibility = View.GONE
+                binding.mergeDateInput.inputHeightFt1.visibility = View.GONE
+                binding.mergeDateInput.inputHeightIn1.visibility = View.GONE
+                height = ((heightFt * 12) + heightIn) * 2.54f
+
+                val showText = String.format("%.2f", height)
+                binding.mergeDateInput.inputHeight.setText(showText)
+            }
+        }
+
+    }
+
+    //选择时间
+    private fun setupTime() {
+        dayInput = binding.mergeDateInput.inputTime1
+        timeInput = binding.mergeDateInput.inputTime2
+
+        dayInput.setOnClickListener {
             showDatePickerBottomSheet()
 
         }
+        timeInput.setOnClickListener {
+            showDate2PickerBottomSheet()
+        }
     }
 
-    // 打开日期选择弹窗入口（按钮点击调用此方法）
+    // 打开日期选择弹窗入口1
     fun showDatePickerBottomSheet() {
         val sheetDialog = BottomSheetDialog(this)
         val rootView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_date_picker, null)
@@ -168,7 +360,8 @@ class DataInputActivity : AppCompatActivity() {
             dayList = getDayList(yearCur, monthCur)
             // 刷新日期适配器
             // 防止原来选中的天数超过当月最大天数，自动修正下标
-            Toast.makeText(this,"${wheelDay.currentItem} ${dayList.size}",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "${wheelDay.currentItem} ${dayList.size}", Toast.LENGTH_SHORT)
+                .show()
             if (wheelDay.currentItem >= dayList.size) {
                 wheelDay.currentItem = dayList.size - 1
 
@@ -195,7 +388,7 @@ class DataInputActivity : AppCompatActivity() {
             selectDay = dayList[wheelDay.currentItem]
             selectYear = yearData[wheelYear.currentItem]
 
-            dayinput.text = selectMonth + " " + selectDay + ", " + selectYear
+            dayInput.text = selectMonth + " " + selectDay + ", " + selectYear
             // 业务逻辑：回调日期
             sheetDialog.dismiss()
         }
@@ -204,35 +397,101 @@ class DataInputActivity : AppCompatActivity() {
 
     }
 
-    private fun setupWeightAndHeight() {
-        val edtWeight = binding.mergeDateInput.inputWeight
-        val edtHeight = binding.mergeDateInput.inputHeight
+    // 打开日期选择弹窗入口2
+    private fun showDate2PickerBottomSheet() {
+        val sheetDialog = BottomSheetDialog(this)
+        val rootView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_date2_picker, null)
+        sheetDialog.setContentView(rootView)
 
-        val heightFloat: Float = edtHeight.text.toString().toFloat()
-        val weightFloat: Float = edtHeight.text.toString().toFloat()
+        val wheelPeriod: WheelView = rootView.findViewById(R.id.wheel_time)
 
-        data.height = heightFloat
-        data.weight = weightFloat
+// 1. 单列数据源
+        val periodData = listOf(
+            "Morning",
+            "Afternoon",
+            "Evening",
+            "Night"
+        )
+
+// 根据当前小时自动匹配对应时段下标
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val defaultSelectIndex = when {
+            // Morning 6:00 ~ 11:59
+            hour in 6..11 -> 0
+            // Afternoon 12:00 ~ 17:59
+            hour in 12..17 -> 1
+            // Evening 18:00 ~ 22:59
+            hour in 18..22 -> 2
+            // Night 23:00 ~ 5:59
+            else -> 3
+        }
+
+        val boldTypeface: Typeface? = ResourcesCompat.getFont(this, R.font.font_bold_extrabold)
+
+        // 2. 复用你原来通用滚轮初始化方法
+        fun initWheel(
+            wheel: WheelView,
+            dataList: List<String>,
+            selectIndex: Int,
+            typeface: Typeface?
+        ) {
+            wheel.adapter = ArrayWheelAdapter(dataList)
+            wheel.currentItem = selectIndex
+            wheel.setTypeface(typeface)
+            wheel.setCyclic(false)
+            wheel.setLineSpacingMultiplier(2f)
+            wheel.setAlphaGradient(true)
+            wheel.setOnTouchListener { v, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                        v.parent?.requestDisallowInterceptTouchEvent(true)
+                    }
+
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        v.parent?.requestDisallowInterceptTouchEvent(false)
+                        v.performClick()
+                    }
+                }
+                false
+            }
+            wheel.setTextSize(16f)
+        }
+
+// 3. 初始化时段滚轮
+        initWheel(wheelPeriod, periodData, defaultSelectIndex, boldTypeface)
+
+// 取消、确认按钮逻辑
+        rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog.dismiss() }
+        rootView.findViewById<Button>(R.id.btn_done).setOnClickListener {
+            selectPeriod = periodData[wheelPeriod.currentItem]
+            timeInput.text = selectPeriod
+            sheetDialog.dismiss()
+        }
+
+        sheetDialog.show()
     }
 
+    // 年龄选择
     private fun setupAgeRecyclerView() {
-        val ageRecyclerView = binding.mergeDateInput.inputAge
+        ageRecyclerView = binding.mergeDateInput.inputAge
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         ageRecyclerView.layoutManager = layoutManager
-        val adapter = InputAgeAdapter(ageRecyclerView) {
 
+        ageAdapter = InputAgeAdapter(ageRecyclerView) { selectedAgeInt ->
+            age = selectedAgeInt
         }
-        ageRecyclerView.adapter = adapter
+        ageRecyclerView.adapter = ageAdapter
+
         val snapHelper = LinearSnapHelper()
         snapHelper.attachToRecyclerView(ageRecyclerView)
 
-        // ========== 滚动透明度监听，全部放入函数内 ==========
+        // ========== 滚动透明度监听 ==========
         ageRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private val minAlpha = 0f
             private val maxAlpha = 1f
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-
                 val lm = recyclerView.layoutManager as LinearLayoutManager
                 val rvCenterX = recyclerView.width / 2f
                 val firstVisible = lm.findFirstVisibleItemPosition()
@@ -245,19 +504,157 @@ class DataInputActivity : AppCompatActivity() {
                     val maxDistance = recyclerView.width / 2f
                     var ratio = 1 - (distance / maxDistance)
                     ratio = ratio.coerceAtLeast(0f)
-
-                    // 透明度计算
                     val alpha = minAlpha + maxAlpha * ratio
-
                     itemView.alpha = alpha
+                }
+            }
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+
+                // 当列表停止滚动时（SCROLL_STATE_IDLE）
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val lm = recyclerView.layoutManager as LinearLayoutManager
+                    // 利用 SnapHelper 精准找到当前居中的 View
+                    val centerView = snapHelper.findSnapView(lm)
+                    if (centerView != null) {
+                        val centerAge = lm.getPosition(centerView) + 2
+                        if (age != centerAge) {
+                            age = centerAge
+                        }
+                    }
                 }
             }
         })
 
-        // 页面加载完成后手动刷新一次透明度（刚进来没滑动时生效）
-        ageRecyclerView.post {
-            ageRecyclerView.scrollBy(1, 0)
-            ageRecyclerView.scrollBy(-1, 0)
+        ageRecyclerView.layoutManager?.scrollToPosition(age - 2)
+    }
+
+    // 身高体重
+    private fun setupWeightAndHeight() {
+        edtWeight = binding.mergeDateInput.inputWeight
+        edtHeight = binding.mergeDateInput.inputHeight
+
+        height = edtHeight.text.toString().toFloat()
+        weight = edtWeight.text.toString().toFloat()
+
+        edtWeight.setText(weight.toString())
+        edtHeight.setText(height.toString())
+
+        val edtHeightFt = binding.mergeDateInput.inputHeightFt
+        val edtHeightIn = binding.mergeDateInput.inputHeightIn
+        edtHeightFt.setText(heightFt.toString())
+        edtHeightIn.setText(heightIn.toString())
+
+        val editTexts = listOf(edtHeightFt, edtHeightIn, edtWeight, edtHeight)
+        editTexts.forEach { et ->
+            et.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    // 失焦：校验当前这个EditText
+                    checkNumberValid()
+                } else {
+                    // 获焦：清空错误提示
+                    et.error = null
+                }
+            }
+
+            // 回车完成：清焦点自动触发上面的失焦校验，不用重复写逻辑
+            et.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    hideSoftKeyboard(et)
+                    et.clearFocus() // 清除焦点，自动走onFocusChange校验
+                    return@setOnEditorActionListener true
+                }
+                false
+            }
         }
     }
+
+    //检查数值合法
+    private fun checkNumberValid(): Boolean {
+        //判断数据范围
+
+        Toast.makeText(this, "进行数据判断", Toast.LENGTH_SHORT)
+            .show()
+        weight = edtWeight.text.toString().toFloat()
+        if (!weightUnit) {
+            if (weight < 1f || weight > 551f) {
+                weight = 551f
+                edtWeight.setText("551.00")
+                Toast.makeText(this, "体重超出范围( 2 - 551 lb)", Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+        } else {
+            if (weight < 1f || weight > 250f) {
+                weight = 250f
+                edtWeight.setText("250.00")
+                Toast.makeText(this, "体重超出范围( 1 - 250 kg)", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+
+        if (!heightUnit) {
+            val edtHeightFt = binding.mergeDateInput.inputHeightFt
+            val edtHeightIn = binding.mergeDateInput.inputHeightIn
+
+            heightFt = edtHeightFt.text.toString().toInt()
+            heightIn = edtHeightIn.text.toString().toInt()
+
+            if (heightFt < 1f || heightFt > 8f) {
+                heightFt = 8
+                edtHeightFt.setText("8")
+                Toast.makeText(this, "身高超出范围( 1 - 8 ft)", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            if (heightIn < 0f || heightIn > 11f) {
+                heightIn = 11
+                edtHeightIn.setText(11.toString())
+                Toast.makeText(this, "身高超出范围( 0 - 11 ft)", Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+        } else {
+            height = edtHeight.text.toString().toFloat()
+            if (height < 1f || height > 250) {
+                height = 150f
+                Toast.makeText(this, "身高超出范围( 1 - 250 cm)", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+        return true
+    }
+
+    //显示软键盘
+    protected fun showSoftKeyboard(view: View) {
+        if (view.requestFocus()) {
+            val imm = getSystemService(view.context, InputMethodManager::class.java)
+            imm?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
+
+    //隐藏软键盘
+    protected fun hideSoftKeyboard(view: View) {
+        val imm = getSystemService(view.context, InputMethodManager::class.java)
+        imm?.hideSoftInputFromWindow(view.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+    }
+
+    //点击其它区域
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (ev?.action == MotionEvent.ACTION_DOWN) {
+            val v = currentFocus
+            if (v is EditText) {
+                val outRect = Rect()
+                v.getGlobalVisibleRect(outRect)
+                // 如果点击的位置在输入框外面
+                if (!outRect.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                    v.clearFocus()
+                    hideSoftKeyboard(v)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+
 }
