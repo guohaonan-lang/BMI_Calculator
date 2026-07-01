@@ -1,6 +1,7 @@
 package com.example.bmicalculator.model
 
 import android.os.Parcelable
+import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
@@ -24,5 +25,6 @@ data class BmiEntity(
     // 记录创建时间（系统自动时间戳）
     var createTime: Long = System.currentTimeMillis(),
     // 自定义记录时间（用户手动选择的日期时间戳）
-    var customTime: Long
+    var customTime: Long,
+    var timeText: String
 ) : Parcelable

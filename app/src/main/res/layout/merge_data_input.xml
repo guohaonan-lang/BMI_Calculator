@@ -26,6 +26,7 @@
 
     <!--        个人主页-->
     <ImageView
+        android:id="@+id/settings_user"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginTop="18dp"

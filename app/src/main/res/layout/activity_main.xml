@@ -5,7 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity">
+    tools:context=".ui.MainActivity"
+    android:background="@color/white">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/main_viewpage2"
@@ -18,6 +19,7 @@
         android:id="@+id/main_table"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        app:tabPaddingTop="10dp"
         android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

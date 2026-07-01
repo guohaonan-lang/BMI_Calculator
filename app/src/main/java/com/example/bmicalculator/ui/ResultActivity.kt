@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.bmicalculator.R
 import com.example.bmicalculator.databinding.ActivityResultBinding
 import com.example.bmicalculator.model.BmiEntity
+import com.example.bmicalculator.util.BmiUtil
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -27,7 +28,7 @@ class ResultActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityResultBinding
     private var bmiRecord: BmiEntity? = null
-    private lateinit var alertDialog : AlertDialog
+    private lateinit var alertDialog: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +47,7 @@ class ResultActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra("BMI")
         }
+        val saveStatus = intent.getBooleanExtra("SAVE", false)
 
         // 2. 非空校验并渲染数据（示例，自行对应布局TextView）
         bmiRecord?.let { record ->
@@ -54,64 +56,63 @@ class ResultActivity : AppCompatActivity() {
             binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", record.bmiValue)
             binding.resultMergeResult.mergeBmiGauge.currentBmi = record.bmiValue
             // 身高体重
-            binding.resultMergeResult.mergeResultHeight.text = String.format("%.1f cm", record.height)
-            binding.resultMergeResult.mergeResultWeight.text = String.format("%.1f kg", record.weight)
+            binding.resultMergeResult.mergeResultHeight.text =
+                String.format("%.1f cm", record.height)
+            binding.resultMergeResult.mergeResultWeight.text =
+                String.format("%.1f kg", record.weight)
 
             // 年龄
             binding.resultMergeResult.mergeResultAge.text = record.age.toString()
             // 性别
-            binding.resultMergeResult.mergeResultGender.text = if(record.gender == 1) "Male" else "Female"
+            binding.resultMergeResult.mergeResultGender.text =
+                if (record.gender == 1) "Male" else "Female"
 
-            // 用 customTime 反向解析日期+时段
-//            val displayTime = formatFullTime(record.customTime)
 
+            val wheel = binding.resultMergeResult.mergeBmiGauge
+            // 给仪表盘赋值
+            wheel.age = record.age
+            wheel.gender = record.gender
+            wheel.currentBmi = record.bmiValue
+            // 同步获取BMI评估文字，展示页面等级文本
+            val bmiInfo = BmiUtil.getBmiFullInfo(record.age, record.gender, record.bmiValue)
+            binding.resultMergeResult.mergeResultGrade.text = bmiInfo.levelName
+            // 可同步设置文字颜色
+            binding.resultMergeResult.mergeResultGrade.backgroundTintList =
+                android.content.res.ColorStateList.valueOf(bmiInfo.colorInt)
 
         } ?: run {
             // 无数据返回输入页
-            Toast.makeText(this,"数据传递失败！！！",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "数据传递失败！！！", Toast.LENGTH_SHORT).show()
             finish()
         }
 
-        initDeleteDialog()
-        binding.resultDelete.setOnClickListener {
-            alertDialog.show()
+        if (saveStatus) {
+            initDeleteDialog()
+            binding.resultDelete.setOnClickListener {
+                alertDialog.show()
+            }
+
+            onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+            setupBmiGardAndAssessment()
+
+            binding.resultSave.setOnClickListener {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finishAffinity()
+            }
+        } else {
+
+
         }
 
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-
-        setupBmiGardAndAssessment()
-        binding.resultSave.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finishAffinity()
-        }
     }
 
     private fun setupBmiGardAndAssessment() {
 //        TODO("Not yet implemented")
     }
 
-    // 解析出 Morning/Afternoon/Evening/Night
-    private fun getPeriodFromTimeStamp(timeStamp: Long): String {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = timeStamp
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        return when {
-            hour in 6..11 -> "Morning"
-            hour in 12..17 -> "Afternoon"
-            hour in 18..22 -> "Evening"
-            else -> "Night"
-        }
-    }
-
-    // 拼接成目标格式：May 6, 2021 Morning
-    private fun formatFullTime(timeStamp: Long): String {
-        val sdf = SimpleDateFormat("MMM d, yyyy", Locale.ENGLISH)
-        val dateText = sdf.format(Date(timeStamp))
-        val period = getPeriodFromTimeStamp(timeStamp)
-        return "$dateText $period"
-    }
-    private fun initDeleteDialog(){
+    private fun initDeleteDialog() {
         val dialogLayout = layoutInflater.inflate(R.layout.dialog_delete, null)
 
         alertDialog = AlertDialog.Builder(this)
@@ -128,10 +129,16 @@ class ResultActivity : AppCompatActivity() {
         }
         alertDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
     }
+
     val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            // 当用户手势返回时，这里会被触发，从而代替系统默认的退出行为
             alertDialog.show()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // 注销返回键监听
+        onBackPressedCallback.isEnabled = false
     }
 }

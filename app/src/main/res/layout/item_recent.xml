@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="340dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginVertical="10dp"
+    android:layout_marginStart="10dp"
+    android:background="@color/white"
+    app:cardCornerRadius="15dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/item_recent_bmi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="13.5dp"
+            android:fontFamily="@font/font_bold_extrabold"
+            android:text="21.9"
+            android:textColor="@color/black"
+            android:textSize="27sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/item_recent_color"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginTop="3dp"
+            android:background="@drawable/circle_bg"
+            android:backgroundTint="@color/grad4"
+            app:layout_constraintStart_toStartOf="@id/item_recent_bmi"
+            app:layout_constraintTop_toBottomOf="@id/item_recent_bmi" />
+
+        <TextView
+            android:id="@+id/item_recent_grade"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginBottom="13dp"
+            android:fontFamily="@font/font_regular"
+            android:text="Normal"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_recent_color"
+            app:layout_constraintTop_toBottomOf="@id/item_recent_bmi" />
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/recent_right"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_recent_time"
+            android:layout_width="92dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="40dp"
+            android:fontFamily="@font/font_regular"
+            android:text="Oct 16, 2020 Evening"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_recent_grade"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

@@ -1,11 +1,9 @@
 package com.example.bmicalculator.ui
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -24,7 +22,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Visibility
 import com.bigkoo.pickerview.adapter.ArrayWheelAdapter
 import com.contrarywind.view.WheelView
 import com.example.bmicalculator.R
@@ -32,16 +29,16 @@ import com.example.bmicalculator.adapter.InputAgeAdapter
 import com.example.bmicalculator.databinding.ActivityDataInputBinding
 import com.example.bmicalculator.model.BmiEntity
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import java.lang.System
 import java.util.Calendar
+import kotlin.math.abs
 
 class DataInputActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDataInputBinding
 
-    private var weight: Float = 140.00f
+    private var weight: Float = 120.00f
     private var weightUnit = false
 
-    private var height: Float = 170.00f
+    private var height: Float = 169.00f
     private var heightFt: Int = 5
     private var heightIn: Int = 7
     private var heightUnit = false
@@ -83,12 +80,10 @@ class DataInputActivity : AppCompatActivity() {
         binding.dataInputCalculate.setOnClickListener {
             var weightKg = weight
             if (!weightUnit) weightKg = weight * 0.45359237f
-
             var heightM = height / 100f
             if (!heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
 
             bmi = weightKg / (heightM * heightM)
-
 
             val bmiRecord = BmiEntity(
                 height = heightM * 100f,
@@ -97,16 +92,21 @@ class DataInputActivity : AppCompatActivity() {
                 age = age,
                 gender = gender,
                 createTime = System.currentTimeMillis(),
-                customTime = getCustomTimeStamp()
+                customTime = getCustomTimeStamp(),
+                timeText = selectMonth + " " + selectDay + "," + selectYear + " " + selectPeriod
             )
 
-
             val intent = Intent(this, ResultActivity::class.java)
-            intent.putExtra("BMI",bmiRecord)
+            intent.putExtra("BMI", bmiRecord)
+            intent.putExtra("SAVE",true)
             startActivity(intent)
-            finish()
+        }
+        binding.mergeDateInput.settingsUser.setOnClickListener {
+            val intent = Intent(this, SettingActivity::class.java)
+            startActivity(intent)
         }
     }
+
     private fun getCustomTimeStamp(): Long {
         val monthMap = mapOf(
             "Jan" to 0, "Feb" to 1, "Mar" to 2, "Apr" to 3, "May" to 4, "June" to 5,
@@ -117,7 +117,7 @@ class DataInputActivity : AppCompatActivity() {
             selectYear.toInt(),
             monthMap[selectMonth] ?: 0,
             selectDay.toInt(),
-            when(selectPeriod){
+            when (selectPeriod) {
                 "Morning" -> 9
                 "Afternoon" -> 14
                 "Evening" -> 19
@@ -129,33 +129,46 @@ class DataInputActivity : AppCompatActivity() {
 
     //选择性别
     private fun setupgender() {
+        genderView()
         val male = binding.mergeDateInput.cardMale
         val female = binding.mergeDateInput.cardFemale
         male.setOnClickListener {
             gender = 1
-            male.alpha = 1f
-            binding.mergeDateInput.tvMale.alpha = 1f
-            binding.mergeDateInput.ivMaleIcon.alpha = 1f
-            binding.mergeDateInput.ivMaleCheck.visibility = View.VISIBLE
-
-            female.alpha = 0.7f
-            binding.mergeDateInput.tvFemale.alpha = 0.7f
-            binding.mergeDateInput.ivFemaleIcon.alpha = 0.7f
-            binding.mergeDateInput.ivFemaleCheck.visibility = View.GONE
+            genderView()
 
         }
         female.setOnClickListener {
             gender = 0
-            male.alpha = 0.7f
-            binding.mergeDateInput.tvMale.alpha = 0.7f
-            binding.mergeDateInput.ivMaleIcon.alpha = 0.7f
-            binding.mergeDateInput.ivMaleCheck.visibility = View.GONE
+            genderView()
+        }
+    }
 
-            female.alpha = 1f
-            binding.mergeDateInput.tvFemale.alpha = 1f
-            binding.mergeDateInput.ivFemaleIcon.alpha = 1f
+    private fun genderView() {
+        var m: Float
+        var f: Float
+
+        if (gender == 1) {
+            m = 1f
+            f = 0.7f
+        } else {
+            m = 0.7f
+            f = 1f
+        }
+        binding.mergeDateInput.cardMale.alpha = m
+        binding.mergeDateInput.tvMale.alpha = m
+        binding.mergeDateInput.ivMaleIcon.alpha = m
+        if (gender == 1) {
+            binding.mergeDateInput.ivMaleCheck.visibility = View.VISIBLE
+            binding.mergeDateInput.ivFemaleCheck.visibility = View.GONE
+        } else {
+            binding.mergeDateInput.ivMaleCheck.visibility = View.GONE
             binding.mergeDateInput.ivFemaleCheck.visibility = View.VISIBLE
         }
+
+        binding.mergeDateInput.cardFemale.alpha = f
+        binding.mergeDateInput.tvFemale.alpha = f
+        binding.mergeDateInput.ivFemaleIcon.alpha = f
+
     }
 
     //选择身高体重单位
@@ -180,7 +193,7 @@ class DataInputActivity : AppCompatActivity() {
                 binding.mergeDateInput.selectorThumbWeight.setText("lb")
                 weight /= 0.4536f
 
-                val showText = String.format("%.2f", weight)
+                val showText = String.format("%.2f", weight + 0.005f)
                 edtWeight.setText(showText)
             }
         }
@@ -194,7 +207,7 @@ class DataInputActivity : AppCompatActivity() {
                 binding.mergeDateInput.selectorThumbWeight.setText("kg")
                 weight *= 0.4536f
                 // 保留两位小数
-                val showText = String.format("%.2f", weight)
+                val showText = String.format("%.2f", weight + 0.005f)
                 edtWeight.setText(showText)
             }
         }
@@ -239,7 +252,7 @@ class DataInputActivity : AppCompatActivity() {
                 binding.mergeDateInput.inputHeightIn1.visibility = View.GONE
                 height = ((heightFt * 12) + heightIn) * 2.54f
 
-                val showText = String.format("%.2f", height)
+                val showText = String.format("%.1f", height + 0.05)
                 binding.mergeDateInput.inputHeight.setText(showText)
             }
         }
@@ -501,7 +514,7 @@ class DataInputActivity : AppCompatActivity() {
                 for (pos in firstVisible - 1..lastVisible + 1) {
                     val itemView = lm.findViewByPosition(pos) ?: continue
                     val itemCenterX = itemView.left + itemView.width / 2f
-                    val distance = kotlin.math.abs(itemCenterX - rvCenterX)
+                    val distance = abs(itemCenterX - rvCenterX)
                     val maxDistance = recyclerView.width / 2f
                     var ratio = 1 - (distance / maxDistance)
                     ratio = ratio.coerceAtLeast(0f)
@@ -536,9 +549,6 @@ class DataInputActivity : AppCompatActivity() {
         edtWeight = binding.mergeDateInput.inputWeight
         edtHeight = binding.mergeDateInput.inputHeight
 
-        height = edtHeight.text.toString().toFloat()
-        weight = edtWeight.text.toString().toFloat()
-
         edtWeight.setText(weight.toString())
         edtHeight.setText(height.toString())
 
@@ -559,7 +569,7 @@ class DataInputActivity : AppCompatActivity() {
                 }
             }
 
-            // 回车完成：清焦点自动触发上面的失焦校验，不用重复写逻辑
+            // 回车：清除焦点
             et.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     hideSoftKeyboard(et)
