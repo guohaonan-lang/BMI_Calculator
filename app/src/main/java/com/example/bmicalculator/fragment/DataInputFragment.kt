@@ -79,13 +79,13 @@ class DataInputFragment : Fragment() {
         setupTime()
         setupAgeRecyclerView()
         setupConvertWeightAndHeight()
-        setupgender()
+        setupGender()
 
         // 根布局监听触摸，仅当前输入页生效
         binding.root.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 val focusView = requireActivity().currentFocus
-                if (focusView is android.widget.EditText) {
+                if (focusView is EditText) {
                     val outRect = Rect()
                     focusView.getGlobalVisibleRect(outRect)
                     val x = event.rawX.toInt()
@@ -102,7 +102,7 @@ class DataInputFragment : Fragment() {
 
         binding.dataInputCalculate.setOnClickListener {
             var weightKg = weight
-            if (!weightUnit) weightKg = weight * 0.45359237f
+            if (!weightUnit) weightKg = weight * 0.45359236f
             var heightM = height / 100f
             if (!heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
 
@@ -116,7 +116,7 @@ class DataInputFragment : Fragment() {
                 gender = gender,
                 createTime = System.currentTimeMillis(),
                 customTime = getCustomTimeStamp(),
-                timeText = selectMonth + " " + selectDay + "," + selectYear + " " + selectPeriod
+                timeText = "$selectMonth $selectDay,$selectYear $selectPeriod"
             )
 
             val intent = Intent(requireContext(), ResultActivity::class.java)
@@ -151,7 +151,7 @@ class DataInputFragment : Fragment() {
     }
 
     //选择性别
-    private fun setupgender() {
+    private fun setupGender() {
         genderView()
         val male = binding.mergeDateInput.cardMale
         val female = binding.mergeDateInput.cardFemale
@@ -213,7 +213,7 @@ class DataInputFragment : Fragment() {
                     .withLayer()
                     .start()
 
-                binding.mergeDateInput.selectorThumbWeight.setText("lb")
+                binding.mergeDateInput.selectorThumbWeight.text = "lb"
                 weight /= 0.4536f
 
                 val showText = String.format("%.2f", weight + 0.005f)
@@ -227,7 +227,7 @@ class DataInputFragment : Fragment() {
                     .translationX(-movePx)
                     .withLayer()
                     .start()
-                binding.mergeDateInput.selectorThumbWeight.setText("kg")
+                binding.mergeDateInput.selectorThumbWeight.text = "kg"
                 weight *= 0.4536f
                 // 保留两位小数
                 val showText = String.format("%.2f", weight + 0.005f)
@@ -299,8 +299,7 @@ class DataInputFragment : Fragment() {
     // 打开日期选择弹窗入口1
     fun showDatePickerBottomSheet() {
         val sheetDialog = BottomSheetDialog(requireContext())
-        val rootView =
-            LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date_picker, null)
+        val rootView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date_picker, null)
         sheetDialog.setContentView(rootView)
 
         val wheelMonth: WheelView = rootView.findViewById(R.id.wheel_month)
@@ -336,8 +335,7 @@ class DataInputFragment : Fragment() {
         // 日期初始下标 = 当前日 - 1（列表从1开始，下标0对应1号）
         val daySelectIndex = currentDay - 1
 
-        val boldTypeface: Typeface? =
-            ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
+        val boldTypeface: Typeface? = ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
         // 2. 局部通用初始化滚轮方法
         fun initWheel(
@@ -397,8 +395,10 @@ class DataInputFragment : Fragment() {
             val yearCur = wheelYear.currentItem
             val monthCur = wheelMonth.currentItem
             dayList = getDayList(yearCur, monthCur)
-            //自动修正下标
-
+            // 刷新日期适配器
+            // 防止原来选中的天数超过当月最大天数，自动修正下标
+            Toast.makeText(requireContext(), "${wheelDay.currentItem} ${dayList.size}", Toast.LENGTH_SHORT)
+                .show()
             if (wheelDay.currentItem >= dayList.size) {
                 wheelDay.currentItem = dayList.size - 1
 
@@ -425,7 +425,7 @@ class DataInputFragment : Fragment() {
             selectDay = dayList[wheelDay.currentItem]
             selectYear = yearData[wheelYear.currentItem]
 
-            dayInput.text = selectMonth + " " + selectDay + ", " + selectYear
+            dayInput.text = "$selectMonth $selectDay, $selectYear"
             // 业务逻辑：回调日期
             sheetDialog.dismiss()
         }
@@ -437,8 +437,7 @@ class DataInputFragment : Fragment() {
     // 打开日期选择弹窗入口2
     private fun showDate2PickerBottomSheet() {
         val sheetDialog = BottomSheetDialog(requireContext())
-        val rootView =
-            LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date2_picker, null)
+        val rootView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date2_picker, null)
         sheetDialog.setContentView(rootView)
 
         val wheelPeriod: WheelView = rootView.findViewById(R.id.wheel_time)
@@ -454,19 +453,18 @@ class DataInputFragment : Fragment() {
 // 根据当前小时自动匹配对应时段下标
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val defaultSelectIndex = when {
-            // Morning 6:00 ~ 11:59
-            hour in 6..11 -> 0
+        val defaultSelectIndex = when (// Morning 6:00 ~ 11:59
+            hour) {
+            in 6..11 -> 0
             // Afternoon 12:00 ~ 17:59
-            hour in 12..17 -> 1
+            in 12..17 -> 1
             // Evening 18:00 ~ 22:59
-            hour in 18..22 -> 2
+            in 18..22 -> 2
             // Night 23:00 ~ 5:59
             else -> 3
         }
 
-        val boldTypeface: Typeface? =
-            ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
+        val boldTypeface: Typeface? = ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
         // 2. 复用你原来通用滚轮初始化方法
         fun initWheel(
@@ -514,8 +512,7 @@ class DataInputFragment : Fragment() {
     // 年龄选择
     private fun setupAgeRecyclerView() {
         ageRecyclerView = binding.mergeDateInput.inputAge
-        val layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        val layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         ageRecyclerView.layoutManager = layoutManager
 
         ageAdapter = InputAgeAdapter(ageRecyclerView) { selectedAgeInt ->
@@ -610,9 +607,12 @@ class DataInputFragment : Fragment() {
     //检查数值合法
     private fun checkNumberValid(): Boolean {
         //判断数据范围
+
+        Toast.makeText(requireContext(), "进行数据判断", Toast.LENGTH_SHORT)
+            .show()
         weight = edtWeight.text.toString().toFloat()
         if (!weightUnit) {
-            if (weight < 1f || weight > 551f) {
+            if (weight !in 1f..551f) {
                 weight = 551f
                 edtWeight.setText("551.00")
                 Toast.makeText(requireContext(), "体重超出范围( 2 - 551 lb)", Toast.LENGTH_SHORT)
@@ -620,7 +620,7 @@ class DataInputFragment : Fragment() {
             }
 
         } else {
-            if (weight < 1f || weight > 250f) {
+            if (weight !in 1f..250f) {
                 weight = 250f
                 edtWeight.setText("250.00")
                 Toast.makeText(requireContext(), "体重超出范围( 1 - 250 kg)", Toast.LENGTH_SHORT)
@@ -650,7 +650,7 @@ class DataInputFragment : Fragment() {
 
         } else {
             height = edtHeight.text.toString().toFloat()
-            if (height < 1f || height > 250) {
+            if (height !in 1f..250.0f) {
                 height = 150f
                 Toast.makeText(requireContext(), "身高超出范围( 1 - 250 cm)", Toast.LENGTH_SHORT)
                     .show()
@@ -659,16 +659,8 @@ class DataInputFragment : Fragment() {
         return true
     }
 
-    //显示软键盘
-    protected fun showSoftKeyboard(view: View) {
-        if (view.requestFocus()) {
-            val imm = getSystemService(view.context, InputMethodManager::class.java)
-            imm?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
-        }
-    }
-
     //隐藏软键盘
-    protected fun hideSoftKeyboard(view: View) {
+    private fun hideSoftKeyboard(view: View) {
         val imm = getSystemService(view.context, InputMethodManager::class.java)
         imm?.hideSoftInputFromWindow(view.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
     }

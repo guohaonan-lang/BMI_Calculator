@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/ad_line"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingVertical="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- 左分割线 -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1px"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@color/black" />
+
+        <!-- 中间日期时段文本 -->
+        <TextView
+            android:id="@+id/tv_time_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.5"
+            android:fontFamily="@font/font_extrabold"
+            android:paddingHorizontal="10dp"
+            android:text="May 6, 2021 Morning"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+        <!-- 右分割线 -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1px"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@color/black" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:fontFamily="@font/font_extrabold"
+        android:text="Apps you might need"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ad_line" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ad1"
+        android:layout_width="345dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/merge_ad_background"
+        app:layout_constraintTop_toBottomOf="@id/ad_line"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/ad1_iv1"
+            android:layout_width="49dp"
+            android:layout_height="49dp"
+            android:layout_marginStart="15dp"
+            android:src="@drawable/ad1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/ad1_text1"
+            android:layout_width="240dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="15dp"
+            android:fontFamily="@font/font_regular"
+            android:text="Home Workout - No Equipments"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@id/ad1_iv1"
+            app:layout_constraintTop_toTopOf="@id/ad1_iv1" />
+
+        <TextView
+            android:id="@+id/ad1_text2"
+            android:layout_width="240dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="2dp"
+            android:alpha="0.8"
+            android:fontFamily="@font/font_regular"
+            android:text="Weight Loss, Lose Belly Fat"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/ad1_text1"
+            app:layout_constraintTop_toBottomOf="@id/ad1_text1" />
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="15dp"
+            android:alpha="0.3"
+            android:background="@drawable/merge_ad_ad_bg"
+            android:gravity="center"
+            android:text="AD"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ad1_star1"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toStartOf="@id/ad1_text2"
+            app:layout_constraintTop_toBottomOf="@id/ad1_text2"
+            android:layout_marginTop="3dp"/>
+        <ImageView
+            android:id="@+id/ad1_star2"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toEndOf="@id/ad1_star1"
+            app:layout_constraintTop_toTopOf="@id/ad1_star1"
+            android:layout_marginStart="3dp"/>
+        <ImageView
+            android:id="@+id/ad1_star3"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toEndOf="@id/ad1_star2"
+            app:layout_constraintTop_toTopOf="@id/ad1_star2"
+            android:layout_marginStart="3dp"/>
+        <ImageView
+            android:id="@+id/ad1_star4"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toEndOf="@id/ad1_star3"
+            app:layout_constraintTop_toTopOf="@id/ad1_star3"
+            android:layout_marginStart="3dp"/>
+        <ImageView
+            android:id="@+id/ad1_star5"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toEndOf="@id/ad1_star4"
+            app:layout_constraintTop_toTopOf="@id/ad1_star4"
+            android:layout_marginStart="3dp"/>
+        <TextView
+            android:layout_width="20dp"
+            android:layout_height="15dp"
+            android:text="4.8"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@id/ad1_star5"
+            app:layout_constraintTop_toBottomOf="@id/ad1_text2"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="1.5dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="345dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/merge_ad_background"
+        app:layout_constraintTop_toBottomOf="@id/ad1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/ad2_iv1"
+            android:layout_width="49dp"
+            android:layout_height="49dp"
+            android:layout_marginStart="15dp"
+            android:src="@drawable/ad2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/ad2_text1"
+            android:layout_width="240dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="15dp"
+            android:fontFamily="@font/font_regular"
+            android:text="Lose Weight for Men at Home"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@id/ad2_iv1"
+            app:layout_constraintTop_toTopOf="@id/ad2_iv1" />
+
+        <TextView
+            android:id="@+id/ad2_text2"
+            android:layout_width="240dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="2dp"
+            android:alpha="0.8"
+            android:fontFamily="@font/font_regular"
+            android:text="Weight Loss, Lose Belly Fat"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/ad2_text1"
+            app:layout_constraintTop_toBottomOf="@id/ad2_text1" />
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="15dp"
+            android:alpha="0.3"
+            android:background="@drawable/merge_ad_ad_bg"
+            android:gravity="center"
+            android:text="AD"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ad2_star1"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toStartOf="@id/ad2_text2"
+            app:layout_constraintTop_toBottomOf="@id/ad2_text2"
+            android:layout_marginTop="3dp"/>
+        <ImageView
+            android:id="@+id/ad2_star2"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toEndOf="@id/ad2_star1"
+            app:layout_constraintTop_toTopOf="@id/ad2_star1"
+            android:layout_marginStart="3dp"/>
+        <ImageView
+            android:id="@+id/ad2_star3"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toEndOf="@id/ad2_star2"
+            app:layout_constraintTop_toTopOf="@id/ad2_star2"
+            android:layout_marginStart="3dp"/>
+        <ImageView
+            android:id="@+id/ad2_star4"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toEndOf="@id/ad2_star3"
+            app:layout_constraintTop_toTopOf="@id/ad2_star3"
+            android:layout_marginStart="3dp"/>
+        <ImageView
+            android:id="@+id/ad2_star5"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ad_star"
+            app:layout_constraintStart_toEndOf="@id/ad2_star4"
+            app:layout_constraintTop_toTopOf="@id/ad2_star4"
+            android:layout_marginStart="3dp"/>
+        <TextView
+            android:layout_width="20dp"
+            android:layout_height="15dp"
+            android:text="4.9"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@id/ad2_star5"
+            app:layout_constraintTop_toBottomOf="@id/ad2_text2"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="1.5dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

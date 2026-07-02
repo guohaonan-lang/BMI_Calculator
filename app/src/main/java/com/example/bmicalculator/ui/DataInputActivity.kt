@@ -75,11 +75,11 @@ class DataInputActivity : AppCompatActivity() {
         setupTime()
         setupAgeRecyclerView()
         setupConvertWeightAndHeight()
-        setupgender()
+        setupGender()
 
         binding.dataInputCalculate.setOnClickListener {
             var weightKg = weight
-            if (!weightUnit) weightKg = weight * 0.45359237f
+            if (!weightUnit) weightKg = weight * 0.45359236f
             var heightM = height / 100f
             if (!heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
 
@@ -93,7 +93,7 @@ class DataInputActivity : AppCompatActivity() {
                 gender = gender,
                 createTime = System.currentTimeMillis(),
                 customTime = getCustomTimeStamp(),
-                timeText = selectMonth + " " + selectDay + "," + selectYear + " " + selectPeriod
+                timeText = "$selectMonth $selectDay,$selectYear $selectPeriod"
             )
 
             val intent = Intent(this, ResultActivity::class.java)
@@ -128,7 +128,7 @@ class DataInputActivity : AppCompatActivity() {
     }
 
     //选择性别
-    private fun setupgender() {
+    private fun setupGender() {
         genderView()
         val male = binding.mergeDateInput.cardMale
         val female = binding.mergeDateInput.cardFemale
@@ -190,7 +190,7 @@ class DataInputActivity : AppCompatActivity() {
                     .withLayer()
                     .start()
 
-                binding.mergeDateInput.selectorThumbWeight.setText("lb")
+                binding.mergeDateInput.selectorThumbWeight.text = "lb"
                 weight /= 0.4536f
 
                 val showText = String.format("%.2f", weight + 0.005f)
@@ -204,7 +204,7 @@ class DataInputActivity : AppCompatActivity() {
                     .translationX(-movePx)
                     .withLayer()
                     .start()
-                binding.mergeDateInput.selectorThumbWeight.setText("kg")
+                binding.mergeDateInput.selectorThumbWeight.text = "kg"
                 weight *= 0.4536f
                 // 保留两位小数
                 val showText = String.format("%.2f", weight + 0.005f)
@@ -402,7 +402,7 @@ class DataInputActivity : AppCompatActivity() {
             selectDay = dayList[wheelDay.currentItem]
             selectYear = yearData[wheelYear.currentItem]
 
-            dayInput.text = selectMonth + " " + selectDay + ", " + selectYear
+            dayInput.text = "$selectMonth $selectDay, $selectYear"
             // 业务逻辑：回调日期
             sheetDialog.dismiss()
         }
@@ -430,13 +430,13 @@ class DataInputActivity : AppCompatActivity() {
 // 根据当前小时自动匹配对应时段下标
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val defaultSelectIndex = when {
-            // Morning 6:00 ~ 11:59
-            hour in 6..11 -> 0
+        val defaultSelectIndex = when (// Morning 6:00 ~ 11:59
+            hour) {
+            in 6..11 -> 0
             // Afternoon 12:00 ~ 17:59
-            hour in 12..17 -> 1
+            in 12..17 -> 1
             // Evening 18:00 ~ 22:59
-            hour in 18..22 -> 2
+            in 18..22 -> 2
             // Night 23:00 ~ 5:59
             else -> 3
         }
@@ -589,7 +589,7 @@ class DataInputActivity : AppCompatActivity() {
             .show()
         weight = edtWeight.text.toString().toFloat()
         if (!weightUnit) {
-            if (weight < 1f || weight > 551f) {
+            if (weight !in 1f..551f) {
                 weight = 551f
                 edtWeight.setText("551.00")
                 Toast.makeText(this, "体重超出范围( 2 - 551 lb)", Toast.LENGTH_SHORT)
@@ -597,7 +597,7 @@ class DataInputActivity : AppCompatActivity() {
             }
 
         } else {
-            if (weight < 1f || weight > 250f) {
+            if (weight !in 1f..250f) {
                 weight = 250f
                 edtWeight.setText("250.00")
                 Toast.makeText(this, "体重超出范围( 1 - 250 kg)", Toast.LENGTH_SHORT)
@@ -627,7 +627,7 @@ class DataInputActivity : AppCompatActivity() {
 
         } else {
             height = edtHeight.text.toString().toFloat()
-            if (height < 1f || height > 250) {
+            if (height !in 1f..250.0f) {
                 height = 150f
                 Toast.makeText(this, "身高超出范围( 1 - 250 cm)", Toast.LENGTH_SHORT)
                     .show()
@@ -636,16 +636,8 @@ class DataInputActivity : AppCompatActivity() {
         return true
     }
 
-    //显示软键盘
-    protected fun showSoftKeyboard(view: View) {
-        if (view.requestFocus()) {
-            val imm = getSystemService(view.context, InputMethodManager::class.java)
-            imm?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
-        }
-    }
-
     //隐藏软键盘
-    protected fun hideSoftKeyboard(view: View) {
+    private fun hideSoftKeyboard(view: View) {
         val imm = getSystemService(view.context, InputMethodManager::class.java)
         imm?.hideSoftInputFromWindow(view.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
     }

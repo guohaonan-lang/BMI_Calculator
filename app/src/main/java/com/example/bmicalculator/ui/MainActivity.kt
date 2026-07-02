@@ -1,24 +1,15 @@
 package com.example.bmicalculator.ui
 
-import android.graphics.Color
-import android.graphics.Rect
 import android.os.Bundle
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.example.bmicalculator.R
-import com.example.bmicalculator.adapter.Homeadapter
+import com.example.bmicalculator.adapter.HomeAdapter
 import com.example.bmicalculator.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -48,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViewPage2() {
-        val adapter = Homeadapter(this)
+        val adapter = HomeAdapter(this)
         viewPager2.adapter = adapter
         viewPager2.offscreenPageLimit = 1
         viewPager2.isUserInputEnabled = false

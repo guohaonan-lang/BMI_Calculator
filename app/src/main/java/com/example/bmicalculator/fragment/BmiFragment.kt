@@ -2,11 +2,10 @@ package com.example.bmicalculator.fragment
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.bmicalculator.R
+import androidx.fragment.app.Fragment
 import com.example.bmicalculator.databinding.FragmentBmiBinding
 import com.example.bmicalculator.ui.MainActivity
 import com.example.bmicalculator.ui.RecentActivity

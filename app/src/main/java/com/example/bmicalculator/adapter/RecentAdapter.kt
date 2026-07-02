@@ -13,21 +13,21 @@ class RecentAdapter(private var dataList: List<BmiEntity>) :
     RecyclerView.Adapter<RecentAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var bmiText: TextView = itemView.findViewById<TextView>(R.id.item_recent_bmi)
-        var timeText: TextView = itemView.findViewById<TextView>(R.id.item_recent_time)
-        var bmiColor: View = itemView.findViewById<View>(R.id.item_recent_color)
-        var bmiGrade: TextView = itemView.findViewById<TextView>(R.id.item_recent_grade)
+        var bmiText: TextView = itemView.findViewById(R.id.item_recent_bmi)
+        var timeText: TextView = itemView.findViewById(R.id.item_recent_time)
+        var bmiColor: View = itemView.findViewById(R.id.item_recent_color)
+        var bmiGrade: TextView = itemView.findViewById(R.id.item_recent_grade)
     }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): RecentAdapter.ViewHolder {
+    ): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_recent, parent, false)
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: RecentAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = dataList[position]
         val bmiInfo = BmiUtil.getBmiFullInfo(item.age, item.gender, item.bmiValue)
 

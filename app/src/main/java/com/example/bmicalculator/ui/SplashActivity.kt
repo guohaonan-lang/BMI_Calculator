@@ -1,23 +1,18 @@
 package com.example.bmicalculator.ui
 
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.animation.PathInterpolator
-import android.view.animation.TranslateAnimation
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.transition.TransitionManager
 import com.example.bmicalculator.R
 import com.example.bmicalculator.databinding.ActivitySplashBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.core.graphics.toColorInt
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding

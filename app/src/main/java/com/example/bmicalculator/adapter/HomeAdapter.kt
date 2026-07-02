@@ -7,7 +7,7 @@ import com.example.bmicalculator.fragment.DataInputFragment
 import com.example.bmicalculator.fragment.StatisticsFragment
 import com.example.bmicalculator.ui.MainActivity
 
-class Homeadapter(activity: MainActivity) : FragmentStateAdapter(activity) {
+class HomeAdapter(activity: MainActivity) : FragmentStateAdapter(activity) {
     override fun getItemCount(): Int = 3
 
     override fun createFragment(position: Int): Fragment {
