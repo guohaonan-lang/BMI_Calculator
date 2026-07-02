@@ -1,4 +1,28 @@
 package com.example.bmicalculator.data
 
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import com.example.bmicalculator.model.BmiEntity
+import kotlinx.coroutines.flow.Flow
+
+@Dao
 interface BmiDao {
+    @Query("SELECT * FROM bmi  ORDER BY customTime Desc")
+    fun getAllBmi(): Flow<List<BmiEntity>>
+
+    @Query("SELECT COUNT(*) FROM bmi")
+    suspend fun countAllBmi(): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertbmi(bmi: BmiEntity): Long
+
+    @Update
+    suspend fun updatebmi(bmi: BmiEntity)
+
+    @Delete
+    suspend fun deletebmi(bmi: BmiEntity)
 }

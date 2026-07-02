@@ -19,11 +19,34 @@
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <Button
+        android:id="@+id/result_recent_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:fontFamily="@font/font_regular"
+        android:text="Delete"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <ImageView
+        android:id="@+id/result_recent_back"
+        android:layout_width="24dp"
+        android:visibility="gone"
+        android:layout_height="24dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="17dp"
+        android:src="@drawable/recent_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/result_delete"
+        android:layout_marginTop="50dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/result_save"
         android:fillViewport="true">
 
@@ -52,7 +75,7 @@
 
             <TextView
                 android:id="@+id/result_assessment"
-                android:layout_width="350dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/merge_ad_background"
                 android:layout_marginStart="30dp"

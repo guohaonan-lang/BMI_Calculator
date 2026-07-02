@@ -62,8 +62,11 @@ class DataInputFragment : Fragment() {
     private lateinit var dayInput: TextView
     private lateinit var timeInput: TextView
     private lateinit var ageRecyclerView: RecyclerView
-
     private lateinit var ageAdapter: InputAgeAdapter
+
+    private lateinit var sheetDialog: BottomSheetDialog
+    private lateinit var sheetDialog2: BottomSheetDialog
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -82,22 +85,22 @@ class DataInputFragment : Fragment() {
         setupGender()
 
         // 根布局监听触摸，仅当前输入页生效
-        binding.root.setOnTouchListener { _, event ->
+        binding.mergeDateInput.root.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
-                val focusView = requireActivity().currentFocus
+                val focusView = view?.findFocus()
                 if (focusView is EditText) {
-                    val outRect = Rect()
-                    focusView.getGlobalVisibleRect(outRect)
-                    val x = event.rawX.toInt()
-                    val y = event.rawY.toInt()
-                    if (!outRect.contains(x, y)) {
+                    val rect = Rect()
+                    focusView.getGlobalVisibleRect(rect)
+                    val touchX = event.rawX.toInt()
+                    val touchY = event.rawY.toInt()
+                    // 点击不在EditText区域内 → 收起键盘
+                    if (!rect.contains(touchX, touchY)) {
                         focusView.clearFocus()
                         hideSoftKeyboard(focusView)
                     }
                 }
             }
-            // 返回false，不拦截正常点击、滑动事件
-            false
+            false // 不拦截原有点击滑动
         }
 
         binding.dataInputCalculate.setOnClickListener {
@@ -121,7 +124,7 @@ class DataInputFragment : Fragment() {
 
             val intent = Intent(requireContext(), ResultActivity::class.java)
             intent.putExtra("BMI", bmiRecord)
-            intent.putExtra("SAVE",true)
+            intent.putExtra("FATHER", "InputFragment")
             startActivity(intent)
         }
         binding.mergeDateInput.settingsUser.setOnClickListener {
@@ -282,23 +285,24 @@ class DataInputFragment : Fragment() {
 
     }
 
-    //选择时间
     private fun setupTime() {
+        initDatePickerBottomSheet()
+        initDate2PickerBottomSheet()
         dayInput = binding.mergeDateInput.inputTime1
         timeInput = binding.mergeDateInput.inputTime2
 
         dayInput.setOnClickListener {
-            showDatePickerBottomSheet()
+            sheetDialog.show()
 
         }
         timeInput.setOnClickListener {
-            showDate2PickerBottomSheet()
+            sheetDialog2.show()
         }
     }
 
     // 打开日期选择弹窗入口1
-    fun showDatePickerBottomSheet() {
-        val sheetDialog = BottomSheetDialog(requireContext())
+    fun initDatePickerBottomSheet() {
+        sheetDialog = BottomSheetDialog(requireContext())
         val rootView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date_picker, null)
         sheetDialog.setContentView(rootView)
 
@@ -330,10 +334,13 @@ class DataInputFragment : Fragment() {
 
         // 年份下标，偏移量 = 当前年 - 1970
         val yearSelectIndex = currentYear - 1970
+        selectYear = currentYear.toString()
         // 月份下标等于Calendar.MONTH
         val monthSelectIndex = currentMonth
+        selectMonth = monthData[currentMonth]
         // 日期初始下标 = 当前日 - 1（列表从1开始，下标0对应1号）
         val daySelectIndex = currentDay - 1
+        selectDay = currentDay.toString()
 
         val boldTypeface: Typeface? = ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
@@ -429,20 +436,17 @@ class DataInputFragment : Fragment() {
             // 业务逻辑：回调日期
             sheetDialog.dismiss()
         }
-
-        sheetDialog.show()
-
     }
 
     // 打开日期选择弹窗入口2
-    private fun showDate2PickerBottomSheet() {
-        val sheetDialog = BottomSheetDialog(requireContext())
+    private fun initDate2PickerBottomSheet() {
+        sheetDialog2 = BottomSheetDialog(requireContext())
         val rootView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date2_picker, null)
-        sheetDialog.setContentView(rootView)
+        sheetDialog2.setContentView(rootView)
 
         val wheelPeriod: WheelView = rootView.findViewById(R.id.wheel_time)
 
-// 1. 单列数据源
+        // 1. 单列数据源
         val periodData = listOf(
             "Morning",
             "Afternoon",
@@ -450,7 +454,7 @@ class DataInputFragment : Fragment() {
             "Night"
         )
 
-// 根据当前小时自动匹配对应时段下标
+        // 根据当前小时自动匹配对应时段下标
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val defaultSelectIndex = when (// Morning 6:00 ~ 11:59
@@ -463,6 +467,8 @@ class DataInputFragment : Fragment() {
             // Night 23:00 ~ 5:59
             else -> 3
         }
+
+        selectPeriod = periodData[defaultSelectIndex]
 
         val boldTypeface: Typeface? = ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
@@ -495,24 +501,23 @@ class DataInputFragment : Fragment() {
             wheel.setTextSize(16f)
         }
 
-// 3. 初始化时段滚轮
+        // 3. 初始化时段滚轮
         initWheel(wheelPeriod, periodData, defaultSelectIndex, boldTypeface)
 
-// 取消、确认按钮逻辑
-        rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog.dismiss() }
+        // 取消、确认按钮逻辑
+        rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog2.dismiss() }
         rootView.findViewById<Button>(R.id.btn_done).setOnClickListener {
             selectPeriod = periodData[wheelPeriod.currentItem]
             timeInput.text = selectPeriod
-            sheetDialog.dismiss()
+            sheetDialog2.dismiss()
         }
-
-        sheetDialog.show()
     }
 
     // 年龄选择
     private fun setupAgeRecyclerView() {
         ageRecyclerView = binding.mergeDateInput.inputAge
-        val layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        val layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         ageRecyclerView.layoutManager = layoutManager
 
         ageAdapter = InputAgeAdapter(ageRecyclerView) { selectedAgeInt ->

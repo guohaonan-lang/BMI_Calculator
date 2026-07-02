@@ -12,6 +12,11 @@ import com.example.bmicalculator.util.BmiUtil
 class RecentAdapter(private var dataList: List<BmiEntity>) :
     RecyclerView.Adapter<RecentAdapter.ViewHolder>() {
 
+
+    fun update(newdata : List<BmiEntity>){
+        dataList = newdata
+        notifyDataSetChanged()
+    }
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var bmiText: TextView = itemView.findViewById(R.id.item_recent_bmi)
         var timeText: TextView = itemView.findViewById(R.id.item_recent_time)

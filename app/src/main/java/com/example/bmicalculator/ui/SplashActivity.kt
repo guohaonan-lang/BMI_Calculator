@@ -4,18 +4,28 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.animation.PathInterpolator
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.bmicalculator.R
+import com.example.bmicalculator.data.BmiDatabase
+import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySplashBinding
+import com.example.bmicalculator.viewmodel.BmiViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
+    private val viewModel: BmiViewModel by viewModels {
+        val db = BmiDatabase.getDatabase(this)
+        BmiViewModel.provideFactory(BmiRepository(db.bmiDao()))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -75,14 +85,13 @@ class SplashActivity : AppCompatActivity() {
         lifecycleScope.launch {
             delay(2000)
             //判断是否是初次打开，选择跳转的页面
-
-            val intent = Intent(this@SplashActivity, DataInputActivity::class.java)
+            val isfirst = viewModel.countBmiRecord()
+            var intent = Intent(this@SplashActivity, MainActivity::class.java)
+            if (isfirst.toInt() == 0) {
+                intent = Intent(this@SplashActivity, DataInputActivity::class.java)
+            }
             startActivity(intent)
-            finish()
-            // 跳转主页面
-//            val intent = Intent(this@SplashActivity, MainActivity::class.java)
-//            startActivity(intent)
-//            finish() // 销毁启动页，返回键不会回到闪屏
+            finish() // 销毁启动页，返回键不会回到闪屏
         }
     }
 }

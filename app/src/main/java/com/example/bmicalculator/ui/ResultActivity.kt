@@ -9,21 +9,34 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
+import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.databinding.ActivityResultBinding
 import com.example.bmicalculator.model.BmiEntity
+import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.util.BmiUtil
+import com.example.bmicalculator.viewmodel.BmiViewModel
+import kotlinx.coroutines.launch
 
 class ResultActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityResultBinding
     private var bmiRecord: BmiEntity? = null
     private lateinit var alertDialog: AlertDialog
+    private var status: String = ""
+    private val viewModel: BmiViewModel by viewModels {
+        val db = BmiDatabase.getDatabase(this)
+        BmiViewModel.provideFactory(BmiRepository(db.bmiDao()))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +55,7 @@ class ResultActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra("BMI")
         }
-        val saveStatus = intent.getBooleanExtra("SAVE", false)
+        status = intent.getStringExtra("FATHER").toString()
 
         // 2. 非空校验并渲染数据（示例，自行对应布局TextView）
         bmiRecord?.let { record ->
@@ -81,8 +94,25 @@ class ResultActivity : AppCompatActivity() {
             finish()
         }
 
-        if (saveStatus) {
-            initDeleteDialog()
+        initDeleteDialog()
+
+        //判断不同的页面，控制部分控件显隐
+        if (status == "RecentActivity") {
+            binding.resultMergeGrade.root.visibility = View.GONE
+            binding.resultSave.visibility = View.GONE
+            binding.resultDelete.visibility = View.GONE
+            binding.resultRecentDelete.visibility = View.VISIBLE
+            binding.resultRecentBack.visibility = View.VISIBLE
+
+            binding.resultRecentBack.setOnClickListener {
+                finish()
+            }
+            binding.resultRecentDelete.setOnClickListener {
+                alertDialog.show()
+            }
+
+        } else {
+
             binding.resultDelete.setOnClickListener {
                 alertDialog.show()
             }
@@ -92,13 +122,23 @@ class ResultActivity : AppCompatActivity() {
             setupBmiGardAndAssessment()
 
             binding.resultSave.setOnClickListener {
+                lifecycleScope.launch {
+                    lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        viewModel.insertBmiRecord(bmiRecord!!)
+                    }
+                }
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
                 finishAffinity()
             }
-        } else {
-            binding.resultMergeGrade.root.visibility = View.GONE
 
+            if (status == "InputActivity") {
+                binding.resultMergeAd.root.visibility = View.GONE
+            } else {
+                binding.resultMergeGrade.root.visibility = View.GONE
+                binding.resultMergeAd.tvTimeTag.visibility = View.GONE
+
+            }
         }
 
     }
@@ -119,8 +159,20 @@ class ResultActivity : AppCompatActivity() {
         val buttonNo = dialogLayout.findViewById<TextView>(R.id.cancel)
         buttonNo.setOnClickListener { alertDialog.dismiss() }
         buttonYes.setOnClickListener {
-            alertDialog.dismiss()
-            finish()
+            var sum: Long = 1
+            lifecycleScope.launch {
+                sum = viewModel.countBmiRecord()
+                viewModel.deleteBmiRecord(bmiRecord!!)
+            }
+            if (status == "RecentActivity" && sum.toInt() == 0) {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finishAffinity()
+            } else {
+                alertDialog.dismiss()
+                finish()
+            }
+
         }
         alertDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
     }

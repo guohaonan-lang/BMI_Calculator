@@ -3,19 +3,34 @@ package com.example.bmicalculator.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bmicalculator.R
 import com.example.bmicalculator.adapter.RecentAdapter
+import com.example.bmicalculator.data.BmiDatabase
+import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
+import com.example.bmicalculator.viewmodel.BmiViewModel
+import kotlinx.coroutines.launch
 
 class RecentActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: RecentAdapter
+
+    //创建viewmodel
+    private val viewModel: BmiViewModel by viewModels {
+        val db = BmiDatabase.getDatabase(this)
+        BmiViewModel.provideFactory( BmiRepository(db.bmiDao()))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -27,55 +42,26 @@ class RecentActivity : AppCompatActivity() {
         }
 
 
-
         setupRecyclerView()
 
     }
 
+    //初始化列表
     private fun setupRecyclerView() {
         recyclerView = findViewById(R.id.recent_rv)
 
-        adapter = RecentAdapter(
-            listOf(
-                BmiEntity(
-                    id = 1,
-                    height = 170f,
-                    weight = 52f,
-                    bmiValue = 17.9f,
-
-                    age = 22,
-                    gender = 1,
-                    customTime = System.currentTimeMillis(),
-                    timeText = "2026-06-28"
-                ),
-                BmiEntity(
-                    id = 2,
-                    height = 170f,
-                    weight = 62f,
-                    bmiValue = 21.4f,
-                    age = 22,
-                    gender = 1,
-                    customTime = System.currentTimeMillis(),
-                    timeText = "2026-06-29"
-                ),
-                BmiEntity(
-                    id = 3,
-                    height = 170f,
-                    weight = 82f,
-                    bmiValue = 28.4f,
-
-                    age = 22,
-                    gender = 1,
-                    customTime = System.currentTimeMillis(),
-                    timeText = "2026-06-30"
-                )
-            )
-        )
-
+        adapter = RecentAdapter(emptyList())
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.allBmiList.collect { data ->
+                    adapter.update(data)
+                }
+            }
+        }
         adapter.setOnItemClick { item ->
             val intent = Intent(this, ResultActivity::class.java)
             intent.putExtra("BMI",item)
-            intent.putExtra("Save",false)
+            intent.putExtra("FATHER","RecentActivity")
             startActivity(intent)
         }
 

@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         setupViewPage2()
         setupTableLayout()
+        viewPager2.setCurrentItem(1, false)
     }
 
     private fun setupViewPage2() {
@@ -67,25 +68,24 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             tab.customView = tabView
-            // 监听Tab选中切换图标
-            tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-                override fun onTabSelected(tab: TabLayout.Tab?) {
-                    val pos = tab?.position ?: 0
-                    val selectView = tab?.customView
-                    val icon = selectView?.findViewById<ImageView>(R.id.tab_iv)
-                    icon?.alpha = 1f
-                }
-
-                override fun onTabUnselected(tab: TabLayout.Tab?) {
-                    val pos = tab?.position ?: 0
-                    val unSelectView = tab?.customView
-                    val icon = unSelectView?.findViewById<ImageView>(R.id.tab_iv)
-                    icon?.alpha = 0.5f
-                }
-
-                override fun onTabReselected(tab: TabLayout.Tab?) {}
-            })
-
         }.attach()
+        // 监听Tab选中切换图标
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val pos = tab?.position ?: 0
+                val selectView = tab?.customView
+                val icon = selectView?.findViewById<ImageView>(R.id.tab_iv)
+                icon?.alpha = 1f
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                val pos = tab?.position ?: 0
+                val unSelectView = tab?.customView
+                val icon = unSelectView?.findViewById<ImageView>(R.id.tab_iv)
+                icon?.alpha = 0.5f
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
     }
 }

@@ -57,9 +57,9 @@ class DataInputActivity : AppCompatActivity() {
     private lateinit var dayInput: TextView
     private lateinit var timeInput: TextView
     private lateinit var ageRecyclerView: RecyclerView
-
     private lateinit var ageAdapter: InputAgeAdapter
-
+    private lateinit var sheetDialog : BottomSheetDialog
+    private lateinit var sheetDialog2 : BottomSheetDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -98,7 +98,7 @@ class DataInputActivity : AppCompatActivity() {
 
             val intent = Intent(this, ResultActivity::class.java)
             intent.putExtra("BMI", bmiRecord)
-            intent.putExtra("SAVE",true)
+            intent.putExtra("FATHER", "InputActivity")
             startActivity(intent)
         }
         binding.mergeDateInput.settingsUser.setOnClickListener {
@@ -193,7 +193,7 @@ class DataInputActivity : AppCompatActivity() {
                 binding.mergeDateInput.selectorThumbWeight.text = "lb"
                 weight /= 0.4536f
 
-                val showText = String.format("%.2f", weight + 0.005f)
+                val showText = String.format("%.2f", weight)
                 edtWeight.setText(showText)
             }
         }
@@ -207,7 +207,7 @@ class DataInputActivity : AppCompatActivity() {
                 binding.mergeDateInput.selectorThumbWeight.text = "kg"
                 weight *= 0.4536f
                 // 保留两位小数
-                val showText = String.format("%.2f", weight + 0.005f)
+                val showText = String.format("%.2f", weight)
                 edtWeight.setText(showText)
             }
         }
@@ -261,21 +261,23 @@ class DataInputActivity : AppCompatActivity() {
 
     //选择时间
     private fun setupTime() {
+        initDatePickerBottomSheet()
+        initDate2PickerBottomSheet()
         dayInput = binding.mergeDateInput.inputTime1
         timeInput = binding.mergeDateInput.inputTime2
 
         dayInput.setOnClickListener {
-            showDatePickerBottomSheet()
+            sheetDialog.show()
 
         }
         timeInput.setOnClickListener {
-            showDate2PickerBottomSheet()
+            sheetDialog2.show()
         }
     }
 
     // 打开日期选择弹窗入口1
-    fun showDatePickerBottomSheet() {
-        val sheetDialog = BottomSheetDialog(this)
+    fun initDatePickerBottomSheet() {
+        sheetDialog = BottomSheetDialog(this)
         val rootView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_date_picker, null)
         sheetDialog.setContentView(rootView)
 
@@ -307,10 +309,13 @@ class DataInputActivity : AppCompatActivity() {
 
         // 年份下标，偏移量 = 当前年 - 1970
         val yearSelectIndex = currentYear - 1970
+        selectYear = currentYear.toString()
         // 月份下标等于Calendar.MONTH
         val monthSelectIndex = currentMonth
+        selectMonth = monthData[currentMonth]
         // 日期初始下标 = 当前日 - 1（列表从1开始，下标0对应1号）
         val daySelectIndex = currentDay - 1
+        selectDay = currentDay.toString()
 
         val boldTypeface: Typeface? = ResourcesCompat.getFont(this, R.font.font_bold_extrabold)
 
@@ -406,16 +411,13 @@ class DataInputActivity : AppCompatActivity() {
             // 业务逻辑：回调日期
             sheetDialog.dismiss()
         }
-
-        sheetDialog.show()
-
     }
 
     // 打开日期选择弹窗入口2
-    private fun showDate2PickerBottomSheet() {
-        val sheetDialog = BottomSheetDialog(this)
+    private fun initDate2PickerBottomSheet() {
+        sheetDialog2 = BottomSheetDialog(this)
         val rootView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_date2_picker, null)
-        sheetDialog.setContentView(rootView)
+        sheetDialog2.setContentView(rootView)
 
         val wheelPeriod: WheelView = rootView.findViewById(R.id.wheel_time)
 
@@ -440,6 +442,8 @@ class DataInputActivity : AppCompatActivity() {
             // Night 23:00 ~ 5:59
             else -> 3
         }
+
+        selectPeriod = periodData[defaultSelectIndex]
 
         val boldTypeface: Typeface? = ResourcesCompat.getFont(this, R.font.font_bold_extrabold)
 
@@ -472,18 +476,16 @@ class DataInputActivity : AppCompatActivity() {
             wheel.setTextSize(16f)
         }
 
-// 3. 初始化时段滚轮
+        // 3. 初始化时段滚轮
         initWheel(wheelPeriod, periodData, defaultSelectIndex, boldTypeface)
 
-// 取消、确认按钮逻辑
-        rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog.dismiss() }
+        // 取消、确认按钮逻辑
+        rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog2.dismiss() }
         rootView.findViewById<Button>(R.id.btn_done).setOnClickListener {
             selectPeriod = periodData[wheelPeriod.currentItem]
             timeInput.text = selectPeriod
-            sheetDialog.dismiss()
+            sheetDialog2.dismiss()
         }
-
-        sheetDialog.show()
     }
 
     // 年龄选择
@@ -656,8 +658,8 @@ class DataInputActivity : AppCompatActivity() {
                 }
             }
         }
+
         return super.dispatchTouchEvent(ev)
     }
-
 
 }
