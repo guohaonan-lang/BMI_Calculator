@@ -7,16 +7,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bmicalculator.R
 import com.example.bmicalculator.model.BmiEntity
-import com.example.bmicalculator.util.BmiUtil
 
 class RecentAdapter(private var dataList: List<BmiEntity>) :
     RecyclerView.Adapter<RecentAdapter.ViewHolder>() {
 
 
-    fun update(newdata : List<BmiEntity>){
-        dataList = newdata
+    fun update(newData: List<BmiEntity>) {
+        dataList = newData
         notifyDataSetChanged()
     }
+
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var bmiText: TextView = itemView.findViewById(R.id.item_recent_bmi)
         var timeText: TextView = itemView.findViewById(R.id.item_recent_time)
@@ -34,13 +34,12 @@ class RecentAdapter(private var dataList: List<BmiEntity>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = dataList[position]
-        val bmiInfo = BmiUtil.getBmiFullInfo(item.age, item.gender, item.bmiValue)
 
         holder.bmiText.text = item.bmiValue.toString()
         holder.timeText.text = item.timeText
         holder.bmiColor.backgroundTintList =
-            android.content.res.ColorStateList.valueOf(bmiInfo.colorInt)
-        holder.bmiGrade.text = bmiInfo.levelName
+            android.content.res.ColorStateList.valueOf(item.bmiColor)
+        holder.bmiGrade.text = item.bmiGrade
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(item)
         }

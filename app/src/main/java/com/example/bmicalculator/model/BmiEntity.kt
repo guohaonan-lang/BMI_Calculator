@@ -12,10 +12,15 @@ data class BmiEntity(
     @PrimaryKey(true) var id: Long = 0,
     // 身高 cm
     var height: Float,
+    var heightUnit: Boolean = false,
     // 体重 kg
     var weight: Float,
+    var weightUnit: Boolean,
+
     // BMI 计算结果
     var bmiValue: Float,
+    var bmiGrade: String,
+    var bmiColor: Int,
     // 年龄
     var age: Int,
     // 性别 0女 / 1男

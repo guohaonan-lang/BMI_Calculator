@@ -12,10 +12,16 @@ class BmiViewModel(private val repository: BmiRepository) :
     ViewModel() {
 
     val allBmiList : Flow<List<BmiEntity>> = repository.getAllBmiRecords()
+    val chartBmiList : Flow<List<BmiEntity>> = repository.getChartBmi()
+
 
 
     suspend fun insertBmiRecord(bmi: BmiEntity) {
         repository.insertBmiRecord(bmi)
+    }
+
+    suspend fun getLatestBmi(): BmiEntity{
+        return repository.getLatestBmi()
     }
 
     suspend fun updateBmiRecord(bmi: BmiEntity) {

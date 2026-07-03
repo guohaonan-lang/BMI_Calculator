@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
@@ -28,6 +29,7 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.adapter.InputAgeAdapter
 import com.example.bmicalculator.databinding.ActivityDataInputBinding
 import com.example.bmicalculator.model.BmiEntity
+import com.example.bmicalculator.util.BmiUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.Calendar
 import kotlin.math.abs
@@ -50,6 +52,10 @@ class DataInputActivity : AppCompatActivity() {
     private var gender: Int = 1
     private var bmi = 0f
 
+//    private val bmiRecord: BmiEntity = {
+//
+//    }
+
     //XML控件
     private lateinit var edtWeight: EditText
     private lateinit var edtHeight: EditText
@@ -58,8 +64,9 @@ class DataInputActivity : AppCompatActivity() {
     private lateinit var timeInput: TextView
     private lateinit var ageRecyclerView: RecyclerView
     private lateinit var ageAdapter: InputAgeAdapter
-    private lateinit var sheetDialog : BottomSheetDialog
-    private lateinit var sheetDialog2 : BottomSheetDialog
+    private lateinit var sheetDialog: BottomSheetDialog
+    private lateinit var sheetDialog2: BottomSheetDialog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -85,10 +92,17 @@ class DataInputActivity : AppCompatActivity() {
 
             bmi = weightKg / (heightM * heightM)
 
+            val bmiLevel = BmiUtil.getBmiFullInfo(age, gender, bmi)
+            val bmiColor = ContextCompat.getColor(this, bmiLevel.colorInt)
+
             val bmiRecord = BmiEntity(
                 height = heightM * 100f,
+                heightUnit = heightUnit,
                 weight = weightKg,
+                weightUnit = weightUnit,
                 bmiValue = bmi,
+                bmiColor = bmiColor,
+                bmiGrade = bmiLevel.levelName,
                 age = age,
                 gender = gender,
                 createTime = System.currentTimeMillis(),

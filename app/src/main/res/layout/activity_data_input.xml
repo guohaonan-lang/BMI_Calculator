@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.DataInputActivity"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:fitsSystemWindows="true">
 
     <include
         android:id="@+id/merge_date_input"
@@ -16,7 +17,7 @@
         android:id="@+id/data_input_calculate"
         android:layout_width="300dp"
         android:layout_height="65dp"
-        android:text="CALCULATE"
+        android:text="@string/input_calculate"
         android:textSize="20sp"
         android:backgroundTint="@color/blue"
         android:fontFamily="@font/font_extrabold"

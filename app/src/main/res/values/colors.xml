@@ -6,6 +6,8 @@
     <color name="background">#EAEAEE</color>
     <color name="gray">#F5F5F7</color>
 
+    <color name="red">#D13B3B</color>
+<!--    圆点与卡片背景色-->
     <color name="grad1">#4343B8</color>
     <color name="grad2">#1258E1</color>
     <color name="grad3">#0099F2</color>
@@ -15,4 +17,15 @@
     <color name="grad7">#FF7137</color>
     <color name="grad8">#D3333B</color>
 
+<!--    色环对应颜色-->
+    <color name="band1">#286DE6</color>
+    <color name="band2">#349CEA</color>
+    <color name="band3">#5BB1F5</color>
+    <color name="band4">#A8C526</color>
+    <color name="band5">#FECD2E</color>
+    <color name="band6">#FD9845</color>
+    <color name="band7">#F67D3C</color>
+    <color name="band8">#F04E46</color>
+
+    <color name="point">#2C2C2E</color>
 </resources>

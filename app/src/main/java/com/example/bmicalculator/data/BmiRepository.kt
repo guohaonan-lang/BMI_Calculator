@@ -8,6 +8,14 @@ class BmiRepository(private val bmiDao: BmiDao) {
         return bmiDao.getAllBmi()
     }
 
+    fun getChartBmi(): Flow<List<BmiEntity>> {
+        return bmiDao.getChartBmi()
+    }
+
+    suspend fun getLatestBmi(): BmiEntity{
+        return bmiDao.getLatestBmiOnce()
+    }
+
     suspend fun insertBmiRecord(bmi: BmiEntity) {
         bmiDao.insertbmi(bmi)
     }

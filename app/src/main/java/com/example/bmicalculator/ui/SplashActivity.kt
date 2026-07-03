@@ -6,7 +6,6 @@ import android.view.animation.PathInterpolator
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +16,6 @@ import com.example.bmicalculator.databinding.ActivitySplashBinding
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
@@ -38,7 +36,7 @@ class SplashActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        window.navigationBarColor = "#3659CF".toColorInt() //导航栏颜色
+        window.navigationBarColor = R.color.blue//导航栏颜色
 
 
         // 确保在布局完全测量并绘制到屏幕后，再触发动画

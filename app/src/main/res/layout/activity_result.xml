@@ -19,6 +19,7 @@
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/result_recent_delete"
         android:layout_width="wrap_content"
@@ -31,14 +32,15 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/result_recent_back"
         android:layout_width="24dp"
-        android:visibility="gone"
         android:layout_height="24dp"
         android:layout_marginStart="15dp"
         android:layout_marginTop="17dp"
         android:src="@drawable/recent_back"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -46,9 +48,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="50dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/result_save"
-        android:fillViewport="true">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -68,36 +70,87 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
+                android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/result_merge_result"
-                android:visibility="visible"/>
+                app:layout_constraintTop_toBottomOf="@id/result_merge_result" />
 
-            <TextView
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/result_assessment"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/merge_ad_background"
                 android:layout_marginStart="30dp"
-                android:layout_marginEnd="30dp"
                 android:layout_marginTop="20dp"
-                android:fontFamily="@font/font_regular"
-                android:padding="17dp"
-                android:text="😎 Congratulations! You’re in a great place now. Keep up your healthy habits to maintain your healthy weight."
-                android:textSize="14sp"
+                android:layout_marginEnd="30dp"
+                android:paddingBottom="25dp"
+                android:background="@drawable/merge_ad_background"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/result_merge_grade" />
+                app:layout_constraintTop_toBottomOf="@+id/result_merge_grade">
+
+                <TextView
+                    android:id="@+id/assessment_text1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_regular"
+                    android:paddingHorizontal="15dp"
+                    android:paddingTop="15dp"
+                    android:text="😎 Congratulations! You’re in a great place now. Keep up your healthy habits to maintain your healthy weight."
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/assessment_text2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="17dp"
+                    android:fontFamily="@font/font_regular"
+                    android:paddingHorizontal="15dp"
+                    android:text="Normal Weight for your height (180cm):"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/assessment_text1" />
+
+                <TextView
+                    android:id="@+id/assessment_range"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/font_extrabold"
+                    android:paddingLeft="15dp"
+                    android:text="13.4 kg - 31.3 kg"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/assessment_text2" />
+                <TextView
+                    android:id="@+id/assessment_difference"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_extrabold"
+                    android:text="(+24kg)"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/red"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@id/assessment_range"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/assessment_range"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <include
                 android:id="@+id/result_merge_ad"
                 layout="@layout/merge_ad"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/result_assessment"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="25dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginBottom="25dp"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/result_assessment" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
@@ -106,13 +159,13 @@
         android:id="@+id/result_save"
         android:layout_width="300dp"
         android:layout_height="65dp"
-        android:text="SAVE"
-        android:textSize="20sp"
+        android:layout_marginBottom="15dp"
         android:backgroundTint="@color/blue"
         android:fontFamily="@font/font_extrabold"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="SAVE"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="15dp"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

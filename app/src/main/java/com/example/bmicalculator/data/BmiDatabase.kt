@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.bmicalculator.R
 import com.example.bmicalculator.model.BmiEntity
 
 
@@ -23,7 +24,7 @@ abstract class BmiDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     BmiDatabase::class.java,
-                    "task_database"
+                    context.getString(R.string.database_name)
                 )
                     .build()
                 INSTANCE = instance

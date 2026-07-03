@@ -11,8 +11,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BmiDao {
-    @Query("SELECT * FROM bmi  ORDER BY customTime Desc")
+    @Query("SELECT * FROM bmi  ORDER BY customTime Desc,createTime Desc")
     fun getAllBmi(): Flow<List<BmiEntity>>
+
+    @Query("SELECT * FROM bmi  ORDER BY customTime Asc,createTime Asc")
+    fun getChartBmi(): Flow<List<BmiEntity>>
+
+    @Query("SELECT * FROM bmi ORDER BY customTime DESC LIMIT 1")
+    suspend fun getLatestBmiOnce(): BmiEntity
 
     @Query("SELECT COUNT(*) FROM bmi")
     suspend fun countAllBmi(): Long

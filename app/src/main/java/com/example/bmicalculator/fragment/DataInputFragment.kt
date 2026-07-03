@@ -14,6 +14,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -28,6 +29,7 @@ import com.example.bmicalculator.databinding.FragmentDataInputBinding
 import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.ui.ResultActivity
 import com.example.bmicalculator.ui.SettingActivity
+import com.example.bmicalculator.util.BmiUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.Calendar
 import kotlin.math.abs
@@ -36,13 +38,11 @@ class DataInputFragment : Fragment() {
 
     private var _binding: FragmentDataInputBinding? = null
 
-    // 对外只读不可空属性，业务代码直接使用 binding.xxx
-    private val binding get() = checkNotNull(_binding) { "视图已销毁，禁止访问Binding" }
+    private val binding get() = checkNotNull(_binding)
 
 
     private var weight: Float = 120.00f
     private var weightUnit = false
-
     private var height: Float = 169.00f
     private var heightFt: Int = 5
     private var heightIn: Int = 7
@@ -70,7 +70,7 @@ class DataInputFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentDataInputBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -85,25 +85,35 @@ class DataInputFragment : Fragment() {
         setupGender()
 
         // 根布局监听触摸，仅当前输入页生效
-        binding.mergeDateInput.root.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                val focusView = view?.findFocus()
-                if (focusView is EditText) {
-                    val rect = Rect()
-                    focusView.getGlobalVisibleRect(rect)
-                    val touchX = event.rawX.toInt()
-                    val touchY = event.rawY.toInt()
-                    // 点击不在EditText区域内 → 收起键盘
-                    if (!rect.contains(touchX, touchY)) {
-                        focusView.clearFocus()
-                        hideSoftKeyboard(focusView)
-                    }
+        binding.mergeDateInput.root.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) { // 改用UP，不会被子控件抢占DOWN
+                val focusEt = view.findFocus() as? EditText ?: return@setOnTouchListener false
+
+                // 获取EditText在根布局内的局部坐标
+                val loc = IntArray(2)
+                focusEt.getLocationInWindow(loc)
+                val etLeft = loc[0]
+                val etTop = loc[1]
+                val etRight = etLeft + focusEt.width
+                val etBottom = etTop + focusEt.height
+
+                // 触摸全局坐标
+                val x = event.rawX
+                val y = event.rawY
+
+                // 判断点击是否在EditText范围外
+                val outSide = x < etLeft || x > etRight || y < etTop || y > etBottom
+                if (outSide) {
+                    focusEt.clearFocus()
+                    hideSoftKeyboard(focusEt)
                 }
             }
-            false // 不拦截原有点击滑动
+            false
         }
 
         binding.dataInputCalculate.setOnClickListener {
+            if(!checkNumberValid()) return@setOnClickListener
+
             var weightKg = weight
             if (!weightUnit) weightKg = weight * 0.45359236f
             var heightM = height / 100f
@@ -111,10 +121,18 @@ class DataInputFragment : Fragment() {
 
             bmi = weightKg / (heightM * heightM)
 
+
+            val bmiLevel = BmiUtil.getBmiFullInfo(age, gender, bmi)
+            val bmiColor = ContextCompat.getColor(context, bmiLevel.colorInt)
+
             val bmiRecord = BmiEntity(
                 height = heightM * 100f,
+                heightUnit = heightUnit,
                 weight = weightKg,
+                weightUnit = weightUnit,
                 bmiValue = bmi,
+                bmiColor = bmiColor,
+                bmiGrade = bmiLevel.levelName,
                 age = age,
                 gender = gender,
                 createTime = System.currentTimeMillis(),
@@ -615,13 +633,14 @@ class DataInputFragment : Fragment() {
 
         Toast.makeText(requireContext(), "进行数据判断", Toast.LENGTH_SHORT)
             .show()
-        weight = edtWeight.text.toString().toFloat()
+            weight = edtWeight.text.toString().toFloat()
         if (!weightUnit) {
             if (weight !in 1f..551f) {
                 weight = 551f
                 edtWeight.setText("551.00")
                 Toast.makeText(requireContext(), "体重超出范围( 2 - 551 lb)", Toast.LENGTH_SHORT)
                     .show()
+                return false
             }
 
         } else {
@@ -630,6 +649,7 @@ class DataInputFragment : Fragment() {
                 edtWeight.setText("250.00")
                 Toast.makeText(requireContext(), "体重超出范围( 1 - 250 kg)", Toast.LENGTH_SHORT)
                     .show()
+                return false
             }
         }
 
@@ -645,12 +665,14 @@ class DataInputFragment : Fragment() {
                 edtHeightFt.setText("8")
                 Toast.makeText(requireContext(), "身高超出范围( 1 - 8 ft)", Toast.LENGTH_SHORT)
                     .show()
+                return false
             }
             if (heightIn < 0f || heightIn > 11f) {
                 heightIn = 11
                 edtHeightIn.setText(11.toString())
                 Toast.makeText(requireContext(), "身高超出范围( 0 - 11 ft)", Toast.LENGTH_SHORT)
                     .show()
+                return false
             }
 
         } else {
@@ -659,6 +681,7 @@ class DataInputFragment : Fragment() {
                 height = 150f
                 Toast.makeText(requireContext(), "身高超出范围( 1 - 250 cm)", Toast.LENGTH_SHORT)
                     .show()
+                return false
             }
         }
         return true

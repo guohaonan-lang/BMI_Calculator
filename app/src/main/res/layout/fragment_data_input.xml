@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="40dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragment.DataInputFragment"
-    android:background="@color/background"
-    android:fitsSystemWindows="true">
+    android:background="@color/background">
 
     <!-- TODO: Update blank fragment layout -->
     <include
@@ -16,7 +16,7 @@
         android:id="@+id/data_input_calculate"
         android:layout_width="300dp"
         android:layout_height="65dp"
-        android:text="CALCULATE"
+        android:text="@string/input_calculate"
         android:textSize="20sp"
         android:backgroundTint="@color/blue"
         android:fontFamily="@font/font_extrabold"

@@ -1,19 +1,20 @@
 package com.example.bmicalculator.util
-import android.graphics.Color
+
+import com.example.bmicalculator.R
 import com.example.bmicalculator.model.BmiLevel
 import com.example.bmicalculator.model.TeenBmiRange
 
 object BmiUtil {
     // 配色池（和你之前完全一致）
     private val colorMap = mapOf(
-        "VERY_SEVERELY_UNDER" to Color.parseColor("#4343B8"),
-        "SEVERELY_UNDER" to Color.parseColor("#1258E1"),
-        "UNDER" to Color.parseColor("#0099F2"),
-        "NORMAL" to Color.parseColor("#54A529"),
-        "OVER" to Color.parseColor("#FECD2E"),
-        "OBESE1" to Color.parseColor("#FFA100"),
-        "OBESE2" to Color.parseColor("#FF7137"),
-        "OBESE3" to Color.parseColor("#D3333B")
+        "VERY_SEVERELY_UNDER" to R.color.grad1,
+        "SEVERELY_UNDER" to R.color.grad2,
+        "UNDER" to R.color.grad3,
+        "NORMAL" to R.color.grad4,
+        "OVER" to R.color.grad5,
+        "OBESE1" to R.color.grad6,
+        "OBESE2" to R.color.grad7,
+        "OBESE3" to R.color.grad8
     )
 
     // region 成年标准阈值（>=18岁）
@@ -99,7 +100,11 @@ object BmiUtil {
     // 成年人8档判断
     private fun getAdultBmi(bmi: Float): BmiLevel {
         return when {
-            bmi < ADULT_VSU_MAX -> BmiLevel("Very Severely Underweight", colorMap["VERY_SEVERELY_UNDER"]!!)
+            bmi < ADULT_VSU_MAX -> BmiLevel(
+                "Very Severely Underweight",
+                colorMap["VERY_SEVERELY_UNDER"]!!
+            )
+
             bmi <= ADULT_SU_MAX -> BmiLevel("Severely Underweight", colorMap["SEVERELY_UNDER"]!!)
             bmi <= ADULT_U_MAX -> BmiLevel("Underweight", colorMap["UNDER"]!!)
             bmi <= ADULT_N_MAX -> BmiLevel("Normal", colorMap["NORMAL"]!!)

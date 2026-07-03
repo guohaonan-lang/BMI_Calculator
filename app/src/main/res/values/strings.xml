@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">BMI Calculator</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="database_name">bmi_database</string>
+    <string name="result_activity_data_transmission_failed">数据传递失败！！！</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="input_calculate">CALCULATE</string>
 </resources>

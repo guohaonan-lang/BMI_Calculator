@@ -49,6 +49,19 @@ class ResultActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        initData()
+
+        initDeleteDialog()
+
+        //判断不同的页面，控制部分控件显隐
+        initChangePage()
+
+
+//        binding.resultAssessment.text2 = "Normal Weight for your height (180cm):"
+    }
+
+    private fun initData() {
         bmiRecord = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra("BMI", BmiEntity::class.java)
         } else {
@@ -59,44 +72,39 @@ class ResultActivity : AppCompatActivity() {
 
         // 2. 非空校验并渲染数据（示例，自行对应布局TextView）
         bmiRecord?.let { record ->
-
-            // BMI数值
             binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", record.bmiValue)
             binding.resultMergeResult.mergeBmiGauge.currentBmi = record.bmiValue
-            // 身高体重
             binding.resultMergeResult.mergeResultHeight.text =
                 String.format("%.1f cm", record.height)
             binding.resultMergeResult.mergeResultWeight.text =
                 String.format("%.1f kg", record.weight)
 
-            // 年龄
             binding.resultMergeResult.mergeResultAge.text = record.age.toString()
-            // 性别
             binding.resultMergeResult.mergeResultGender.text =
-                if (record.gender == 1) "Male" else "Female"
+                if (record.gender == 1) getString(R.string.male) else getString(R.string.female)
 
 
             val wheel = binding.resultMergeResult.mergeBmiGauge
-            // 给仪表盘赋值
             wheel.age = record.age
             wheel.gender = record.gender
             wheel.currentBmi = record.bmiValue
-            // 同步获取BMI评估文字，展示页面等级文本
+
             val bmiInfo = BmiUtil.getBmiFullInfo(record.age, record.gender, record.bmiValue)
             binding.resultMergeResult.mergeResultGrade.text = bmiInfo.levelName
-            // 可同步设置文字颜色
             binding.resultMergeResult.mergeResultGrade.backgroundTintList =
-                android.content.res.ColorStateList.valueOf(bmiInfo.colorInt)
+                android.content.res.ColorStateList.valueOf(record.bmiColor)
 
         } ?: run {
             // 无数据返回输入页
-            Toast.makeText(this, "数据传递失败！！！", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.result_activity_data_transmission_failed), Toast.LENGTH_SHORT
+            ).show()
             finish()
         }
+    }
 
-        initDeleteDialog()
-
-        //判断不同的页面，控制部分控件显隐
+    private fun initChangePage() {
         if (status == "RecentActivity") {
             binding.resultMergeGrade.root.visibility = View.GONE
             binding.resultSave.visibility = View.GONE
@@ -110,6 +118,16 @@ class ResultActivity : AppCompatActivity() {
             binding.resultRecentDelete.setOnClickListener {
                 alertDialog.show()
             }
+            val btn = binding.resultMergeResult.mergeResultGrade
+            // 参数：start, top, end, bottom 资源ID
+            btn.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                0,
+                0,
+                R.drawable.help_circle, // 右侧图标
+                0
+            )
+            // 图标和文字间距
+            btn.compoundDrawablePadding = 10
 
         } else {
 
@@ -140,7 +158,6 @@ class ResultActivity : AppCompatActivity() {
 
             }
         }
-
     }
 
     private fun setupBmiGardAndAssessment() {

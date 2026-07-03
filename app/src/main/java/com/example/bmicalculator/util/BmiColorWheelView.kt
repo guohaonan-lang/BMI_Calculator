@@ -1,44 +1,56 @@
 package com.example.bmicalculator.util
+
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.DecelerateInterpolator
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.example.bmicalculator.R
 
 class BmiColorWheelView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
+
     // 外部传入数据
     var age: Int = 18
         set(value) {
             field = value
             updateRangeAndColor()
-            invalidate()
+            // 属性改变时，指针从头重新跑一次动画
+            startPointerAnimation()
         }
     var gender: Int = 1 // 0女 1男
         set(value) {
             field = value
             updateRangeAndColor()
-            invalidate()
+            startPointerAnimation()
         }
     var currentBmi = 20f
         set(value) {
             field = value.coerceIn(minBmi, maxBmi)
-            invalidate()
+            startPointerAnimation()
         }
 
-    // 动态变量（由age+gender自动更新）
+    // 动态变量
     private var minBmi = 15.0f
     private var maxBmi = 41.0f
     private var totalRange = maxBmi - minBmi
     private var bmiRanges = floatArrayOf(15f, 16f, 18.5f, 25f, 30f, 35f, 40f, 41f)
     private var colors = intArrayOf()
+
+    // 关键：将角度列表提取为全局成员变量，与 bmiRanges 长度保持实时同步
+    private val angleList = ArrayList<Float>()
+
+    // 动画控制变量
+    private var animatedBmi = minBmi
+    private var pointerAnimator: ValueAnimator? = null
 
     // 画笔不变
     private val paintArc = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -46,67 +58,95 @@ class BmiColorWheelView @JvmOverloads constructor(
         strokeCap = Paint.Cap.BUTT
     }
     private val paintText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#000000")
+        color = ContextCompat.getColor(context, R.color.black)
         textAlign = Paint.Align.CENTER
         typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.font_extrabold), Typeface.NORMAL)
     }
     private val paintPointer = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#333333")
+        color = ContextCompat.getColor(context, R.color.point)
         style = Paint.Style.FILL
     }
     private val rectF = RectF()
 
     init {
-        // 初始化一次区间与颜色
         updateRangeAndColor()
     }
 
-    /** 核心：根据年龄性别更新表盘刻度区间、对应色值 */
+    /** 核心：根据年龄性别更新表盘刻度区间、对应色值，并预计算好角度 */
     private fun updateRangeAndColor() {
-        // 分支1：成年人 >=18，8档完整区间
         if (age >= 18) {
             minBmi = 15f
             maxBmi = 41f
             bmiRanges = floatArrayOf(15f, 16f, 17f, 18.5f, 25f, 30f, 35f, 40f, 41f)
             colors = intArrayOf(
-                Color.parseColor("#4343B8"),
-                Color.parseColor("#1258E1"),
-                Color.parseColor("#0099F2"),
-                Color.parseColor("#54A529"),
-                Color.parseColor("#FECD2E"),
-                Color.parseColor("#FFA100"),
-                Color.parseColor("#FF7137"),
-                Color.parseColor("#D3333B")
+                ContextCompat.getColor(context, R.color.band1),
+                ContextCompat.getColor(context, R.color.band2),
+                ContextCompat.getColor(context, R.color.band3),
+                ContextCompat.getColor(context, R.color.band4),
+                ContextCompat.getColor(context, R.color.band5),
+                ContextCompat.getColor(context, R.color.band6),
+                ContextCompat.getColor(context, R.color.band7),
+                ContextCompat.getColor(context, R.color.band8)
             )
         } else {
-            // 分支2：未成年2~20，仅4档 Under/Normal/Over/ObeseI
-            // 读取对应性别年龄阈值
             val teenRange = if (gender == 0) {
-                BmiUtil.femaleTeenTable.first { it.age == age }
+                BmiUtil.femaleTeenTable.firstOrNull { it.age == age }
             } else {
-                BmiUtil.maleTeenTable.first { it.age == age }
+                BmiUtil.maleTeenTable.firstOrNull { it.age == age }
             }
             minBmi = 13f
             maxBmi = 33f
-            // 四段分界：min | underMax | normalMax | overMax | max
-            bmiRanges = floatArrayOf(
-                minBmi,
-                teenRange.underweightMax,
-                teenRange.normalMax,
-                teenRange.overweightMax,
-                maxBmi
-            )
-            // 未成年只用前4个色系
+            bmiRanges = if (teenRange != null) {
+                floatArrayOf(
+                    minBmi,
+                    teenRange.underweightMax,
+                    teenRange.normalMax,
+                    teenRange.overweightMax,
+                    maxBmi
+                )
+            } else {
+                floatArrayOf(13f, 15f, 20f, 25f, 33f)
+            }
             colors = intArrayOf(
-                Color.parseColor("#0099F2"),
-                Color.parseColor("#54A529"),
-                Color.parseColor("#FECD2E"),
-                Color.parseColor("#FFA100")
+                ContextCompat.getColor(context, R.color.band3),
+                ContextCompat.getColor(context, R.color.band4),
+                ContextCompat.getColor(context, R.color.band5),
+                ContextCompat.getColor(context, R.color.band6)
             )
         }
         totalRange = maxBmi - minBmi
-        // 限制指针不越界
-        currentBmi = currentBmi.coerceIn(minBmi, maxBmi)
+
+        // 数据更新时，立即重新计算并清空重组全局角度缓存，防止 onDraw 越界
+        angleList.clear()
+        var currentStartAngle = 180.0f
+        angleList.add(currentStartAngle)
+        for (i in 0 until bmiRanges.size - 1) {
+            val startVal = bmiRanges[i]
+            val endVal = bmiRanges[i + 1]
+            val sweepAngle = ((endVal - startVal) / totalRange) * 180.0f
+            currentStartAngle += sweepAngle
+            angleList.add(currentStartAngle)
+        }
+    }
+
+    /** 启动指针旋转动画 */
+    private fun startPointerAnimation() {
+        // 先安全的限制当前目标 BMI 边界
+        val targetBmi = currentBmi.coerceIn(minBmi, maxBmi)
+
+        // 如果已有动画正在运行，先取消
+        pointerAnimator?.cancel()
+
+        // 动画从最左侧起点(minBmi) 逐步增加到 目标值(targetBmi)
+        pointerAnimator = ValueAnimator.ofFloat(minBmi, targetBmi).apply {
+            duration = 1000 // 动画时长 1000 毫秒（1秒）
+            interpolator = DecelerateInterpolator() // 减速插值器，让指针结尾落地更平滑
+            addUpdateListener { animator ->
+                animatedBmi = animator.animatedValue as Float
+                invalidate() // 触发重绘
+            }
+            start()
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -135,48 +175,44 @@ class BmiColorWheelView @JvmOverloads constructor(
         val textMargin = dpToPx(24f)
         val radius = (w - strokeW) / 2f
         val centerY = paddingTop + textMargin + radius + strokeW / 2f
-        rectF.set(
-            centerX - radius,
-            centerY - radius,
-            centerX + radius,
-            centerY + radius
-        )
+        rectF.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius)
 
-        // 绘制分段彩色圆弧（动态区间、动态颜色）
-        var currentStartAngle = 180.0f
-        val angleList = ArrayList<Float>()
-        angleList.add(currentStartAngle)
-        for (i in 0 until bmiRanges.size - 1) {
-            val startVal = bmiRanges[i]
-            val endVal = bmiRanges[i + 1]
-            val sweepAngle = ((endVal - startVal) / totalRange) * 180.0f
-            paintArc.color = colors[i]
-            canvas.drawArc(rectF, currentStartAngle, sweepAngle, false, paintArc)
-            currentStartAngle += sweepAngle
-            angleList.add(currentStartAngle)
+        // 1. 绘制分段彩色圆弧（使用预存的全局 angleList 安全绘制）
+        if (angleList.size >= bmiRanges.size) {
+            for (i in 0 until bmiRanges.size - 1) {
+                val startAngle = angleList[i]
+                val sweepAngle = angleList[i + 1] - startAngle
+                paintArc.color = colors[i]
+                canvas.drawArc(rectF, startAngle, sweepAngle, false, paintArc)
+            }
         }
 
-        // 绘制刻度数字
+        // 2. 绘制刻度数字（此时 angleList 数据安全可靠）
         paintText.textSize = dpToPx(11f)
         val textDistance = radius + (strokeW / 2f) + (w * 0.04f)
-        for (i in bmiRanges.indices) {
-            val angle = angleList[i]
-            val bmiVal = bmiRanges[i]
-            val text = if (bmiVal % 1f == 0f) bmiVal.toInt().toString() else bmiVal.toString()
-            canvas.save()
-            canvas.translate(centerX, centerY)
-            canvas.rotate(angle + 90f)
-            val fontMetrics = paintText.fontMetrics
-            val baseline = -textDistance - fontMetrics.ascent
-            canvas.drawText(text, 0f, baseline, paintText)
-            canvas.restore()
+        if (angleList.size >= bmiRanges.size) {
+            for (i in bmiRanges.indices) {
+                val angle = angleList[i]
+                val bmiVal = bmiRanges[i]
+                val text = if (bmiVal % 1f == 0f) bmiVal.toInt().toString() else bmiVal.toString()
+                canvas.save()
+                canvas.translate(centerX, centerY)
+                canvas.rotate(angle + 90f)
+                val fontMetrics = paintText.fontMetrics
+                val baseline = -textDistance - fontMetrics.ascent
+                canvas.drawText(text, 0f, baseline, paintText)
+                canvas.restore()
+            }
         }
 
-        // 绘制指针
+        // 3. 绘制带有动画效果的指针（核心：使用已动画化的 animatedBmi 计算角度）
         canvas.save()
         canvas.translate(centerX, centerY)
-        val pointerAngle = ((currentBmi - minBmi) / totalRange) * 180f
+
+        // 关键点：由 animatedBmi 动态控制当前帧的角度，从 0度 跑向 目标度数
+        val pointerAngle = ((animatedBmi - minBmi) / totalRange) * 180f
         canvas.rotate(180f + pointerAngle)
+
         val pathPointer = Path()
         val pointerLength = radius - (strokeW / 2f) + dpToPx(8f)
         val pointerWidth = dpToPx(20f)
@@ -190,6 +226,12 @@ class BmiColorWheelView @JvmOverloads constructor(
         paintPointer.pathEffect = null
         canvas.drawCircle(0f, 0f, dpToPx(10f), paintPointer)
         canvas.restore()
+    }
+
+    override fun onDetachedFromWindow() {
+        // 防止内存泄漏：当 View 销毁时，及时停止并释放动画
+        pointerAnimator?.cancel()
+        super.onDetachedFromWindow()
     }
 
     private fun dpToPx(dp: Float): Float {
