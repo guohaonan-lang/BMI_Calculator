@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -34,27 +35,33 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.Calendar
 import kotlin.math.abs
 
+
 class DataInputActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDataInputBinding
 
-    private var weight: Float = 120.00f
-    private var weightUnit = false
 
-    private var height: Float = 169.00f
-    private var heightFt: Int = 5
-    private var heightIn: Int = 7
-    private var heightUnit = false
+    var bmiRecord = BmiEntity(
+        height = 170f,
+        heightUnit = false,
+        weight = 140f,
+        weightUnit = false,
+        bmiValue = 21.9f,
+        bmiColor = 0xFF888888.toInt(), // 临时占位色
+        bmiGrade = "Normal",
+        age = 25,
+        gender = 1,
+        createTime = System.currentTimeMillis(),
+        customTime = 0L,
+        timeText = ""
+    )
+
+    private var heightIn: Int = 5
+    private var heightFt: Int = 7
     private var selectMonth: String = "June"
     private var selectDay: String = "21"
     private var selectYear: String = "2018"
     private var selectPeriod: String = "Morning"
-    private var age: Int = 25
-    private var gender: Int = 1
-    private var bmi = 0f
 
-//    private val bmiRecord: BmiEntity = {
-//
-//    }
 
     //XML控件
     private lateinit var edtWeight: EditText
@@ -85,31 +92,25 @@ class DataInputActivity : AppCompatActivity() {
         setupGender()
 
         binding.dataInputCalculate.setOnClickListener {
-            var weightKg = weight
-            if (!weightUnit) weightKg = weight * 0.45359236f
-            var heightM = height / 100f
-            if (!heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
+            var weightKg = bmiRecord.weight
+            if (!bmiRecord.weightUnit) weightKg = bmiRecord.weight * 0.45359236f
+            var heightM = bmiRecord.height / 100f
+            if (!bmiRecord.heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
 
-            bmi = weightKg / (heightM * heightM)
+            var bmi = weightKg / (heightM * heightM)
 
-            val bmiLevel = BmiUtil.getBmiFullInfo(age, gender, bmi)
-            val bmiColor = ContextCompat.getColor(this, bmiLevel.colorInt)
+            val bmiLevel = BmiUtil.getBmiFullInfo(bmiRecord.age, bmiRecord.gender, bmi)
+            bmiRecord.bmiColor = ContextCompat.getColor(this, bmiLevel.colorInt)
 
-            val bmiRecord = BmiEntity(
-                height = heightM * 100f,
-                heightUnit = heightUnit,
-                weight = weightKg,
-                weightUnit = weightUnit,
-                bmiValue = bmi,
-                bmiColor = bmiColor,
-                bmiGrade = bmiLevel.levelName,
-                age = age,
-                gender = gender,
-                createTime = System.currentTimeMillis(),
-                customTime = getCustomTimeStamp(),
+            bmiRecord.apply {
+                height = heightM * 100f
+                weight = weightKg
+                bmiValue = bmi
+                bmiGrade = bmiLevel.levelName
+                createTime = System.currentTimeMillis()
+                customTime = getCustomTimeStamp()
                 timeText = "$selectMonth $selectDay,$selectYear $selectPeriod"
-            )
-
+            }
             val intent = Intent(this, ResultActivity::class.java)
             intent.putExtra("BMI", bmiRecord)
             intent.putExtra("FATHER", "InputActivity")
@@ -147,12 +148,12 @@ class DataInputActivity : AppCompatActivity() {
         val male = binding.mergeDateInput.cardMale
         val female = binding.mergeDateInput.cardFemale
         male.setOnClickListener {
-            gender = 1
+            bmiRecord.gender = 1
             genderView()
 
         }
         female.setOnClickListener {
-            gender = 0
+            bmiRecord.gender = 0
             genderView()
         }
     }
@@ -161,7 +162,7 @@ class DataInputActivity : AppCompatActivity() {
         var m: Float
         var f: Float
 
-        if (gender == 1) {
+        if (bmiRecord.gender == 1) {
             m = 1f
             f = 0.7f
         } else {
@@ -171,7 +172,7 @@ class DataInputActivity : AppCompatActivity() {
         binding.mergeDateInput.cardMale.alpha = m
         binding.mergeDateInput.tvMale.alpha = m
         binding.mergeDateInput.ivMaleIcon.alpha = m
-        if (gender == 1) {
+        if (bmiRecord.gender == 1) {
             binding.mergeDateInput.ivMaleCheck.visibility = View.VISIBLE
             binding.mergeDateInput.ivFemaleCheck.visibility = View.GONE
         } else {
@@ -196,8 +197,8 @@ class DataInputActivity : AppCompatActivity() {
         val movePx = -(76 * density)
 
         lb.setOnClickListener {
-            if (weightUnit) {
-                weightUnit = false
+            if (bmiRecord.weightUnit) {
+                bmiRecord.weightUnit = false
 
                 binding.mergeDateInput.selectorThumbWeight.animate()
                     .translationX(0f)
@@ -205,30 +206,30 @@ class DataInputActivity : AppCompatActivity() {
                     .start()
 
                 binding.mergeDateInput.selectorThumbWeight.text = "lb"
-                weight /= 0.4536f
+                bmiRecord.weight /= 0.4536f
 
-                val showText = String.format("%.2f", weight)
+                val showText = String.format("%.2f", bmiRecord.weight)
                 edtWeight.setText(showText)
             }
         }
         kg.setOnClickListener {
-            if (!weightUnit) {
-                weightUnit = true
+            if (!bmiRecord.weightUnit) {
+                bmiRecord.weightUnit = true
                 binding.mergeDateInput.selectorThumbWeight.animate()
                     .translationX(-movePx)
                     .withLayer()
                     .start()
                 binding.mergeDateInput.selectorThumbWeight.text = "kg"
-                weight *= 0.4536f
+                bmiRecord.weight *= 0.4536f
                 // 保留两位小数
-                val showText = String.format("%.2f", weight)
+                val showText = String.format("%.2f", bmiRecord.weight)
                 edtWeight.setText(showText)
             }
         }
 
         ft.setOnClickListener {
-            if (heightUnit) {
-                heightUnit = false
+            if (bmiRecord.heightUnit) {
+                bmiRecord.heightUnit = false
                 binding.mergeDateInput.selectorThumbHeight.animate()
                     .translationX(0f)
                     .withLayer()
@@ -241,7 +242,7 @@ class DataInputActivity : AppCompatActivity() {
                 binding.mergeDateInput.inputHeightFt1.visibility = View.VISIBLE
                 binding.mergeDateInput.inputHeightIn1.visibility = View.VISIBLE
 
-                val totalInch = (height / 2.54f).toInt()
+                val totalInch = (bmiRecord.height / 2.54f).toInt()
                 heightFt = totalInch / 12
                 heightIn = totalInch % 12
                 binding.mergeDateInput.inputHeightFt.setText(heightFt.toString())
@@ -251,8 +252,8 @@ class DataInputActivity : AppCompatActivity() {
         }
 
         cm.setOnClickListener {
-            if (!heightUnit) {
-                heightUnit = true
+            if (!bmiRecord.heightUnit) {
+                bmiRecord.heightUnit = true
                 binding.mergeDateInput.selectorThumbHeight.animate()
                     .translationX(-movePx)
                     .withLayer()
@@ -264,9 +265,9 @@ class DataInputActivity : AppCompatActivity() {
                 binding.mergeDateInput.inputHeightIn.visibility = View.GONE
                 binding.mergeDateInput.inputHeightFt1.visibility = View.GONE
                 binding.mergeDateInput.inputHeightIn1.visibility = View.GONE
-                height = ((heightFt * 12) + heightIn) * 2.54f
+                bmiRecord.height = ((heightFt * 12) + heightIn) * 2.54f
 
-                val showText = String.format("%.1f", height + 0.05)
+                val showText = String.format("%.1f", bmiRecord.height + 0.05)
                 binding.mergeDateInput.inputHeight.setText(showText)
             }
         }
@@ -509,7 +510,7 @@ class DataInputActivity : AppCompatActivity() {
         ageRecyclerView.layoutManager = layoutManager
 
         ageAdapter = InputAgeAdapter(ageRecyclerView) { selectedAgeInt ->
-            age = selectedAgeInt
+            bmiRecord.age = selectedAgeInt
         }
         ageRecyclerView.adapter = ageAdapter
 
@@ -549,15 +550,15 @@ class DataInputActivity : AppCompatActivity() {
                     val centerView = snapHelper.findSnapView(lm)
                     if (centerView != null) {
                         val centerAge = lm.getPosition(centerView) + 2
-                        if (age != centerAge) {
-                            age = centerAge
+                        if (bmiRecord.age != centerAge) {
+                            bmiRecord.age = centerAge
                         }
                     }
                 }
             }
         })
 
-        ageRecyclerView.layoutManager?.scrollToPosition(age - 2)
+        ageRecyclerView.layoutManager?.scrollToPosition(bmiRecord.age - 2)
     }
 
     // 身高体重
@@ -565,8 +566,8 @@ class DataInputActivity : AppCompatActivity() {
         edtWeight = binding.mergeDateInput.inputWeight
         edtHeight = binding.mergeDateInput.inputHeight
 
-        edtWeight.setText(weight.toString())
-        edtHeight.setText(height.toString())
+        edtWeight.setText(bmiRecord.weight.toString())
+        edtHeight.setText(bmiRecord.height.toString())
 
         val edtHeightFt = binding.mergeDateInput.inputHeightFt
         val edtHeightIn = binding.mergeDateInput.inputHeightIn
@@ -575,6 +576,29 @@ class DataInputActivity : AppCompatActivity() {
 
         val editTexts = listOf(edtHeightFt, edtHeightIn, edtWeight, edtHeight)
         editTexts.forEach { et ->
+            et.doAfterTextChanged { editable ->
+                val text = editable.toString()
+                // 空输入直接跳过，避免数字转换崩溃
+                if (text.isBlank()) return@doAfterTextChanged
+                try {
+                    when (et) {
+                        edtWeight -> {
+                            bmiRecord.weight = text.toFloat()
+                        }
+                        edtHeight -> {
+                            bmiRecord.height = text.toFloat()
+                        }
+                        edtHeightFt -> {
+                            heightFt = text.toInt()
+                        }
+                        edtHeightIn -> {
+                            heightIn = text.toInt()
+                        }
+                    }
+                } catch (e: NumberFormatException) {
+                }
+            }
+
             et.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     // 失焦：校验当前这个EditText
@@ -603,25 +627,25 @@ class DataInputActivity : AppCompatActivity() {
 
         Toast.makeText(this, "进行数据判断", Toast.LENGTH_SHORT)
             .show()
-        weight = edtWeight.text.toString().toFloat()
-        if (!weightUnit) {
-            if (weight !in 1f..551f) {
-                weight = 551f
+        bmiRecord.weight = edtWeight.text.toString().toFloat()
+        if (!bmiRecord.weightUnit) {
+            if (bmiRecord.weight !in 1f..551f) {
+                bmiRecord.weight = 551f
                 edtWeight.setText("551.00")
                 Toast.makeText(this, "体重超出范围( 2 - 551 lb)", Toast.LENGTH_SHORT)
                     .show()
             }
 
         } else {
-            if (weight !in 1f..250f) {
-                weight = 250f
+            if (bmiRecord.weight !in 1f..250f) {
+                bmiRecord.weight = 250f
                 edtWeight.setText("250.00")
                 Toast.makeText(this, "体重超出范围( 1 - 250 kg)", Toast.LENGTH_SHORT)
                     .show()
             }
         }
 
-        if (!heightUnit) {
+        if (!bmiRecord.heightUnit) {
             val edtHeightFt = binding.mergeDateInput.inputHeightFt
             val edtHeightIn = binding.mergeDateInput.inputHeightIn
 
@@ -642,9 +666,9 @@ class DataInputActivity : AppCompatActivity() {
             }
 
         } else {
-            height = edtHeight.text.toString().toFloat()
-            if (height !in 1f..250.0f) {
-                height = 150f
+            bmiRecord.height = edtHeight.text.toString().toFloat()
+            if (bmiRecord.height !in 1f..250.0f) {
+                bmiRecord.height = 150f
                 Toast.makeText(this, "身高超出范围( 1 - 250 cm)", Toast.LENGTH_SHORT)
                     .show()
             }

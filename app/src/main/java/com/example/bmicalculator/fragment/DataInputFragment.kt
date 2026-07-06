@@ -1,7 +1,6 @@
 package com.example.bmicalculator.fragment
 
 import android.content.Intent
-import android.graphics.Rect
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,6 +16,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
@@ -37,23 +37,31 @@ import kotlin.math.abs
 class DataInputFragment : Fragment() {
 
     private var _binding: FragmentDataInputBinding? = null
-
     private val binding get() = checkNotNull(_binding)
 
 
-    private var weight: Float = 120.00f
-    private var weightUnit = false
-    private var height: Float = 169.00f
-    private var heightFt: Int = 5
-    private var heightIn: Int = 7
-    private var heightUnit = false
+    var bmiRecord = BmiEntity(
+        height = 170f,
+        heightUnit = false,
+        weight = 140f,
+        weightUnit = false,
+        bmiValue = 21.9f,
+        bmiColor = 0xFF888888.toInt(), // 临时占位色
+        bmiGrade = "Normal",
+        age = 25,
+        gender = 1,
+        createTime = System.currentTimeMillis(),
+        customTime = 0L,
+        timeText = ""
+    )
+
+    private var heightIn: Int = 5
+    private var heightFt: Int = 7
     private var selectMonth: String = "June"
     private var selectDay: String = "21"
     private var selectYear: String = "2018"
     private var selectPeriod: String = "Morning"
-    private var age: Int = 25
-    private var gender: Int = 1
-    private var bmi = 0f
+
 
     //XML控件
     private lateinit var edtWeight: EditText
@@ -63,7 +71,6 @@ class DataInputFragment : Fragment() {
     private lateinit var timeInput: TextView
     private lateinit var ageRecyclerView: RecyclerView
     private lateinit var ageAdapter: InputAgeAdapter
-
     private lateinit var sheetDialog: BottomSheetDialog
     private lateinit var sheetDialog2: BottomSheetDialog
 
@@ -112,37 +119,28 @@ class DataInputFragment : Fragment() {
         }
 
         binding.dataInputCalculate.setOnClickListener {
-            if(!checkNumberValid()) return@setOnClickListener
+            var weightKg = bmiRecord.weight
+            if (!bmiRecord.weightUnit) weightKg = bmiRecord.weight * 0.45359236f
+            var heightM = bmiRecord.height / 100f
+            if (!bmiRecord.heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
 
-            var weightKg = weight
-            if (!weightUnit) weightKg = weight * 0.45359236f
-            var heightM = height / 100f
-            if (!heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
+            var bmi = weightKg / (heightM * heightM)
 
-            bmi = weightKg / (heightM * heightM)
+            val bmiLevel = BmiUtil.getBmiFullInfo(bmiRecord.age, bmiRecord.gender, bmi)
+            bmiRecord.bmiColor = ContextCompat.getColor(requireContext(), bmiLevel.colorInt)
 
-
-            val bmiLevel = BmiUtil.getBmiFullInfo(age, gender, bmi)
-            val bmiColor = ContextCompat.getColor(requireContext(), bmiLevel.colorInt)
-
-            val bmiRecord = BmiEntity(
-                height = heightM * 100f,
-                heightUnit = heightUnit,
-                weight = weightKg,
-                weightUnit = weightUnit,
-                bmiValue = bmi,
-                bmiColor = bmiColor,
-                bmiGrade = bmiLevel.levelName,
-                age = age,
-                gender = gender,
-                createTime = System.currentTimeMillis(),
-                customTime = getCustomTimeStamp(),
+            bmiRecord.apply {
+                height = heightM * 100f
+                weight = weightKg
+                bmiValue = bmi
+                bmiGrade = bmiLevel.levelName
+                createTime = System.currentTimeMillis()
+                customTime = getCustomTimeStamp()
                 timeText = "$selectMonth $selectDay,$selectYear $selectPeriod"
-            )
-
+            }
             val intent = Intent(requireContext(), ResultActivity::class.java)
             intent.putExtra("BMI", bmiRecord)
-            intent.putExtra("FATHER", "InputFragment")
+            intent.putExtra("FATHER", "InputActivity")
             startActivity(intent)
         }
         binding.mergeDateInput.settingsUser.setOnClickListener {
@@ -177,12 +175,12 @@ class DataInputFragment : Fragment() {
         val male = binding.mergeDateInput.cardMale
         val female = binding.mergeDateInput.cardFemale
         male.setOnClickListener {
-            gender = 1
+            bmiRecord.gender = 1
             genderView()
 
         }
         female.setOnClickListener {
-            gender = 0
+            bmiRecord.gender = 0
             genderView()
         }
     }
@@ -191,7 +189,7 @@ class DataInputFragment : Fragment() {
         var m: Float
         var f: Float
 
-        if (gender == 1) {
+        if (bmiRecord.gender == 1) {
             m = 1f
             f = 0.7f
         } else {
@@ -201,7 +199,7 @@ class DataInputFragment : Fragment() {
         binding.mergeDateInput.cardMale.alpha = m
         binding.mergeDateInput.tvMale.alpha = m
         binding.mergeDateInput.ivMaleIcon.alpha = m
-        if (gender == 1) {
+        if (bmiRecord.gender == 1) {
             binding.mergeDateInput.ivMaleCheck.visibility = View.VISIBLE
             binding.mergeDateInput.ivFemaleCheck.visibility = View.GONE
         } else {
@@ -226,8 +224,8 @@ class DataInputFragment : Fragment() {
         val movePx = -(76 * density)
 
         lb.setOnClickListener {
-            if (weightUnit) {
-                weightUnit = false
+            if (bmiRecord.weightUnit) {
+                bmiRecord.weightUnit = false
 
                 binding.mergeDateInput.selectorThumbWeight.animate()
                     .translationX(0f)
@@ -235,30 +233,30 @@ class DataInputFragment : Fragment() {
                     .start()
 
                 binding.mergeDateInput.selectorThumbWeight.text = "lb"
-                weight /= 0.4536f
+                bmiRecord.weight /= 0.4536f
 
-                val showText = String.format("%.2f", weight + 0.005f)
+                val showText = String.format("%.2f", bmiRecord.weight)
                 edtWeight.setText(showText)
             }
         }
         kg.setOnClickListener {
-            if (!weightUnit) {
-                weightUnit = true
+            if (!bmiRecord.weightUnit) {
+                bmiRecord.weightUnit = true
                 binding.mergeDateInput.selectorThumbWeight.animate()
                     .translationX(-movePx)
                     .withLayer()
                     .start()
                 binding.mergeDateInput.selectorThumbWeight.text = "kg"
-                weight *= 0.4536f
+                bmiRecord.weight *= 0.4536f
                 // 保留两位小数
-                val showText = String.format("%.2f", weight + 0.005f)
+                val showText = String.format("%.2f", bmiRecord.weight)
                 edtWeight.setText(showText)
             }
         }
 
         ft.setOnClickListener {
-            if (heightUnit) {
-                heightUnit = false
+            if (bmiRecord.heightUnit) {
+                bmiRecord.heightUnit = false
                 binding.mergeDateInput.selectorThumbHeight.animate()
                     .translationX(0f)
                     .withLayer()
@@ -271,7 +269,7 @@ class DataInputFragment : Fragment() {
                 binding.mergeDateInput.inputHeightFt1.visibility = View.VISIBLE
                 binding.mergeDateInput.inputHeightIn1.visibility = View.VISIBLE
 
-                val totalInch = (height / 2.54f).toInt()
+                val totalInch = (bmiRecord.height / 2.54f).toInt()
                 heightFt = totalInch / 12
                 heightIn = totalInch % 12
                 binding.mergeDateInput.inputHeightFt.setText(heightFt.toString())
@@ -281,8 +279,8 @@ class DataInputFragment : Fragment() {
         }
 
         cm.setOnClickListener {
-            if (!heightUnit) {
-                heightUnit = true
+            if (!bmiRecord.heightUnit) {
+                bmiRecord.heightUnit = true
                 binding.mergeDateInput.selectorThumbHeight.animate()
                     .translationX(-movePx)
                     .withLayer()
@@ -294,15 +292,16 @@ class DataInputFragment : Fragment() {
                 binding.mergeDateInput.inputHeightIn.visibility = View.GONE
                 binding.mergeDateInput.inputHeightFt1.visibility = View.GONE
                 binding.mergeDateInput.inputHeightIn1.visibility = View.GONE
-                height = ((heightFt * 12) + heightIn) * 2.54f
+                bmiRecord.height = ((heightFt * 12) + heightIn) * 2.54f
 
-                val showText = String.format("%.1f", height + 0.05)
+                val showText = String.format("%.1f", bmiRecord.height + 0.05)
                 binding.mergeDateInput.inputHeight.setText(showText)
             }
         }
 
     }
 
+    //选择时间
     private fun setupTime() {
         initDatePickerBottomSheet()
         initDate2PickerBottomSheet()
@@ -321,7 +320,8 @@ class DataInputFragment : Fragment() {
     // 打开日期选择弹窗入口1
     fun initDatePickerBottomSheet() {
         sheetDialog = BottomSheetDialog(requireContext())
-        val rootView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date_picker, null)
+        val rootView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date_picker, null)
         sheetDialog.setContentView(rootView)
 
         val wheelMonth: WheelView = rootView.findViewById(R.id.wheel_month)
@@ -360,7 +360,8 @@ class DataInputFragment : Fragment() {
         val daySelectIndex = currentDay - 1
         selectDay = currentDay.toString()
 
-        val boldTypeface: Typeface? = ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
+        val boldTypeface: Typeface? =
+            ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
         // 2. 局部通用初始化滚轮方法
         fun initWheel(
@@ -422,7 +423,11 @@ class DataInputFragment : Fragment() {
             dayList = getDayList(yearCur, monthCur)
             // 刷新日期适配器
             // 防止原来选中的天数超过当月最大天数，自动修正下标
-            Toast.makeText(requireContext(), "${wheelDay.currentItem} ${dayList.size}", Toast.LENGTH_SHORT)
+            Toast.makeText(
+                requireContext(),
+                "${wheelDay.currentItem} ${dayList.size}",
+                Toast.LENGTH_SHORT
+            )
                 .show()
             if (wheelDay.currentItem >= dayList.size) {
                 wheelDay.currentItem = dayList.size - 1
@@ -459,12 +464,13 @@ class DataInputFragment : Fragment() {
     // 打开日期选择弹窗入口2
     private fun initDate2PickerBottomSheet() {
         sheetDialog2 = BottomSheetDialog(requireContext())
-        val rootView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date2_picker, null)
+        val rootView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_date2_picker, null)
         sheetDialog2.setContentView(rootView)
 
         val wheelPeriod: WheelView = rootView.findViewById(R.id.wheel_time)
 
-        // 1. 单列数据源
+// 1. 单列数据源
         val periodData = listOf(
             "Morning",
             "Afternoon",
@@ -472,7 +478,7 @@ class DataInputFragment : Fragment() {
             "Night"
         )
 
-        // 根据当前小时自动匹配对应时段下标
+// 根据当前小时自动匹配对应时段下标
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val defaultSelectIndex = when (// Morning 6:00 ~ 11:59
@@ -488,7 +494,8 @@ class DataInputFragment : Fragment() {
 
         selectPeriod = periodData[defaultSelectIndex]
 
-        val boldTypeface: Typeface? = ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
+        val boldTypeface: Typeface? =
+            ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
         // 2. 复用你原来通用滚轮初始化方法
         fun initWheel(
@@ -539,7 +546,7 @@ class DataInputFragment : Fragment() {
         ageRecyclerView.layoutManager = layoutManager
 
         ageAdapter = InputAgeAdapter(ageRecyclerView) { selectedAgeInt ->
-            age = selectedAgeInt
+            bmiRecord.age = selectedAgeInt
         }
         ageRecyclerView.adapter = ageAdapter
 
@@ -579,15 +586,15 @@ class DataInputFragment : Fragment() {
                     val centerView = snapHelper.findSnapView(lm)
                     if (centerView != null) {
                         val centerAge = lm.getPosition(centerView) + 2
-                        if (age != centerAge) {
-                            age = centerAge
+                        if (bmiRecord.age != centerAge) {
+                            bmiRecord.age = centerAge
                         }
                     }
                 }
             }
         })
 
-        ageRecyclerView.layoutManager?.scrollToPosition(age - 2)
+        ageRecyclerView.layoutManager?.scrollToPosition(bmiRecord.age - 2)
     }
 
     // 身高体重
@@ -595,8 +602,8 @@ class DataInputFragment : Fragment() {
         edtWeight = binding.mergeDateInput.inputWeight
         edtHeight = binding.mergeDateInput.inputHeight
 
-        edtWeight.setText(weight.toString())
-        edtHeight.setText(height.toString())
+        edtWeight.setText(bmiRecord.weight.toString())
+        edtHeight.setText(bmiRecord.height.toString())
 
         val edtHeightFt = binding.mergeDateInput.inputHeightFt
         val edtHeightIn = binding.mergeDateInput.inputHeightIn
@@ -605,6 +612,28 @@ class DataInputFragment : Fragment() {
 
         val editTexts = listOf(edtHeightFt, edtHeightIn, edtWeight, edtHeight)
         editTexts.forEach { et ->
+            et.doAfterTextChanged { editable ->
+                val text = editable.toString()
+                // 空输入直接跳过，避免数字转换崩溃
+                if (text.isBlank()) return@doAfterTextChanged
+                try {
+                    when (et) {
+                        edtWeight -> {
+                            bmiRecord.weight = text.toFloat()
+                        }
+                        edtHeight -> {
+                            bmiRecord.height = text.toFloat()
+                        }
+                        edtHeightFt -> {
+                            heightFt = text.toInt()
+                        }
+                        edtHeightIn -> {
+                            heightIn = text.toInt()
+                        }
+                    }
+                } catch (e: NumberFormatException) {
+                }
+            }
             et.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     // 失焦：校验当前这个EditText
@@ -633,27 +662,25 @@ class DataInputFragment : Fragment() {
 
         Toast.makeText(requireContext(), "进行数据判断", Toast.LENGTH_SHORT)
             .show()
-            weight = edtWeight.text.toString().toFloat()
-        if (!weightUnit) {
-            if (weight !in 1f..551f) {
-                weight = 551f
+        bmiRecord.weight = edtWeight.text.toString().toFloat()
+        if (!bmiRecord.weightUnit) {
+            if (bmiRecord.weight !in 1f..551f) {
+                bmiRecord.weight = 551f
                 edtWeight.setText("551.00")
                 Toast.makeText(requireContext(), "体重超出范围( 2 - 551 lb)", Toast.LENGTH_SHORT)
                     .show()
-                return false
             }
 
         } else {
-            if (weight !in 1f..250f) {
-                weight = 250f
+            if (bmiRecord.weight !in 1f..250f) {
+                bmiRecord.weight = 250f
                 edtWeight.setText("250.00")
                 Toast.makeText(requireContext(), "体重超出范围( 1 - 250 kg)", Toast.LENGTH_SHORT)
                     .show()
-                return false
             }
         }
 
-        if (!heightUnit) {
+        if (!bmiRecord.heightUnit) {
             val edtHeightFt = binding.mergeDateInput.inputHeightFt
             val edtHeightIn = binding.mergeDateInput.inputHeightIn
 
@@ -665,23 +692,20 @@ class DataInputFragment : Fragment() {
                 edtHeightFt.setText("8")
                 Toast.makeText(requireContext(), "身高超出范围( 1 - 8 ft)", Toast.LENGTH_SHORT)
                     .show()
-                return false
             }
             if (heightIn < 0f || heightIn > 11f) {
                 heightIn = 11
                 edtHeightIn.setText(11.toString())
                 Toast.makeText(requireContext(), "身高超出范围( 0 - 11 ft)", Toast.LENGTH_SHORT)
                     .show()
-                return false
             }
 
         } else {
-            height = edtHeight.text.toString().toFloat()
-            if (height !in 1f..250.0f) {
-                height = 150f
+            bmiRecord.height = edtHeight.text.toString().toFloat()
+            if (bmiRecord.height !in 1f..250.0f) {
+                bmiRecord.height = 150f
                 Toast.makeText(requireContext(), "身高超出范围( 1 - 250 cm)", Toast.LENGTH_SHORT)
                     .show()
-                return false
             }
         }
         return true
