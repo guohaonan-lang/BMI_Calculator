@@ -6,4 +6,22 @@
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="input_calculate">CALCULATE</string>
+
+    <string name="adults_bmi_very_severely_underweight">Very Severely Underweight</string>
+    <string name="adults_bmi_range_VerySeverelyUnderweight"><![CDATA[<16.0]]></string>
+    <string name="adults_bmi_severely_underweight">Severely Underweight</string>
+    <string name="adults_bmi_range_SeverelyUnderweight">16.0–16.9</string>
+    <string name="adults_bmi_underweight">Underweight</string>
+    <string name="adults_bmi_range_Underweight">17.0–18.4</string>
+    <string name="adults_bmi_normal">Normal</string>
+    <string name="adults_bmi_range_normal">18.5–24.9</string>
+    <string name="adults_bmi_overweight">Overweight</string>
+    <string name="adults_bmi_range_overweight">25.0–29.9</string>
+    <string name="adult_bmi_obese_class_i">Obese Class I</string>
+    <string name="adult_bmi_range_obese_class_i">30.0–34.9</string>
+    <string name="adults_bmi_obese_class_ii">Obese Class II</string>
+    <string name="adult_bmi_range_obese_class_ii">35.0–39.9</string>
+    <string name="adults_bmi_obese_class_iii">Obese Class III</string>
+    <string name="adult_bmi_range_obese_class_iii">≥ 40.0</string>
+
 </resources>

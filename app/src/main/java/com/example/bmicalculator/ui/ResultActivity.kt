@@ -62,6 +62,7 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun initData() {
+        // 1.读取数据
         bmiRecord = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra("BMI", BmiEntity::class.java)
         } else {
@@ -70,7 +71,7 @@ class ResultActivity : AppCompatActivity() {
         }
         status = intent.getStringExtra("FATHER").toString()
 
-        // 2. 非空校验并渲染数据（示例，自行对应布局TextView）
+        // 2. 非空校验，渲染数据
         bmiRecord?.let { record ->
             binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", record.bmiValue)
             binding.resultMergeResult.mergeBmiGauge.currentBmi = record.bmiValue
@@ -164,6 +165,8 @@ class ResultActivity : AppCompatActivity() {
 //        TODO("Not yet implemented")
     }
 
+
+// 初始化delete弹窗
     private fun initDeleteDialog() {
         val dialogLayout = layoutInflater.inflate(R.layout.dialog_delete, null)
 
@@ -194,6 +197,7 @@ class ResultActivity : AppCompatActivity() {
         alertDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
     }
 
+    //返回监听，触发delete弹窗
     val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             alertDialog.show()

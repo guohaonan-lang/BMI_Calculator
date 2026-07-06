@@ -60,7 +60,10 @@ class BmiColorWheelView @JvmOverloads constructor(
     private val paintText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.black)
         textAlign = Paint.Align.CENTER
-        typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.font_extrabold), Typeface.NORMAL)
+        typeface = Typeface.create(
+            ResourcesCompat.getFont(context, R.font.font_extrabold),
+            Typeface.NORMAL
+        )
     }
     private val paintPointer = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.point)
@@ -94,8 +97,8 @@ class BmiColorWheelView @JvmOverloads constructor(
             } else {
                 BmiUtil.maleTeenTable.firstOrNull { it.age == age }
             }
-            minBmi = 13f
-            maxBmi = 33f
+            minBmi = teenRange?.underweightMax?.minus(1f) ?: 13f
+            maxBmi = teenRange?.overweightMax?.plus(1f) ?: 33f
             bmiRanges = if (teenRange != null) {
                 floatArrayOf(
                     minBmi,
@@ -192,6 +195,7 @@ class BmiColorWheelView @JvmOverloads constructor(
         val textDistance = radius + (strokeW / 2f) + (w * 0.04f)
         if (angleList.size >= bmiRanges.size) {
             for (i in bmiRanges.indices) {
+                if (i == 0 || i == bmiRanges.lastIndex) continue
                 val angle = angleList[i]
                 val bmiVal = bmiRanges[i]
                 val text = if (bmiVal % 1f == 0f) bmiVal.toInt().toString() else bmiVal.toString()

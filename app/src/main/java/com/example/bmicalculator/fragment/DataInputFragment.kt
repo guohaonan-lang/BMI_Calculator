@@ -123,7 +123,7 @@ class DataInputFragment : Fragment() {
 
 
             val bmiLevel = BmiUtil.getBmiFullInfo(age, gender, bmi)
-            val bmiColor = ContextCompat.getColor(context, bmiLevel.colorInt)
+            val bmiColor = ContextCompat.getColor(requireContext(), bmiLevel.colorInt)
 
             val bmiRecord = BmiEntity(
                 height = heightM * 100f,

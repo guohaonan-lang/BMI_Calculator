@@ -3,6 +3,7 @@ package com.example.bmicalculator.model
 data class BmiLevel(
     val levelName: String,
     val colorInt: Int
+
 )
 
 data class TeenBmiRange(

@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.FragmentBmiBinding
@@ -51,7 +53,7 @@ class BmiFragment : Fragment() {
             val intent = Intent(requireContext(), RecentActivity::class.java)
             startActivity(intent)
         }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             bmiRecord = viewModel.getLatestBmi()
             updateBmi()
         }
@@ -65,6 +67,7 @@ class BmiFragment : Fragment() {
         wheel.age = bmiRecord?.age!!
         wheel.gender = bmiRecord?.gender!!
         wheel.currentBmi = bmiRecord!!.bmiValue
+
         binding.resultTime.text = bmiRecord!!.timeText
         binding.resultMergeResult.mergeResultBmi.text = bmiRecord!!.bmiValue.toString()
         binding.resultMergeResult.mergeResultGrade.text = bmiRecord!!.bmiGrade
@@ -75,9 +78,9 @@ class BmiFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val newBmiRecord = viewModel.getLatestBmi()
-            if(newBmiRecord != bmiRecord) {
+            if (newBmiRecord != bmiRecord) {
                 bmiRecord = newBmiRecord
                 updateBmi()
             }

@@ -27,8 +27,10 @@ import kotlinx.coroutines.launch
 
 class StatisticsFragment : Fragment() {
     private lateinit var lineChart: LineChart
+
     // 图表X轴日期标签集合
     private val xLabelList = mutableListOf<String>()
+
     // 原始BMI数据列表
     private var dataList: List<BmiEntity> = emptyList()
 
@@ -60,26 +62,23 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun initChartStyle() {
-        lineChart.description.isEnabled = false
-        lineChart.legend.isEnabled = false
-        lineChart.setTouchEnabled(true)
-        lineChart.setDragEnabled(true)
+        lineChart.apply {
+            description.isEnabled = false
+            legend.isEnabled = false
+            setTouchEnabled(true)
+            setDragEnabled(true)
 
-        // 关键：开启缩放才能支持限定可视区间、左右拖动
-        lineChart.setScaleEnabled(true)
-        // 只允许X轴横向缩放，锁定Y轴上下缩放
-        lineChart.setPinchZoom(false)
-        lineChart.isDragXEnabled = true
-        lineChart.isDragYEnabled = false
+            setScaleEnabled(false)
+            isDragXEnabled = true
+            isDragYEnabled = false
 
+        }
         val xAxis: XAxis = lineChart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.gridColor = 0xFFDDDDDD.toInt()
         xAxis.axisLineColor = Color.TRANSPARENT
         xAxis.labelCount = 0
-        // 一屏最多显示6个数据点，超过就产生滚动区域
-        lineChart.setVisibleXRangeMaximum(6f)
-        lineChart.setVisibleXRangeMinimum(2f)
+
         // 左右留白，避免首尾贴边拖不动
         xAxis.spaceMin = 0.3f
         xAxis.spaceMax = 0.3f
@@ -87,18 +86,18 @@ class StatisticsFragment : Fragment() {
         val leftY: YAxis = lineChart.axisLeft
         leftY.gridColor = 0xFFDDDDDD.toInt()
         leftY.axisLineColor = Color.TRANSPARENT
-        leftY.setLabelCount(5, true)
+        leftY.setLabelCount(6, true)
 
         lineChart.axisRight.isEnabled = false
     }
+
     private fun renderLineChart(entries: MutableList<Entry>) {
+
         if (entries.isEmpty()) {
             lineChart.clear()
             lineChart.invalidate()
             return
         }
-
-        val currentScaleX = lineChart.viewPortHandler.scaleX
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
             mode = LineDataSet.Mode.CUBIC_BEZIER
@@ -123,18 +122,14 @@ class StatisticsFragment : Fragment() {
         lineChart.data = lineData
         lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(xLabelList)
 
+        //必须先填充数据，再设置显示范围
         val maxShowCount = 6f
-        // 核心：限制一屏最多6个点，超出即可左右滑动
-        lineChart.setVisibleXRangeMaximum(maxShowCount)
-        lineChart.setVisibleXRangeMinimum(2f)
-
+        lineChart.setVisibleXRangeMaximum(6f)
+        lineChart.setVisibleXRangeMinimum(6f)
         // 定位到最新数据（右侧末尾）
         if (entries.size > maxShowCount) {
             lineChart.moveViewToX(entries.size - maxShowCount)
         }
-
-        // 恢复缩放比例
-        lineChart.viewPortHandler.setZoom(currentScaleX, 1f, 0f, 0f)
 
         lineChart.invalidate()
     }
@@ -162,4 +157,10 @@ class StatisticsFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // 释放图表资源，避免内存泄漏
+        lineChart.clear()
+        lineChart.data = null
+    }
 }

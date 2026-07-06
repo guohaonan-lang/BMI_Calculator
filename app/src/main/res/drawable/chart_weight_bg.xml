@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- 圆角12dp -->
+    <corners android:radius="12dp" />
+    <!-- 90度 = 左→右渐变 -->
+    <gradient
+        android:angle="90"
+        android:startColor="#FF931E"
+        android:endColor="#FF8537"/>
+</shape>
