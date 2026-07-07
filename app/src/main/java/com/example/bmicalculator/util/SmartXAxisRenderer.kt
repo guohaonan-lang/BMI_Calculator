@@ -2,14 +2,12 @@ package com.example.bmicalculator.util
 
 import android.graphics.Canvas
 import com.example.bmicalculator.fragment.StatisticsFragment
-import com.example.bmicalculator.model.BmiEntity
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.renderer.XAxisRenderer
 import com.github.mikephil.charting.utils.MPPointF
 import com.github.mikephil.charting.utils.Transformer
 import com.github.mikephil.charting.utils.ViewPortHandler
 import java.util.Calendar
-import kotlin.collections.mutableListOf
 import kotlin.math.roundToInt
 
 class SmartXAxisRenderer(
@@ -17,9 +15,7 @@ class SmartXAxisRenderer(
     xAxis: XAxis,
     trans: Transformer,
     private val getBaseTimeZero: () -> Long,
-    private val getCurrentMode: () -> StatisticsFragment.TimeMode,
-    private val getRawData: () -> List<BmiEntity>,
-    private val xList: MutableList<String>
+    private val getCurrentMode: () -> StatisticsFragment.TimeMode
 ) : XAxisRenderer(viewPortHandler, xAxis, trans) {
 
     private val mCalendar = Calendar.getInstance()
@@ -77,7 +73,7 @@ class SmartXAxisRenderer(
                     val currYear = mCalendar.get(Calendar.YEAR)
                     // 首刻度直接绘制，不用走对比逻辑
                     if (index == 0) {
-                        super.drawLabel(c, "${currYear}", x, y, anchor, angleDegrees)
+                        super.drawLabel(c, "$currYear", x, y, anchor, angleDegrees)
                         return
                     }
                     // 对比上一月年份是否跨年
@@ -86,7 +82,7 @@ class SmartXAxisRenderer(
                     prevCal.add(Calendar.MONTH, -prevOff)
                     val prevYear = prevCal.get(Calendar.YEAR)
                     if (currYear != prevYear) {
-                        super.drawLabel(c, "${currYear}", x, y, anchor, angleDegrees)
+                        super.drawLabel(c, "$currYear", x, y, anchor, angleDegrees)
                     }
                 }
             }

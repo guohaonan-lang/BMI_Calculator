@@ -9,13 +9,13 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 
 class WeightMarkerView(context: Context) : MarkerView(context, R.layout.marker_pop) {
-    private val markertext: TextView = findViewById(R.id.marker_text)
+    private val markerText: TextView = findViewById(R.id.marker_text)
 
     override fun refreshContent(e: Entry?, highlight: Highlight?) {
 
         e ?: return
         val yVal = e.y
-        markertext.text = "${"%.1f".format(yVal)}kg"
+        markerText.text = "${"%.1f".format(yVal)}kg"
         super.refreshContent(e, highlight)
 
     }

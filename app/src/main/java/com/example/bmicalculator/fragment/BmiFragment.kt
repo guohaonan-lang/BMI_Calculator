@@ -7,9 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.FragmentBmiBinding
@@ -18,7 +16,6 @@ import com.example.bmicalculator.ui.MainActivity
 import com.example.bmicalculator.ui.RecentActivity
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 class BmiFragment : Fragment() {
 
@@ -35,7 +32,7 @@ class BmiFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentBmiBinding.inflate(inflater, container, false)
         return binding.root
@@ -64,16 +61,17 @@ class BmiFragment : Fragment() {
     private fun updateBmi() {
         val wheel = binding.resultMergeResult.mergeBmiGauge
         // 给仪表盘赋值
-        wheel.age = bmiRecord?.age!!
-        wheel.gender = bmiRecord?.gender!!
-        wheel.currentBmi = bmiRecord!!.bmiValue
+        bmiRecord?.let { record ->
+            wheel.age = record.age
+            wheel.gender = record.gender
+            wheel.currentBmi = record.bmiValue
 
-        binding.resultTime.text = bmiRecord!!.timeText
-        binding.resultMergeResult.mergeResultBmi.text = bmiRecord!!.bmiValue.toString()
-        binding.resultMergeResult.mergeResultGrade.text = bmiRecord!!.bmiGrade
-        binding.resultMergeResult.mergeResultGrade.backgroundTintList =
-            android.content.res.ColorStateList.valueOf(bmiRecord!!.bmiColor)
-
+            binding.resultTime.text = record.timeText
+            binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", record.bmiValue)
+            binding.resultMergeResult.mergeResultGrade.text = record.bmiGrade
+            binding.resultMergeResult.mergeResultGrade.backgroundTintList =
+                android.content.res.ColorStateList.valueOf(record.bmiColor)
+        }
     }
 
     override fun onResume() {

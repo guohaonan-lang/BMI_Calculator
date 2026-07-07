@@ -20,7 +20,7 @@ class InputAgeAdapter(
     var selectedPosition = 23
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val age = itemView.findViewById<TextView>(R.id.item_age_text)
+        val age: TextView = itemView.findViewById(R.id.item_age_text)
     }
 
     override fun onCreateViewHolder(

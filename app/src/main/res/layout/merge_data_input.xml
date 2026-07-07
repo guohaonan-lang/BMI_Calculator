@@ -89,7 +89,7 @@
         android:background="@drawable/input_background"
         android:fontFamily="@font/montserrat_extrabold"
         android:gravity="center"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:maxLength="5"
         android:text="170.0"
         android:textSize="30sp"

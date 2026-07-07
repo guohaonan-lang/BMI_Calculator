@@ -16,7 +16,6 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.adapter.RecentAdapter
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
-import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import kotlinx.coroutines.launch
 

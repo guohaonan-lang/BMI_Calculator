@@ -12,7 +12,7 @@ class BmiRepository(private val bmiDao: BmiDao) {
         return bmiDao.getChartBmi()
     }
 
-    suspend fun getLatestBmi(): BmiEntity{
+    suspend fun getLatestBmi(): BmiEntity?{
         return bmiDao.getLatestBmiOnce()
     }
 

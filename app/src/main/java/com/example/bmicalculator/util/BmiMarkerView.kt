@@ -9,13 +9,13 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 
 class BmiMarkerView(context: Context) : MarkerView(context, R.layout.marker_pop) {
-    private val markertext: TextView = findViewById(R.id.marker_text)
+    private val markerText: TextView = findViewById(R.id.marker_text)
 
     override fun refreshContent(e: Entry?, highlight: Highlight?) {
 
         e ?:return
         val yVal = e.y
-        markertext.text = String.format("%.1f", yVal)
+        markerText.text = String.format("%.1f", yVal)
         super.refreshContent(e, highlight)
 
     }

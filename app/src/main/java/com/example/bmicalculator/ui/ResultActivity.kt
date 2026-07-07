@@ -1,6 +1,5 @@
 package com.example.bmicalculator.ui
 
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Intent
 import android.graphics.Color
@@ -22,9 +21,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
+import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivityResultBinding
 import com.example.bmicalculator.model.BmiEntity
-import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import kotlinx.coroutines.launch

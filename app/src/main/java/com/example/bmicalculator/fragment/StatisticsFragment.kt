@@ -1,6 +1,5 @@
 package com.example.bmicalculator.fragment
 
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -212,7 +211,7 @@ class StatisticsFragment : Fragment() {
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(
                     0x80FFFFFF.toInt(),
-                    0x08FFFFFF.toInt()
+                    0x08FFFFFF
                 )
             )
             fillDrawable = gradient
@@ -240,9 +239,7 @@ class StatisticsFragment : Fragment() {
                 bmiChart.xAxis,
                 bmiChart.getTransformer(YAxis.AxisDependency.LEFT),
                 { mBaseTimeZero },
-                { currentTimeMode },
-                { rawBmiData },
-                xLabelList
+                { currentTimeMode }
             )
         )
 
@@ -306,7 +303,7 @@ class StatisticsFragment : Fragment() {
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(
                     0x80FFFFFF.toInt(),
-                    0x08FFFFFF.toInt()
+                    0x08FFFFFF
                 )
             )
             fillDrawable = gradient
@@ -335,9 +332,7 @@ class StatisticsFragment : Fragment() {
                 weightChart.xAxis,
                 weightChart.getTransformer(YAxis.AxisDependency.LEFT),
                 { mBaseTimeZero },
-                { currentTimeMode },
-                { rawBmiData },
-                xLabelList
+                { currentTimeMode }
             )
         )
 
@@ -466,7 +461,7 @@ class StatisticsFragment : Fragment() {
         val entityCal = Calendar.getInstance()
         data.forEach { entity ->
             entityCal.timeInMillis = entity.customTime
-            var targetIndex = -1
+            var targetIndex: Int
 
             // 高性能、100% 精准的区间反查法：计算它与最早时间刻度（tempTimeList[0]）的自然跨度差
             when (currentTimeMode) {

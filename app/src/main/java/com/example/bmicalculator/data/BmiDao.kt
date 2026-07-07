@@ -18,7 +18,7 @@ interface BmiDao {
     fun getChartBmi(): Flow<List<BmiEntity>>
 
     @Query("SELECT * FROM bmi ORDER BY customTime DESC LIMIT 1")
-    suspend fun getLatestBmiOnce(): BmiEntity
+    suspend fun getLatestBmiOnce(): BmiEntity?
 
     @Query("SELECT COUNT(*) FROM bmi")
     suspend fun countAllBmi(): Long
