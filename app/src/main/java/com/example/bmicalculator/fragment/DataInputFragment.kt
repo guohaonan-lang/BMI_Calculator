@@ -55,8 +55,8 @@ class DataInputFragment : Fragment() {
         timeText = ""
     )
 
-    private var heightIn: Int = 5
-    private var heightFt: Int = 7
+    private var heightIn: Int = 7
+    private var heightFt: Int = 5
     private var selectMonth: String = "June"
     private var selectDay: String = "21"
     private var selectYear: String = "2018"

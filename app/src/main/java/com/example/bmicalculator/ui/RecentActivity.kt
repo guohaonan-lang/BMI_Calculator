@@ -54,6 +54,11 @@ class RecentActivity : AppCompatActivity() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
                 viewModel.allBmiList.collect { data ->
+                    if(data.isEmpty()){
+                        val intent = Intent(this@RecentActivity, DataInputActivity::class.java)
+                        startActivity(intent)
+                        finishAffinity()
+                    }
                     adapter.update(data)
                 }
             }
