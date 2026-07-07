@@ -1,28 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.DataInputActivity"
-    android:background="@color/background"
-    android:fitsSystemWindows="true">
-
-    <include
-        android:id="@+id/merge_date_input"
-        layout="@layout/merge_data_input"/>
-
-    <Button
-        android:id="@+id/data_input_calculate"
-        android:layout_width="300dp"
-        android:layout_height="65dp"
-        android:text="@string/input_calculate"
-        android:textSize="20sp"
-        android:backgroundTint="@color/blue"
-        android:fontFamily="@font/font_extrabold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="25dp"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+    android:layout_height="match_parent" />
