@@ -293,9 +293,9 @@
         android:fontFamily="@font/montserrat_extrabold"
         android:gravity="center"
         android:inputType="number"
-        android:text="June 25,2026"
+        android:text="July 25,2026"
         android:textColor="@color/black"
-        android:textSize="20sp"
+        android:textSize="19sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guide_time" />
 
@@ -311,7 +311,7 @@
         android:inputType="number"
         android:text="Afternoon"
         android:textColor="@color/black"
-        android:textSize="20sp"
+        android:textSize="19sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guide_time" />
 
@@ -350,6 +350,13 @@
         app:layout_constraintStart_toStartOf="@id/input_time_1"
         app:layout_constraintTop_toBottomOf="@id/guide_age" />
 
+    <ImageView
+        android:layout_width="15dp"
+        android:layout_height="10dp"
+        app:layout_constraintStart_toStartOf="@id/input_age"
+        app:layout_constraintEnd_toEndOf="@id/input_age"
+        app:layout_constraintBottom_toBottomOf="@id/input_age"
+        android:src="@drawable/input_age_indicator"/>
     <!--        性别-->
 
     <!-- 男性卡片 -->

@@ -1,5 +1,6 @@
 package com.example.bmicalculator.fragment
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -18,7 +19,10 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
+import com.example.bmicalculator.ui.MainActivity
+import com.example.bmicalculator.util.BmiMarkerView
 import com.example.bmicalculator.util.SmartXAxisRenderer
+import com.example.bmicalculator.util.WeightMarkerView
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
@@ -37,7 +41,8 @@ class StatisticsFragment : Fragment() {
     private lateinit var weekOfData: TextView
     private lateinit var monthOfData: TextView
     private lateinit var thumbTime: TextView
-
+    private lateinit var update1: TextView
+    private lateinit var update2: TextView
     private val chartFont by lazy {
         ResourcesCompat.getFont(requireContext(), R.font.font_extrabold)
     }
@@ -45,7 +50,7 @@ class StatisticsFragment : Fragment() {
     // 图表X轴日期标签集合
     private val xLabelList = mutableListOf<String>()
 
-    public enum class TimeMode { DAY, WEEK, MONTH }
+    enum class TimeMode { DAY, WEEK, MONTH }
 
     private var currentTimeMode = TimeMode.DAY // 默认是天
     private var rawBmiData: List<BmiEntity> = emptyList() // 缓存一份从数据库拿到的原始全量数据
@@ -69,6 +74,8 @@ class StatisticsFragment : Fragment() {
         monthOfData = view.findViewById(R.id.switch_time_month)
         thumbTime = view.findViewById(R.id.selector_thumb_time)
 
+        update1 = view.findViewById(R.id.chart_update1)
+        update2 = view.findViewById(R.id.chart_update2)
         return view
     }
 
@@ -80,7 +87,18 @@ class StatisticsFragment : Fragment() {
         setChartData()
 
         initSwitchTime()
+        initUpdate()
+    }
 
+    private fun initUpdate() {
+        update1.setOnClickListener {
+            val mainActivity = requireActivity() as MainActivity
+            mainActivity.binding.mainViewpage2.currentItem = 0
+        }
+        update2.setOnClickListener {
+            val mainActivity = requireActivity() as MainActivity
+            mainActivity.binding.mainViewpage2.currentItem = 0
+        }
     }
 
     // 切换时间周期
@@ -137,7 +155,7 @@ class StatisticsFragment : Fragment() {
             extraLeftOffset = 15f
             extraBottomOffset = 15f
             extraTopOffset = 25f
-            extraRightOffset = 10f
+            extraRightOffset = 15f
 
         }
         val xAxis: XAxis = lineChart.xAxis
@@ -174,6 +192,10 @@ class StatisticsFragment : Fragment() {
             bmiChart.invalidate()
             return
         }
+
+        val marker = BmiMarkerView(requireContext())
+        marker.chartView = bmiChart // 必须设置，边缘自动防裁切
+        bmiChart.marker = marker
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
             mode = LineDataSet.Mode.CUBIC_BEZIER
@@ -264,6 +286,10 @@ class StatisticsFragment : Fragment() {
             weightChart.invalidate()
             return
         }
+
+        val marker = WeightMarkerView(requireContext())
+        marker.chartView = weightChart // 必须设置，边缘自动防裁切
+        weightChart.marker = marker
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
             mode = LineDataSet.Mode.CUBIC_BEZIER

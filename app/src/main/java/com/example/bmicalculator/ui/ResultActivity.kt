@@ -1,5 +1,7 @@
 package com.example.bmicalculator.ui
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -73,7 +75,16 @@ class ResultActivity : AppCompatActivity() {
 
         // 2. 非空校验，渲染数据
         bmiRecord?.let { record ->
-            binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", record.bmiValue)
+            val targetBmi = record.bmiValue
+            val anim = ValueAnimator.ofFloat(0f, targetBmi)
+            anim.duration = 1000 // 动画时长1.2秒，可自行修改
+
+            anim.addUpdateListener { animation ->
+                val current = animation.animatedValue as Float
+                binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", current)
+            }
+            anim.start()
+
             binding.resultMergeResult.mergeBmiGauge.currentBmi = record.bmiValue
             binding.resultMergeResult.mergeResultHeight.text =
                 String.format("%.1f cm", record.height)

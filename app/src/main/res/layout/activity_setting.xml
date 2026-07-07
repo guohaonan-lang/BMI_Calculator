@@ -7,5 +7,8 @@
     android:layout_height="match_parent"
     tools:context=".ui.SettingActivity"
     android:background="@color/background">
-
+    
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

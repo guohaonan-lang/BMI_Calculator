@@ -1,0 +1,27 @@
+package com.example.bmicalculator.util
+
+import android.content.Context
+import android.widget.TextView
+import com.example.bmicalculator.R
+import com.github.mikephil.charting.components.MarkerView
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.utils.MPPointF
+
+class WeightMarkerView(context: Context) : MarkerView(context, R.layout.marker_pop) {
+    private val markertext: TextView = findViewById(R.id.marker_text)
+
+    override fun refreshContent(e: Entry?, highlight: Highlight?) {
+
+        e ?: return
+        val yVal = e.y
+        markertext.text = "${"%.1f".format(yVal)}kg"
+        super.refreshContent(e, highlight)
+
+    }
+
+    override fun getOffset(): MPPointF {
+//        return super.getOffset()
+        return MPPointF(-(width / 2f), -height.toFloat() - 8f)
+    }
+}

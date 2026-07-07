@@ -6,6 +6,7 @@ import android.view.animation.PathInterpolator
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -36,7 +37,7 @@ class SplashActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        window.navigationBarColor = R.color.blue//导航栏颜色
+        window.navigationBarColor = ContextCompat.getColor(this,R.color.blue)//导航栏颜色
 
 
         // 确保在布局完全测量并绘制到屏幕后，再触发动画

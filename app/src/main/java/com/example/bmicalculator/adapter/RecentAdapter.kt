@@ -35,7 +35,7 @@ class RecentAdapter(private var dataList: List<BmiEntity>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = dataList[position]
 
-        holder.bmiText.text = item.bmiValue.toString()
+        holder.bmiText.text = String.format("%.1f", item.bmiValue)
         holder.timeText.text = item.timeText
         holder.bmiColor.backgroundTintList =
             android.content.res.ColorStateList.valueOf(item.bmiColor)
