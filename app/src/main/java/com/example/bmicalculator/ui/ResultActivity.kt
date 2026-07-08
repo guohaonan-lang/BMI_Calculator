@@ -94,18 +94,22 @@ class ResultActivity : AppCompatActivity() {
             val targetBmi = record.bmiValue
             val anim = ValueAnimator.ofFloat(0f, targetBmi)
             anim.duration = 1000 // 动画时长1.2秒，可自行修改
-
             anim.addUpdateListener { animation ->
                 val current = animation.animatedValue as Float
                 binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", current)
             }
             anim.start()
 
+
             binding.resultMergeResult.mergeBmiGauge.currentBmi = record.bmiValue
-            binding.resultMergeResult.mergeResultHeight.text =
-                String.format("%.1f cm", record.height)
-            binding.resultMergeResult.mergeResultWeight.text =
-                String.format("%.1f kg", record.weight)
+
+            if (record.weightUnit) binding.resultMergeResult.mergeResultWeight.text =
+                "${record.weight} kg"
+            else binding.resultMergeResult.mergeResultWeight.text = "${record.weight} lb"
+            if (record.heightUnit) binding.resultMergeResult.mergeResultHeight.text =
+                "${record.height} cm"
+            else binding.resultMergeResult.mergeResultHeight.text =
+                "${record.heightFt}ft ${record.heightIn}in"
 
             binding.resultMergeResult.mergeResultAge.text = record.age.toString()
             binding.resultMergeResult.mergeResultGender.text =
@@ -117,6 +121,7 @@ class ResultActivity : AppCompatActivity() {
             wheel.gender = record.gender
             wheel.currentBmi = record.bmiValue
 
+            //  评论
             val bmiInfo = BmiUtil.getBmiFullInfo(this, record.age, record.gender, record.bmiValue)
             binding.resultMergeResult.mergeResultGrade.text = bmiInfo.levelName
             binding.resultMergeResult.mergeResultGrade.backgroundTintList =
@@ -127,28 +132,68 @@ class ResultActivity : AppCompatActivity() {
                 binding.assessmentRange.visibility = View.GONE
                 binding.assessmentDifference.visibility = View.GONE
             } else {
-                binding.assessmentText2.text = "Normal Weight for your height (${record.height}cm):"
+                if (record.heightUnit) binding.assessmentText2.text =
+                    "Normal Weight for your height (${record.height}cm):"
+                else binding.assessmentText2.text =
+                    "Normal Weight for your height (${record.heightFt}ft ${record.heightIn}in):"
 
-                val teenRange = if (record.gender == 0) {
-                    BmiUtil.femaleTeenTable.firstOrNull { it.age == record.age }
-                } else {
-                    BmiUtil.maleTeenTable.firstOrNull { it.age == record.age }
+
+                var minBmi = 0f
+                var maxBmi = 0f
+                if(record.age<=20){
+                    val teenRange = if (record.gender == 0) {
+                        BmiUtil.femaleTeenTable.firstOrNull { it.age == record.age }
+                    } else {
+                        BmiUtil.maleTeenTable.firstOrNull { it.age == record.age }
+                    }
+                    minBmi = teenRange?.underweightMax ?: 0f
+                    maxBmi = teenRange?.normalMax ?: 0f
+                }else {
+                    minBmi =18.5f
+                    maxBmi = 24.9f
                 }
-                val h = record.height/100 // 你这里变量名写错了，身高应该是 record.height
-                val minBmi = teenRange?.underweightMax ?: 0f
-                val maxBmi = teenRange?.normalMax ?: 0f
+
+
+                val h: Float = (if (record.heightUnit) {
+                    record.height / 100f
+                } else (record.heightFt * 12f + record.heightIn) * 2.54f / 100f)
+
+
+
 
                 val minkg = minBmi * h * h
                 val maxkg = maxBmi * h * h
+                var diff1 = 0f
+                var diff2 = 0f
 
-                val diff1 = record.weight - minkg
-                val diff2 = record.weight - maxkg
-                val difference: Float
-                if(diff1>0) difference = min(diff1, diff2)
+                if(record.weightUnit){
+                    diff1 = record.weight - minkg
+                    diff2 = record.weight - maxkg
+                }else{
+                    diff1 = (record.weight* 0.45359236f) - minkg
+                    diff2 = (record.weight* 0.45359236f) - maxkg
+                }
+
+                var difference: Float
+                if (diff1 > 0) difference = min(diff1, diff2)
                 else difference = max(diff1, diff2)
-                binding.assessmentRange.text = "%.1f kg - %.1f kg".format(minkg,maxkg)
-                if(diff1>0)binding.assessmentDifference.text = "(+%.1f kg)".format(difference)
-                else binding.assessmentDifference.text = "(%.1f kg)".format(difference)
+                if (record.weightUnit) {
+                    binding.assessmentRange.text = "%.1f kg - %.1f kg".format(minkg, maxkg)
+                    if (diff1 > 0) binding.assessmentDifference.text =
+                        "(+%.1f kg)".format(difference)
+                    else binding.assessmentDifference.text = "(%.1f kg)".format(difference)
+                } else {
+                    val minlb = minkg / 0.45359236f
+                    val maxlb = maxkg / 0.45359236f
+                    difference /= 0.45359236f
+
+                    Toast.makeText(this, "$diff1  $diff2", Toast.LENGTH_SHORT).show()
+                    binding.assessmentRange.text = "%.1f lb - %.1f lb".format(minlb, maxlb)
+                    if (diff1 > 0) binding.assessmentDifference.text =
+                        "(+%.1f lb)".format(difference)
+                    else binding.assessmentDifference.text = "(%.1f lb)".format(difference)
+                }
+
             }
 
             setupBmiGard(bmiInfo.levelName)

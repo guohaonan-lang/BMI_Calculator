@@ -68,6 +68,13 @@ class BmiFragment : Fragment() {
         val wheel = binding.resultMergeResult.mergeBmiGauge
         // 给仪表盘赋值
         bmiRecord?.let { record ->
+            if (record.weightUnit) binding.resultMergeResult.mergeResultWeight.text =
+                "${record.weight} kg"
+            else binding.resultMergeResult.mergeResultWeight.text = "${record.weight} lb"
+            if (record.heightUnit) binding.resultMergeResult.mergeResultHeight.text =
+                "${record.height} cm"
+            else binding.resultMergeResult.mergeResultHeight.text = "${record.heightFt}ft ${record.heightIn}in"
+
             wheel.age = record.age
             wheel.gender = record.gender
             wheel.currentBmi = record.bmiValue
@@ -135,17 +142,20 @@ class BmiFragment : Fragment() {
         for (i in 1..8) {
             val resetId = ctx.resources.getIdentifier("merge_grade_list_$i", "id", ctx.packageName)
             val resetItem = rootLayout.findViewById<ViewGroup>(resetId)
-            val scopeId = ctx.resources.getIdentifier("merge_grade_list_scope_$i", "id", ctx.packageName)
+            val scopeId =
+                ctx.resources.getIdentifier("merge_grade_list_scope_$i", "id", ctx.packageName)
             val scopeTv = resetItem.findViewById<TextView>(scopeId)
             if (i in 3..6) {
                 when (i) {
                     3 -> {
                         scopeTv.text = " < ${bmiRanges[0]}"
                     }
+
                     6 -> {
                         val s = getString(R.string.adult_bmi_range_obese_class_iii)
                         scopeTv.text = "${s[0]} ${bmiRanges.last()}"
                     }
+
                     else -> {
 
                         scopeTv.text = "${bmiRanges[i - 4]} - ${bmiRanges[i - 3]}"
@@ -211,9 +221,12 @@ class BmiFragment : Fragment() {
             ViewCompat.setBackgroundTintList(itemRoot, null)
 
             // 找到内部控件
-            val colorViewId = ctx.resources.getIdentifier("merge_grade_list_color_$i", "id", ctx.packageName)
-            val textId = ctx.resources.getIdentifier("merge_grade_list_text_$i", "id", ctx.packageName)
-            val scopeId = ctx.resources.getIdentifier("merge_grade_list_scope_$i", "id", ctx.packageName)
+            val colorViewId =
+                ctx.resources.getIdentifier("merge_grade_list_color_$i", "id", ctx.packageName)
+            val textId =
+                ctx.resources.getIdentifier("merge_grade_list_text_$i", "id", ctx.packageName)
+            val scopeId =
+                ctx.resources.getIdentifier("merge_grade_list_scope_$i", "id", ctx.packageName)
 
             val colorView = itemRoot.findViewById<View>(colorViewId)
             val textTv = itemRoot.findViewById<TextView>(textId)

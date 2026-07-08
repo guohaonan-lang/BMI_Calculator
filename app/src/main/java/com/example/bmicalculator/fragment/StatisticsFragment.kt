@@ -494,7 +494,11 @@ class StatisticsFragment : Fragment() {
 
             // 同一周期内如果存在多条数据，直接用最新值覆盖（一天/一周/一月只留一个终点值）
             if (targetIndex in 0 until totalCount) {
-                val value = if (lineChart == bmiChart) entity.bmiValue else entity.weight
+                val value: Float = if (lineChart == bmiChart) entity.bmiValue
+                else {
+                    if (entity.weightUnit) entity.weight
+                    else entity.weight * 0.45359236f
+                }
                 valueIndexMap[targetIndex] = value
             }
         }

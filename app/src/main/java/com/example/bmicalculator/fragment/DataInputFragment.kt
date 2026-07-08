@@ -51,6 +51,8 @@ class DataInputFragment : Fragment() {
 
     var bmiRecord = BmiEntity(
         height = 170f,
+        heightFt = 5,
+        heightIn = 7,
         heightUnit = false,
         weight = 140f,
         weightUnit = false,
@@ -66,8 +68,6 @@ class DataInputFragment : Fragment() {
     private var weightPair: Pair<String, String> = "140.00" to "63.50"
     private var heightPair: Pair<Int, String> = 67 to "170.0"
 
-    private var heightIn: Int = 7
-    private var heightFt: Int = 5
     private var selectMonth: String = "June"
     private var selectDay: String = "21"
     private var selectYear: String = "2018"
@@ -113,8 +113,7 @@ class DataInputFragment : Fragment() {
                 // 挂起函数正常await等待查询完成
                 val latestBmi = viewModel.getLatestBmi()
                 if (latestBmi != null) {
-                    val it = latestBmi
-                    bmiRecord = it
+                    bmiRecord = latestBmi.copy(id = 0)
                     isFirstData = false
                 } else isFirstData = true
                 // 只初始化一次UI
@@ -161,10 +160,33 @@ class DataInputFragment : Fragment() {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
+            if(!bmiRecord.heightUnit){
+                val showText = String.format("%.1f", bmiRecord.height)
+                if (showText == heightPair.second) {
+                    bmiRecord.heightFt = heightPair.first / 12
+                    bmiRecord.heightIn = heightPair.first % 12
+                } else {
+                    val totalInch = (bmiRecord.height / 2.54f).toInt()
+                    bmiRecord.heightFt = totalInch / 12
+                    bmiRecord.heightIn = totalInch % 12
+                }
+            }else{
+                var showText = String.format("%.1f", bmiRecord.height)
+                val totalInch = bmiRecord.heightFt * 12 + bmiRecord.heightIn
+                if (totalInch == heightPair.first) {
+                    showText == heightPair.second
+                } else {
+                    showText = String.format("%.1f", ((bmiRecord.heightFt * 12) + bmiRecord.heightIn) * 2.54f)
+                    bmiRecord.height = showText.toFloat()
+
+                }
+                bmiRecord.height = ((bmiRecord.heightFt * 12) + bmiRecord.heightIn) * 2.54f
+            }
+
             var weightKg = bmiRecord.weight
             if (!bmiRecord.weightUnit) weightKg = bmiRecord.weight * 0.45359236f
             var heightM = bmiRecord.height / 100f
-            if (!bmiRecord.heightUnit) heightM = ((heightFt * 12) + heightIn) * 2.54f / 100f
+            if (!bmiRecord.heightUnit) heightM = ((bmiRecord.heightFt * 12) + bmiRecord.heightIn) * 2.54f / 100f
 
             val bmi = weightKg / (heightM * heightM)
 
@@ -172,9 +194,9 @@ class DataInputFragment : Fragment() {
                 BmiUtil.getBmiFullInfo(requireContext(), bmiRecord.age, bmiRecord.gender, bmi)
             bmiRecord.bmiColor = ContextCompat.getColor(requireContext(), bmiLevel.colorInt)
 
+
+
             bmiRecord.apply {
-                height = heightM * 100f
-                weight = weightKg
                 bmiValue = bmi
                 bmiGrade = bmiLevel.levelName
                 createTime = System.currentTimeMillis()
@@ -340,22 +362,22 @@ class DataInputFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
                 if (showText == heightPair.second) {
-                    heightFt = heightPair.first / 12
-                    heightIn = heightPair.first % 12
+                    bmiRecord.heightFt = heightPair.first / 12
+                    bmiRecord.heightIn = heightPair.first % 12
                 } else {
 
                     val originHeight = String.format("%.1f", bmiRecord.height)
 
                     val totalInch = (bmiRecord.height / 2.54f).toInt()
-                    heightFt = totalInch / 12
-                    heightIn = totalInch % 12
+                    bmiRecord.heightFt = totalInch / 12
+                    bmiRecord.heightIn = totalInch % 12
                     val newPair = totalInch to originHeight
                     heightPair = newPair
 
                 }
 
-                binding.mergeDateInput.inputHeightFt.setText(heightFt.toString())
-                binding.mergeDateInput.inputHeightIn.setText(heightIn.toString())
+                binding.mergeDateInput.inputHeightFt.setText(bmiRecord.heightFt.toString())
+                binding.mergeDateInput.inputHeightIn.setText(bmiRecord.heightIn.toString())
 
             }
         }
@@ -377,18 +399,18 @@ class DataInputFragment : Fragment() {
 
 
                 var showText = String.format("%.1f", bmiRecord.height)
-                val totalInch = heightFt * 12 + heightIn
+                val totalInch = bmiRecord.heightFt * 12 + bmiRecord.heightIn
                 if (totalInch == heightPair.first) {
                     showText == heightPair.second
                 } else {
 
-                    showText = String.format("%.1f", ((heightFt * 12) + heightIn) * 2.54f)
+                    showText = String.format("%.1f", ((bmiRecord.heightFt * 12) + bmiRecord.heightIn) * 2.54f)
                     bmiRecord.height = showText.toFloat()
                     val newPair = totalInch to showText
                     heightPair = newPair
 
                 }
-                bmiRecord.height = ((heightFt * 12) + heightIn) * 2.54f
+                bmiRecord.height = ((bmiRecord.heightFt * 12) + bmiRecord.heightIn) * 2.54f
 
                 binding.mergeDateInput.inputHeight.setText(showText)
             }
@@ -428,8 +450,8 @@ class DataInputFragment : Fragment() {
 
         val edtHeightFt = binding.mergeDateInput.inputHeightFt
         val edtHeightIn = binding.mergeDateInput.inputHeightIn
-        edtHeightFt.setText(heightFt.toString())
-        edtHeightIn.setText(heightIn.toString())
+        edtHeightFt.setText(bmiRecord.heightFt.toString())
+        edtHeightIn.setText(bmiRecord.heightIn.toString())
     }
 
     //选择时间
@@ -753,11 +775,11 @@ class DataInputFragment : Fragment() {
                         }
 
                         edtHeightFt -> {
-                            heightFt = text.toInt()
+                            bmiRecord.heightFt = text.toInt()
                         }
 
                         edtHeightIn -> {
-                            heightIn = text.toInt()
+                            bmiRecord.heightIn = text.toInt()
                         }
                     }
                 } catch (_: NumberFormatException) {
@@ -831,7 +853,7 @@ class DataInputFragment : Fragment() {
 
             if (ft !in 1..8) {
                 edtHeightFt.setText("8")
-                heightFt = 8
+                bmiRecord.heightFt = 8
                 Toast.makeText(requireContext(), "身高超出范围( 1 - 8 ft)", Toast.LENGTH_SHORT)
                     .show()
                 return false
@@ -839,7 +861,7 @@ class DataInputFragment : Fragment() {
 
             if (inch !in 0..11) {
                 edtHeightIn.setText("11")
-                heightIn = 11
+                bmiRecord.heightIn = 11
                 Toast.makeText(requireContext(), "身高超出范围( 0 - 11 in)", Toast.LENGTH_SHORT)
                     .show()
                 return false
