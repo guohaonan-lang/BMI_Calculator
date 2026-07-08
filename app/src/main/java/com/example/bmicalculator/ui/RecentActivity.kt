@@ -65,7 +65,7 @@ class RecentActivity : AppCompatActivity() {
         adapter.setOnItemClick { item ->
             val intent = Intent(this, ResultActivity::class.java)
             intent.putExtra("BMI",item)
-            intent.putExtra("FATHER","RecentActivity")
+            intent.putExtra("Recent",true)
             startActivity(intent)
         }
 

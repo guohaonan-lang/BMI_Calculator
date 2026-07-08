@@ -1,11 +1,12 @@
 package com.example.bmicalculator.util
 
+import android.content.Context
 import com.example.bmicalculator.R
 import com.example.bmicalculator.model.BmiLevel
 import com.example.bmicalculator.model.TeenBmiRange
 
 object BmiUtil {
-    // 配色池（和你之前完全一致）
+    // 配色池（资源ID，无需上下文）
     private val colorMap = mapOf(
         "VERY_SEVERELY_UNDER" to R.color.grad1,
         "SEVERELY_UNDER" to R.color.grad2,
@@ -77,51 +78,98 @@ object BmiUtil {
 
     /**
      * 统一入口
+     * @param context 上下文（Activity/Fragment传入this/requireContext）
      * @param age 年龄
      * @param gender 0女 / 1男
      * @param bmiValue BMI数值
-     * @return 等级文字+颜色
+     * @return 等级文字+颜色+多语言评价
      */
-    fun getBmiFullInfo(age: Int, gender: Int, bmiValue: Float): BmiLevel {
+    fun getBmiFullInfo(context: Context, age: Int, gender: Int, bmiValue: Float): BmiLevel {
         // 成年人标准 >=18
         if (age >= 18) {
-            return getAdultBmi(bmiValue)
+            return getAdultBmi(context, bmiValue)
         }
         // 未成年 2~20
         if (age in 2..20) {
             val table = if (gender == 0) femaleTeenTable else maleTeenTable
             val range = table.first { it.age == age }
-            return getTeenBmi(bmiValue, range)
+            return getTeenBmi(context, bmiValue, range)
         }
-        // 小于2岁兜底，按成人正常区间返回
-        return BmiLevel("Normal", colorMap["NORMAL"]!!)
+        // 小于2岁兜底，正常区间
+        val name = context.getString(R.string.adults_bmi_normal)
+        val desc = context.getString(R.string.desc_n)
+        return BmiLevel(name, colorMap["NORMAL"]!!, desc)
     }
 
     // 成年人8档判断
-    private fun getAdultBmi(bmi: Float): BmiLevel {
+    private fun getAdultBmi(context: Context, bmi: Float): BmiLevel {
         return when {
-            bmi < ADULT_VSU_MAX -> BmiLevel(
-                "Very Severely Underweight",
-                colorMap["VERY_SEVERELY_UNDER"]!!
-            )
-
-            bmi <= ADULT_SU_MAX -> BmiLevel("Severely Underweight", colorMap["SEVERELY_UNDER"]!!)
-            bmi <= ADULT_U_MAX -> BmiLevel("Underweight", colorMap["UNDER"]!!)
-            bmi <= ADULT_N_MAX -> BmiLevel("Normal", colorMap["NORMAL"]!!)
-            bmi <= ADULT_O_MAX -> BmiLevel("Overweight", colorMap["OVER"]!!)
-            bmi <= ADULT_OB1_MAX -> BmiLevel("Obese Class I", colorMap["OBESE1"]!!)
-            bmi <= ADULT_OB2_MAX -> BmiLevel("Obese Class II", colorMap["OBESE2"]!!)
-            else -> BmiLevel("Obese Class III", colorMap["OBESE3"]!!)
+            bmi < ADULT_VSU_MAX -> {
+                val name = context.getString(R.string.adults_bmi_very_severely_underweight)
+                val desc = context.getString(R.string.desc_vsu)
+                BmiLevel(name, colorMap["VERY_SEVERELY_UNDER"]!!, desc)
+            }
+            bmi <= ADULT_SU_MAX -> {
+                val name = context.getString(R.string.adults_bmi_severely_underweight)
+                val desc = context.getString(R.string.desc_su)
+                BmiLevel(name, colorMap["SEVERELY_UNDER"]!!, desc)
+            }
+            bmi <= ADULT_U_MAX -> {
+                val name = context.getString(R.string.adults_bmi_underweight)
+                val desc = context.getString(R.string.desc_u)
+                BmiLevel(name, colorMap["UNDER"]!!, desc)
+            }
+            bmi <= ADULT_N_MAX -> {
+                val name = context.getString(R.string.adults_bmi_normal)
+                val desc = context.getString(R.string.desc_n)
+                BmiLevel(name, colorMap["NORMAL"]!!, desc)
+            }
+            bmi <= ADULT_O_MAX -> {
+                val name = context.getString(R.string.adults_bmi_overweight)
+                val desc = context.getString(R.string.desc_o)
+                BmiLevel(name, colorMap["OVER"]!!, desc)
+            }
+            bmi <= ADULT_OB1_MAX -> {
+                val name = context.getString(R.string.adult_bmi_obese_class_i)
+                val desc = context.getString(R.string.desc_ob1)
+                BmiLevel(name, colorMap["OBESE1"]!!, desc)
+            }
+            bmi <= ADULT_OB2_MAX -> {
+                val name = context.getString(R.string.adults_bmi_obese_class_ii)
+                val desc = context.getString(R.string.desc_ob2)
+                BmiLevel(name, colorMap["OBESE2"]!!, desc)
+            }
+            else -> {
+                val name = context.getString(R.string.adults_bmi_obese_class_iii)
+                val desc = context.getString(R.string.desc_ob3)
+                BmiLevel(name, colorMap["OBESE3"]!!, desc)
+            }
         }
     }
 
     // 未成年4档：Underweight / Normal / Overweight / Obese Class I
-    private fun getTeenBmi(bmi: Float, r: TeenBmiRange): BmiLevel {
+    private fun getTeenBmi(context: Context, bmi: Float, r: TeenBmiRange): BmiLevel {
         return when {
-            bmi < r.underweightMax -> BmiLevel("Underweight", colorMap["UNDER"]!!)
-            bmi <= r.normalMax -> BmiLevel("Normal", colorMap["NORMAL"]!!)
-            bmi <= r.overweightMax -> BmiLevel("Overweight", colorMap["OVER"]!!)
-            else -> BmiLevel("Obese Class I", colorMap["OBESE1"]!!)
+            bmi < r.underweightMax -> {
+                val name = context.getString(R.string.adults_bmi_underweight)
+                val desc = context.getString(R.string.desc_teen_u)
+                BmiLevel(name, colorMap["UNDER"]!!, desc)
+            }
+            bmi <= r.normalMax -> {
+                val name = context.getString(R.string.adults_bmi_normal)
+                val desc = context.getString(R.string.desc_teen_n)
+                BmiLevel(name, colorMap["NORMAL"]!!, desc)
+            }
+            bmi <= r.overweightMax -> {
+                val name = context.getString(R.string.adults_bmi_overweight)
+                val desc = context.getString(R.string.desc_teen_o)
+                BmiLevel(name, colorMap["OVER"]!!, desc)
+            }
+            else -> {
+                val name = context.getString(R.string.adult_bmi_obese_class_i)
+                val desc = context.getString(R.string.desc_teen_ob1)
+                BmiLevel(name, colorMap["OBESE1"]!!, desc)
+            }
         }
     }
 }

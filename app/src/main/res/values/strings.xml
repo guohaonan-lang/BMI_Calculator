@@ -24,4 +24,20 @@
     <string name="adults_bmi_obese_class_iii">Obese Class III</string>
     <string name="adult_bmi_range_obese_class_iii">≥ 40.0</string>
 
+    <!-- 成年人评价文案 -->
+    <string name="desc_vsu"> We wish you to show some love to yourself! You need to add healthy calories, go nutrient dense and seek medical advice to gain weight.</string>
+    <string name="desc_su">It’s time to take care of yourself and get rid of the risk of poor immune function and osteoporosis. Treat yourself to a balanced meal and a variety of nutrients.</string>
+    <string name="desc_u">It seems that your body needs more fuel. Unless you’re naturally very slim, you may need to consider ways of gaining weight as your weight may pose certain health risks.</string>
+    <string name="desc_n">Congratulations! You’re in a great place now. Keep up your healthy habits to maintain your healthy weight.</string>
+    <string name="desc_o">Don’t wait any longer! It’s time to take action to reach your weight target. You are carrying excess fat and should balance your diet and physical activity to achieve a healthy weight.</string>
+    <string name="desc_ob1">Uh-oh! You currently weigh more than is ideal and have an increased risk of developing various health problems. It’s time to embrace healthy eating and increase your activity level.</string>
+    <string name="desc_ob2"> ime to change! You are at high risk of obesity-related diseases. You should increase physical activity and reduce caloric intake slowly but surely. It is also vital to have health screening.</string>
+    <string name="desc_ob3">We are worried about you! Your weight is a serious and imminent threat to your health. Go for health advice and a weight loss plan scientifically.</string>
+
+    <!-- 青少年专属文案 -->
+    <string name="desc_teen_u">Don’t be picky eating anymore, your body needs more energy to grow. Try to snack on healthy and high energy foods to put on weight.</string>
+    <string name="desc_teen_n">Thumbs Up! You’ve done a great job and now only need to keep your lifestyle healthy to stay in this range.</string>
+    <string name="desc_teen_o">Time to be get moving and say no to junk food! Your extra weight increases the chances of developing health problems. A small amount of weight loss can make a difference.</string>
+    <string name="desc_teen_ob1">Feeling hard to keep up with friends? It’s time to repair your body by staying active and eat healthily! Seek your parents and a health professional`s advice to get support.</string>
+    <string name="bottomsheet_got_it">GOT IT</string>
 </resources>

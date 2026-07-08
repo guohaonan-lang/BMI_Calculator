@@ -1,5 +1,6 @@
 package com.example.bmicalculator.fragment
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
@@ -84,6 +85,7 @@ class DataInputFragment : Fragment() {
     private lateinit var sheetDialog: BottomSheetDialog
     private lateinit var sheetDialog2: BottomSheetDialog
 
+    private var isFirstData = true
 
     private val viewModel: BmiViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
@@ -98,6 +100,7 @@ class DataInputFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -109,9 +112,11 @@ class DataInputFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // 挂起函数正常await等待查询完成
                 val latestBmi = viewModel.getLatestBmi()
-                latestBmi?.let {
+                if (latestBmi != null) {
+                    val it = latestBmi
                     bmiRecord = it
-                }
+                    isFirstData = false
+                } else isFirstData = true
                 // 只初始化一次UI
                 setupTime()
                 setupGenderView()
@@ -152,6 +157,10 @@ class DataInputFragment : Fragment() {
 
         // 跳转结果页面
         binding.dataInputCalculate.setOnClickListener {
+
+            if (!checkNumberValid()) {
+                return@setOnClickListener
+            }
             var weightKg = bmiRecord.weight
             if (!bmiRecord.weightUnit) weightKg = bmiRecord.weight * 0.45359236f
             var heightM = bmiRecord.height / 100f
@@ -159,7 +168,8 @@ class DataInputFragment : Fragment() {
 
             val bmi = weightKg / (heightM * heightM)
 
-            val bmiLevel = BmiUtil.getBmiFullInfo(bmiRecord.age, bmiRecord.gender, bmi)
+            val bmiLevel =
+                BmiUtil.getBmiFullInfo(requireContext(), bmiRecord.age, bmiRecord.gender, bmi)
             bmiRecord.bmiColor = ContextCompat.getColor(requireContext(), bmiLevel.colorInt)
 
             bmiRecord.apply {
@@ -173,7 +183,7 @@ class DataInputFragment : Fragment() {
             }
             val intent = Intent(requireContext(), ResultActivity::class.java)
             intent.putExtra("BMI", bmiRecord)
-            intent.putExtra("FATHER", "InputActivity")
+            intent.putExtra("FATHER", isFirstData)
             startActivity(intent)
         }
 
@@ -267,9 +277,9 @@ class DataInputFragment : Fragment() {
                     .withLayer()
                     .start()
 
-                var showText =  String.format("%.2f", bmiRecord.weight)
+                var showText = String.format("%.2f", bmiRecord.weight)
                 binding.mergeDateInput.selectorThumbWeight.text = "lb"
-                if(showText == weightPair.second) {
+                if (showText == weightPair.second) {
                     bmiRecord.weight = weightPair.first.toFloat()
                     showText = weightPair.first
                 } else {
@@ -293,10 +303,10 @@ class DataInputFragment : Fragment() {
                 binding.mergeDateInput.selectorThumbWeight.text = "kg"
 
                 var showText = String.format("%.2f", bmiRecord.weight)
-                if(showText == weightPair.first){
+                if (showText == weightPair.first) {
                     bmiRecord.weight = weightPair.second.toFloat()
                     showText = weightPair.second
-                }else{
+                } else {
                     val originWeight = String.format("%.2f", bmiRecord.weight)
                     bmiRecord.weight *= 0.4536f
                     showText = String.format("%.2f", bmiRecord.weight)
@@ -324,11 +334,15 @@ class DataInputFragment : Fragment() {
 
 
                 val showText = String.format("%.1f", bmiRecord.height)
-                Toast.makeText(requireContext(),"$showText 为什么不等于 ${heightPair.second}", Toast.LENGTH_SHORT).show()
-                if(showText == heightPair.second){
+                Toast.makeText(
+                    requireContext(),
+                    "$showText 为什么不等于 ${heightPair.second}",
+                    Toast.LENGTH_SHORT
+                ).show()
+                if (showText == heightPair.second) {
                     heightFt = heightPair.first / 12
                     heightIn = heightPair.first % 12
-                }else{
+                } else {
 
                     val originHeight = String.format("%.1f", bmiRecord.height)
 
@@ -362,13 +376,11 @@ class DataInputFragment : Fragment() {
                 binding.mergeDateInput.inputHeightIn1.visibility = View.GONE
 
 
-
-
                 var showText = String.format("%.1f", bmiRecord.height)
-                val totalInch = heightFt*12 +heightIn
-                if(totalInch == heightPair.first){
+                val totalInch = heightFt * 12 + heightIn
+                if (totalInch == heightPair.first) {
                     showText == heightPair.second
-                }else{
+                } else {
 
                     showText = String.format("%.1f", ((heightFt * 12) + heightIn) * 2.54f)
                     bmiRecord.height = showText.toFloat()

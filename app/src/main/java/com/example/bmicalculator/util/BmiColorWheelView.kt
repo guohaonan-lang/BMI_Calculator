@@ -19,24 +19,38 @@ class BmiColorWheelView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     // 外部传入数据
-    var age: Int = 18
+    var age: Int = 20
         set(value) {
             field = value
             updateRangeAndColor()
             // 属性改变时，指针从头重新跑一次动画
-            startPointerAnimation()
+            if (showPointer) {
+                startPointerAnimation()
+            }
         }
     var gender: Int = 1 // 0女 1男
         set(value) {
             field = value
             updateRangeAndColor()
-            startPointerAnimation()
+            if (showPointer) {
+                startPointerAnimation()
+            }
         }
     var currentBmi = 20f
         set(value) {
             field = value.coerceIn(minBmi, maxBmi)
-            startPointerAnimation()
+            // 只有开启指针时才执行动画
+            if (showPointer) {
+                startPointerAnimation()
+            }
         }
+    // 是否显示指针 true显示 / false隐藏
+    var showPointer = true
+        set(value) {
+            field = value
+            invalidate()
+        }
+
 
     // 动态变量
     private var minBmi = 15.0f
@@ -72,12 +86,17 @@ class BmiColorWheelView @JvmOverloads constructor(
     private val rectF = RectF()
 
     init {
+        attrs?.let {
+            val typedArray = context.obtainStyledAttributes(it, R.styleable.BmiColorWheelView)
+            showPointer = typedArray.getBoolean(R.styleable.BmiColorWheelView_showPointer, true)
+            typedArray.recycle()
+        }
         updateRangeAndColor()
     }
 
     /** 核心：根据年龄性别更新表盘刻度区间、对应色值，并预计算好角度 */
     private fun updateRangeAndColor() {
-        if (age >= 18) {
+        if (age > 20) {
             minBmi = 15f
             maxBmi = 41f
             bmiRanges = floatArrayOf(15f, 16f, 17f, 18.5f, 25f, 30f, 35f, 40f, 41f)
@@ -210,26 +229,36 @@ class BmiColorWheelView @JvmOverloads constructor(
         }
 
         // 3. 绘制带有动画效果的指针（核心：使用已动画化的 animatedBmi 计算角度）
-        canvas.save()
-        canvas.translate(centerX, centerY)
+        if (showPointer) {
+            canvas.save()
+            canvas.translate(centerX, centerY)
 
-        // 关键点：由 animatedBmi 动态控制当前帧的角度，从 0度 跑向 目标度数
-        val pointerAngle = ((animatedBmi - minBmi) / totalRange) * 180f
-        canvas.rotate(180f + pointerAngle)
+            val pointerAngle = ((animatedBmi - minBmi) / totalRange) * 180f
+            canvas.rotate(180f + pointerAngle)
 
-        val pathPointer = Path()
-        val pointerLength = radius - (strokeW / 2f) + dpToPx(8f)
-        val pointerWidth = dpToPx(20f)
-        val cornerRadius = dpToPx(4f)
-        pathPointer.moveTo(pointerLength, 0f)
-        pathPointer.lineTo(0f, -pointerWidth / 2f)
-        pathPointer.lineTo(0f, pointerWidth / 2f)
-        pathPointer.close()
-        paintPointer.pathEffect = android.graphics.CornerPathEffect(cornerRadius)
-        canvas.drawPath(pathPointer, paintPointer)
-        paintPointer.pathEffect = null
-        canvas.drawCircle(0f, 0f, dpToPx(10f), paintPointer)
-        canvas.restore()
+            val pathPointer = Path()
+            val pointerLength = radius - (strokeW / 2f) + dpToPx(8f)
+            val pointerWidth = dpToPx(20f)
+            val headRadius = dpToPx(2f)
+
+            pathPointer.reset()
+            pathPointer.moveTo(0f, -pointerWidth / 2f)
+            pathPointer.quadTo(pointerLength * 0.7f, -pointerWidth * 0.2f, pointerLength - headRadius, -headRadius)
+            pathPointer.arcTo(
+                pointerLength - 2 * headRadius, -headRadius,
+                pointerLength, headRadius,
+                -90f, 180f, false
+            )
+            pathPointer.quadTo(pointerLength * 0.7f, pointerWidth * 0.15f, 0f, pointerWidth / 2f)
+            pathPointer.close()
+
+            paintPointer.pathEffect = null
+            canvas.drawPath(pathPointer, paintPointer)
+
+            // 绘制轴心圆
+            canvas.drawCircle(0f, 0f, dpToPx(10f), paintPointer)
+            canvas.restore()
+        }
     }
 
     override fun onDetachedFromWindow() {

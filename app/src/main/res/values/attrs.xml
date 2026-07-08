@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BmiColorWheelView">
+        <!-- 必须加这一行，format="boolean" -->
+        <attr name="showPointer" format="boolean"/>
+    </declare-styleable>
+</resources>
