@@ -40,4 +40,7 @@
     <string name="desc_teen_o">Time to be get moving and say no to junk food! Your extra weight increases the chances of developing health problems. A small amount of weight loss can make a difference.</string>
     <string name="desc_teen_ob1">Feeling hard to keep up with friends? It’s time to repair your body by staying active and eat healthily! Seek your parents and a health professional`s advice to get support.</string>
     <string name="bottomsheet_got_it">GOT IT</string>
+    <string name="day">Day</string>
+    <string name="week">Week</string>
+    <string name="month">Month</string>
 </resources>

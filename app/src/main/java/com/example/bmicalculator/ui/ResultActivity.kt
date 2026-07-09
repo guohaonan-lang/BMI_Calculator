@@ -18,6 +18,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
@@ -31,7 +32,6 @@ import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.util.BmiColorWheelView
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.viewmodel.BmiViewModel
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -138,9 +138,9 @@ class ResultActivity : AppCompatActivity() {
                     "Normal Weight for your height (${record.heightFt}ft ${record.heightIn}in):"
 
 
-                var minBmi = 0f
-                var maxBmi = 0f
-                if(record.age<=20){
+                var minBmi: Float
+                var maxBmi: Float
+                if (record.age <= 20) {
                     val teenRange = if (record.gender == 0) {
                         BmiUtil.femaleTeenTable.firstOrNull { it.age == record.age }
                     } else {
@@ -148,8 +148,8 @@ class ResultActivity : AppCompatActivity() {
                     }
                     minBmi = teenRange?.underweightMax ?: 0f
                     maxBmi = teenRange?.normalMax ?: 0f
-                }else {
-                    minBmi =18.5f
+                } else {
+                    minBmi = 18.5f
                     maxBmi = 24.9f
                 }
 
@@ -159,24 +159,20 @@ class ResultActivity : AppCompatActivity() {
                 } else (record.heightFt * 12f + record.heightIn) * 2.54f / 100f)
 
 
-
-
                 val minkg = minBmi * h * h
                 val maxkg = maxBmi * h * h
-                var diff1 = 0f
-                var diff2 = 0f
+                var diff1: Float
+                var diff2: Float
 
-                if(record.weightUnit){
+                if (record.weightUnit) {
                     diff1 = record.weight - minkg
                     diff2 = record.weight - maxkg
-                }else{
-                    diff1 = (record.weight* 0.45359236f) - minkg
-                    diff2 = (record.weight* 0.45359236f) - maxkg
+                } else {
+                    diff1 = (record.weight * 0.45359236f) - minkg
+                    diff2 = (record.weight * 0.45359236f) - maxkg
                 }
-
-                var difference: Float
-                if (diff1 > 0) difference = min(diff1, diff2)
-                else difference = max(diff1, diff2)
+                var difference: Float = if (diff1 > 0) min(diff1, diff2)
+                else max(diff1, diff2)
                 if (record.weightUnit) {
                     binding.assessmentRange.text = "%.1f kg - %.1f kg".format(minkg, maxkg)
                     if (diff1 > 0) binding.assessmentDifference.text =
@@ -363,7 +359,7 @@ class ResultActivity : AppCompatActivity() {
         // 1. 获取当前条目根ConstraintLayout
         val itemId = ctx.resources.getIdentifier("merge_grade_list_$grad", "id", ctx.packageName)
         val targetItem =
-            rootLayout.findViewById<androidx.constraintlayout.widget.ConstraintLayout>(itemId)
+            rootLayout.findViewById<ConstraintLayout>(itemId)
 
         // 2. 获取内部三个子控件
         val colorViewId =

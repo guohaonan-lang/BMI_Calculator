@@ -109,7 +109,7 @@ class StatisticsFragment : Fragment() {
                 .translationX(0f)
                 .withLayer()
                 .start()
-            thumbTime.text = "Day"
+            thumbTime.text = getString(R.string.day)
 
             currentTimeMode = TimeMode.DAY
             processAndRenderData(rawBmiData, bmiChart)
@@ -120,7 +120,7 @@ class StatisticsFragment : Fragment() {
                 .translationX(-movePx)
                 .withLayer()
                 .start()
-            thumbTime.text = "Week"
+            thumbTime.text = getString(R.string.week)
             currentTimeMode = TimeMode.WEEK
             processAndRenderData(rawBmiData, bmiChart)
             processAndRenderData(rawBmiData, weightChart)
@@ -130,7 +130,7 @@ class StatisticsFragment : Fragment() {
                 .translationX(-movePx * 2)
                 .withLayer()
                 .start()
-            thumbTime.text = "Month"
+            thumbTime.text = getString(R.string.month)
             currentTimeMode = TimeMode.MONTH
             processAndRenderData(rawBmiData, bmiChart)
             processAndRenderData(rawBmiData, weightChart)
@@ -197,7 +197,7 @@ class StatisticsFragment : Fragment() {
         bmiChart.marker = marker
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
-            mode = LineDataSet.Mode.CUBIC_BEZIER
+            mode = LineDataSet.Mode.HORIZONTAL_BEZIER
             lineWidth = 1f
             color = Color.WHITE
 
@@ -289,7 +289,7 @@ class StatisticsFragment : Fragment() {
         weightChart.marker = marker
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
-            mode = LineDataSet.Mode.CUBIC_BEZIER
+            mode = LineDataSet.Mode.HORIZONTAL_BEZIER
             lineWidth = 1f
             color = Color.WHITE
 
@@ -392,7 +392,7 @@ class StatisticsFragment : Fragment() {
 
         xLabelList.clear()
         val entries = mutableListOf<Entry>()
-        val valueIndexMap = mutableMapOf<Int, Float>() // 下标 i -> BMI/体重数值
+        val indexValueListMap = mutableMapOf<Int, MutableList<Float>>() // 下标 i -> BMI/体重数值
 
         // 1. 基准时间：获取最新一条数据，并【严格抹平内部时分秒为凌晨零点】！
         val latestTime = data.last().customTime
@@ -492,28 +492,31 @@ class StatisticsFragment : Fragment() {
                 }
             }
 
-            // 同一周期内如果存在多条数据，直接用最新值覆盖（一天/一周/一月只留一个终点值）
+            // 同一周期内如果存在多条数据，（一天/一周/一月只留一个终点值）
             if (targetIndex in 0 until totalCount) {
                 val value: Float = if (lineChart == bmiChart) entity.bmiValue
-                else {
-                    if (entity.weightUnit) entity.weight
-                    else entity.weight * 0.45359236f
-                }
-                valueIndexMap[targetIndex] = value
+                else if (entity.weightUnit) entity.weight
+                else entity.weight * 0.45359236f
+                // 存入列表，不覆盖
+
+                indexValueListMap.getOrPut(targetIndex) { mutableListOf() }.add(value)
             }
         }
 
-        // 4. 按下标顺序生成 Entry，x=i，实现点位和标签的绝对死锁
+        // 4. 按下标顺序生成 Entry
+        // 生成Entry
         for (i in 0 until totalCount) {
-            val yValue = valueIndexMap[i]
-            if (yValue != null) {
-                entries.add(Entry(i.toFloat(), yValue))
+            val numList = indexValueListMap[i] ?: continue
+            val yValue = if (currentTimeMode == TimeMode.DAY) {
+                // 升序列表，末尾就是当天最新一条，不用平均
+                numList.last()
+            } else {
+                // 周/月：全部数据求平均值
+                numList.sum() / numList.size
             }
+            entries.add(Entry(i.toFloat(), yValue))
         }
 
-        // 🌟 5. 【核心修复 2】：锁死图表的绝对物理渲染范围
-        // 必须强行告诉图表：你的 X 轴物理空间就是从 0 到 totalCount-1。
-        // 哪怕 entries 里面只有最后 3 个点，图表也必须严格画在右侧，绝不发生拉伸错位！
         lineChart.xAxis.apply {
             axisMinimum = 0f
             axisMaximum = (totalCount - 1).toFloat()
