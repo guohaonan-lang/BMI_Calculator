@@ -14,8 +14,8 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySplashBinding
+import com.example.bmicalculator.util.LangHelper
 import com.example.bmicalculator.viewmodel.BmiViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
@@ -37,8 +37,16 @@ class SplashActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        window.navigationBarColor = ContextCompat.getColor(this,R.color.blue)//导航栏颜色
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.blue)//导航栏颜色
 
+        // 初始化语言
+        val savedLang = LangHelper.getSavedLang(this)
+        LangHelper.setLanguage(this, savedLang)
+
+        var isFirst: Long = 0
+        lifecycleScope.launch {
+            isFirst = viewModel.countBmiRecord()
+        }
 
         // 确保在布局完全测量并绘制到屏幕后，再触发动画
         binding.main.post {
@@ -46,7 +54,7 @@ class SplashActivity : AppCompatActivity() {
             val density = resources.displayMetrics.density
             val movePx = -(150 * density)
             val bezierInterpolator = PathInterpolator(0.25f, 0f, 0.1f, 0.1f)
-            val moveDuration = 1000L
+            val moveDuration = 750L
 
             listOf(binding.splash2, binding.splash3, binding.splash4).forEach { view ->
                 view.animate()
@@ -74,23 +82,19 @@ class SplashActivity : AppCompatActivity() {
                         .setDuration(moveDuration)
                         .setInterpolator(bezierInterpolator)
                         .withLayer()
+                        .withEndAction {
+
+                            var intent = Intent(this@SplashActivity, MainActivity::class.java)
+                            if (isFirst.toInt() == 0) {
+                                intent = Intent(this@SplashActivity, DataInputActivity::class.java)
+                            }
+                            startActivity(intent)
+                            finish()
+                        }
                         .start()
                 }
                 .start()
 
-        }
-
-        // 延迟2秒跳转，同时执行初始化
-        lifecycleScope.launch {
-            delay(2000)
-            //判断是否是初次打开，选择跳转的页面
-            val isfirst = viewModel.countBmiRecord()
-            var intent = Intent(this@SplashActivity, MainActivity::class.java)
-            if (isfirst.toInt() == 0) {
-                intent = Intent(this@SplashActivity, DataInputActivity::class.java)
-            }
-            startActivity(intent)
-            finish() // 销毁启动页，返回键不会回到闪屏
         }
     }
 }

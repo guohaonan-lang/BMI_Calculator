@@ -43,6 +43,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/setting_back">
 
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/user_iv"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/user"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/CircleShape"
+            android:visibility="gone"/>
         <TextView
             android:id="@+id/setting_user_text1"
             android:layout_width="wrap_content"
@@ -53,17 +64,19 @@
             android:text="@string/setting_backup_restore"
             android:textColor="@color/black"
             android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/user_iv"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/setting_user_text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:fontFamily="@font/font_regular"
             android:text="@string/setting_synchronize_your_data"
-            android:textColor="#444444"
+            android:textColor="@color/black"
             android:textSize="14sp"
+            android:alpha="0.7"
             app:layout_constraintStart_toStartOf="@id/setting_user_text1"
             app:layout_constraintTop_toBottomOf="@id/setting_user_text1" />
 
@@ -76,6 +89,7 @@
             app:layout_constraintTop_toTopOf="@id/setting_user_text1" />
 
         <ImageView
+            android:id="@+id/setting_user_autorenew"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="15dp"

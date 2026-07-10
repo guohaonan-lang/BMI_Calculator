@@ -16,6 +16,7 @@
         android:layout_marginBottom="32dp"
         android:fontFamily="@font/font_extrabold"
         android:text="@string/date_picker_date"
+        android:textStyle="bold"
         android:textColor="@color/black"
         android:textSize="28sp" />
 
@@ -23,13 +24,6 @@
         android:id="@+id/wheel_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <!-- 分割线（截图中间浅蓝色分隔条，可选） -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginVertical="8dp"
-        android:background="#BBCCFF" />
 
     <!-- 底部双按钮 -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -48,6 +42,7 @@
             android:text="@string/data_cancel"
             android:textColor="@color/black"
             android:textSize="16sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
@@ -60,6 +55,7 @@
             android:text="@string/data_done"
             android:textColor="@color/white"
             android:textSize="16sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

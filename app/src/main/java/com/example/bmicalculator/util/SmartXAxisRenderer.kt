@@ -23,6 +23,20 @@ class SmartXAxisRenderer(
 
     private val mCalendar = Calendar.getInstance()
 
+    val monthData = listOf(
+        context.getString(R.string.jan),
+        context.getString(R.string.feb),
+        context.getString(R.string.mar),
+        context.getString(R.string.apr),
+        context.getString(R.string.may),
+        context.getString(R.string.june),
+        context.getString(R.string.july),
+        context.getString(R.string.aug),
+        context.getString(R.string.sep),
+        context.getString(R.string.oct),
+        context.getString(R.string.nov),
+        context.getString(R.string.dec)
+    )
     override fun drawLabel(
         c: Canvas?,
         formattedLabel: String?,
@@ -57,20 +71,20 @@ class SmartXAxisRenderer(
             when (mode) {
                 StatisticsFragment.TimeMode.DAY -> {
                     mCalendar.add(Calendar.DAY_OF_YEAR, -offsetFromLatest)
-                    val month = mCalendar.get(Calendar.MONTH) + 1
+                    val month = mCalendar.get(Calendar.MONTH)
                     val day = mCalendar.get(Calendar.DAY_OF_MONTH)
                     if (day == 1 || index == 0) {
                         val s = context.getString(R.string.month)
-                        super.drawLabel(c, "${month}$s", x, y, anchor, angleDegrees)
+                        super.drawLabel(c, monthData[month], x, y, anchor, angleDegrees)
                     }
                 }
                 StatisticsFragment.TimeMode.WEEK -> {
                     mCalendar.add(Calendar.WEEK_OF_YEAR, -offsetFromLatest)
                     val day = mCalendar.get(Calendar.DAY_OF_MONTH)
-                    val month = mCalendar.get(Calendar.MONTH) + 1
+                    val month = mCalendar.get(Calendar.MONTH)
                     if ((day in 1..7) || index == 0) {
                         val s = context.getString(R.string.month)
-                        super.drawLabel(c, "${month}$s", x, y, anchor, angleDegrees)
+                        super.drawLabel(c, monthData[month], x, y, anchor, angleDegrees)
                     }
                 }
                 StatisticsFragment.TimeMode.MONTH -> {

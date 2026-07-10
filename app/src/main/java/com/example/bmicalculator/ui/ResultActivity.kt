@@ -425,16 +425,20 @@ class ResultActivity : AppCompatActivity() {
             var sum: Long = 1
             lifecycleScope.launch {
                 sum = viewModel.countBmiRecord()
-                if (statusRecent) viewModel.deleteBmiRecord(bmiRecord!!)
+                if (statusRecent) {
+                    viewModel.deleteBmiRecord(bmiRecord!!)
+                    sum--
+                }
+                if (statusRecent && sum.toInt() == 0) {
+                    val intent = Intent(this@ResultActivity, DataInputActivity::class.java)
+                    startActivity(intent)
+                    finishAffinity()
+                } else {
+                    alertDialog.dismiss()
+                    finish()
+                }
             }
-            if (statusRecent && sum.toInt() == 0) {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finishAffinity()
-            } else {
-                alertDialog.dismiss()
-                finish()
-            }
+
 
         }
         alertDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())

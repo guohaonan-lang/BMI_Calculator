@@ -208,7 +208,7 @@ class DataInputFragment : Fragment() {
         }
 
         // 跳转设置页面
-        binding.mergeDateInput.settingsUser.setOnClickListener {
+        binding.settingsUser.setOnClickListener {
             val intent = Intent(requireContext(), SettingActivity::class.java)
             startActivity(intent)
         }
@@ -383,10 +383,10 @@ class DataInputFragment : Fragment() {
                 binding.mergeDateInput.inputHeightIn1.visibility = View.GONE
 
 
-                var showText = String.format("%.1f", bmiRecord.height)
+                var showText: String
                 val totalInch = bmiRecord.heightFt * 12 + bmiRecord.heightIn
                 if (totalInch == heightPair.first) {
-                    showText == heightPair.second
+                    showText = heightPair.second
                 } else {
 
                     showText = String.format("%.1f", ((bmiRecord.heightFt * 12) + bmiRecord.heightIn) * 2.54f)

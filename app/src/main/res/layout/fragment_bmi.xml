@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:fitsSystemWindows="true"
+    android:paddingTop="30dp"
     tools:context=".fragment.BmiFragment">
 
     <TextView
@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="18dp"
         android:fontFamily="@font/font_bold_extrabold"
         android:text="BMI"
         android:textColor="@color/black"
@@ -39,9 +39,10 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:fontFamily="@font/font_regular"
-        android:text="Recent"
+        android:text="@string/recent"
         android:textColor="@color/blue"
         android:textSize="16sp"
+        android:layout_marginTop="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/BMI" />
 

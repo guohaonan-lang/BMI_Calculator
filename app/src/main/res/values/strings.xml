@@ -97,4 +97,15 @@
     <string name="please_enter_your_height">Please enter your height.</string>
     <string name="height_out_of_range_1_250_cm">Height out of range (1 – 250 cm)</string>
     <string name="years_old">" years old"</string>
+    <string name="log_out">Log out</string>
+    <string name="log_in">Log in</string>
+    <string name="recent">Recent</string>
+    <string name="sorry_for_the_inconvenience">Sorry for the inconvenience</string>
+    <string name="auto_text1">Due to Google’s vertification issue, we have to adjust our data sync function. During that period, your data sync would not be available.</string>
+    <string name="auto_text2">The function will be back once the issue is solved. We’d greatly appreciate your patience.</string>
+    <string name="ad_apps_you_might_need">Apps you might need</string>
+    <string name="ad1_text1">Home Workout - No Equipments</string>
+    <string name="ad1_text2">Weight Loss, Lose Belly Fat</string>
+    <string name="ad2_text1">Lose Weight for Men at Home</string>
+    <string name="ad2_text2">Weight Loss, Lose Belly Fat</string>
 </resources>

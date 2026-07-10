@@ -6,44 +6,17 @@
     android:layout_height="match_parent"
     android:background="@color/background"
     android:clickable="true"
+    android:paddingBottom="100dp"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="18dp"
-        android:fontFamily="@font/montserrat_extrabold"
-        android:text="Calculator"
-        android:textColor="@color/black"
-        android:textFontWeight="800"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <!--        个人主页-->
-    <ImageView
-        android:id="@+id/settings_user"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="18dp"
-        android:layout_marginEnd="15dp"
-        android:src="@drawable/settings_user"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
     <!--        输入体重    -->
     <TextView
         android:id="@+id/input_text_weight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
         android:fontFamily="@font/font_regular"
         android:text="@string/input_weight"
+        android:layout_marginTop="20dp"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
         app:layout_constraintStart_toStartOf="parent"
@@ -71,9 +44,9 @@
         android:id="@+id/input_text_height"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
         android:fontFamily="@font/font_regular"
         android:text="@string/input_height"
+        android:layout_marginTop="20dp"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/guideline_vertical"
@@ -273,7 +246,7 @@
         android:id="@+id/guide_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="250dp"
+        android:layout_marginTop="30dp"
         android:fontFamily="@font/font_regular"
         android:gravity="center"
         android:text="@string/input_time"
@@ -281,7 +254,7 @@
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/input_weight_switch" />
 
     <TextView
         android:id="@+id/input_time_1"
@@ -320,7 +293,7 @@
         android:id="@+id/guide_age"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="380dp"
+        android:layout_marginTop="100dp"
         android:fontFamily="@font/font_regular"
         android:gravity="center"
         android:text="@string/input_age"
@@ -328,7 +301,7 @@
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/guide_time" />
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -368,7 +341,7 @@
         android:clickable="true"
         android:focusable="true"
         app:cardCornerRadius="15dp"
-        app:cardElevation="2dp"
+        app:cardElevation="0dp"
         app:layout_constraintStart_toStartOf="@id/input_age"
         app:layout_constraintTop_toBottomOf="@id/input_age"
         android:alpha="0.7">
@@ -427,7 +400,7 @@
         android:clickable="true"
         android:focusable="true"
         app:cardCornerRadius="15dp"
-        app:cardElevation="2dp"
+        app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="@id/input_age"
         app:layout_constraintTop_toBottomOf="@id/input_age"
         android:alpha="0.7">

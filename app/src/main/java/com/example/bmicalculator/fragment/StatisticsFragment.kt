@@ -197,6 +197,7 @@ class StatisticsFragment : Fragment() {
         bmiChart.marker = marker
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
+            setDrawHighlightIndicators(false)
             mode = LineDataSet.Mode.HORIZONTAL_BEZIER
             lineWidth = 1f
             color = Color.WHITE
@@ -290,6 +291,7 @@ class StatisticsFragment : Fragment() {
         weightChart.marker = marker
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
+            setDrawHighlightIndicators(false)
             mode = LineDataSet.Mode.HORIZONTAL_BEZIER
             lineWidth = 1f
             color = Color.WHITE

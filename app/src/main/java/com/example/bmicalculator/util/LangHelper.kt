@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import java.util.Locale
+import androidx.core.content.edit
 
 object LangHelper {
     private const val SP_NAME = "lang_sp"
@@ -17,7 +18,7 @@ object LangHelper {
     fun setLanguage(context: Context, langCode: String) {
         // 保存到本地SP
         val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
-        sp.edit().putString(KEY_LANG, langCode).apply()
+        sp.edit { putString(KEY_LANG, langCode) }
 
         // 创建对应地区
         val locale = when (langCode) {

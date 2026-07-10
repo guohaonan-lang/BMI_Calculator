@@ -97,4 +97,15 @@
     <string name="please_enter_your_height">请输入您的身高</string>
     <string name="height_out_of_range_1_250_cm">身高超出范围（1 – 250 厘米）</string>
     <string name="years_old">" 岁"</string>
+    <string name="log_out">退出登录</string>
+    <string name="log_in">登录</string>
+    <string name="recent">最近记录</string>
+    <string name="sorry_for_the_inconvenience">由此带来不便，敬请谅解</string>
+    <string name="auto_text1">因谷歌验证相关问题，我们需调整数据同步功能。在此期间，数据同步服务将暂时无法使用。</string>
+    <string name="auto_text2">问题修复后该功能会立即恢复，感谢您的耐心等待。</string>
+    <string name="ad_apps_you_might_need">为您推荐应用</string>
+    <string name="ad1_text1">居家健身 - 无需器械</string>
+    <string name="ad1_text2">减脂瘦腹</string>
+    <string name="ad2_text1">男士居家减重</string>
+    <string name="ad2_text2">减脂瘦腹</string>
 </resources>

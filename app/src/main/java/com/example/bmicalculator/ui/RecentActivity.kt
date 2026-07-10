@@ -2,14 +2,13 @@ package com.example.bmicalculator.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bmicalculator.R
@@ -39,8 +38,10 @@ class RecentActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-
+        val back = findViewById<ImageView>(R.id.recent_back)
+        back.setOnClickListener {
+            finish()
+        }
         setupRecyclerView()
 
     }
@@ -55,7 +56,7 @@ class RecentActivity : AppCompatActivity() {
                 if (data.isEmpty()) {
                     val intent = Intent(this@RecentActivity, DataInputActivity::class.java)
                     startActivity(intent)
-                    finish()
+                    finishAffinity()
                     return@collect
                 }
                 adapter.update(data)
