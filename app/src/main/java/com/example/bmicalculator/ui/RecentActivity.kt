@@ -27,7 +27,7 @@ class RecentActivity : AppCompatActivity() {
     //创建viewmodel
     private val viewModel: BmiViewModel by viewModels {
         val db = BmiDatabase.getDatabase(this)
-        BmiViewModel.provideFactory( BmiRepository(db.bmiDao()))
+        BmiViewModel.provideFactory(BmiRepository(db.bmiDao()))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,21 +51,20 @@ class RecentActivity : AppCompatActivity() {
 
         adapter = RecentAdapter(emptyList())
         lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.allBmiList.collect { data ->
-                    if(data.isEmpty()){
-                        val intent = Intent(this@RecentActivity, DataInputActivity::class.java)
-                        startActivity(intent)
-                        finishAffinity()
-                    }
-                    adapter.update(data)
+            viewModel.allBmiList.collect { data ->
+                if (data.isEmpty()) {
+                    val intent = Intent(this@RecentActivity, DataInputActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                    return@collect
                 }
+                adapter.update(data)
             }
         }
         adapter.setOnItemClick { item ->
             val intent = Intent(this, ResultActivity::class.java)
-            intent.putExtra("BMI",item)
-            intent.putExtra("Recent",true)
+            intent.putExtra("BMI", item)
+            intent.putExtra("Recent", true)
             startActivity(intent)
         }
 

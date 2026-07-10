@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:fontFamily="@font/font_extrabold"
-        android:text="22.6"
+        android:text=""
         android:maxLength="4"
         android:textColor="@color/black"
         android:textSize="64sp"
@@ -42,7 +42,8 @@
         android:layout_height="wrap_content"
         android:backgroundTint="@color/grad4"
         android:fontFamily="@font/font_extrabold"
-        android:text="fdsafdsa"
+        android:text=""
+        android:textStyle="bold"
         android:textSize="19sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
-            android:text="23kg"
+            android:text=""
             android:textColor="@color/black"
             android:textSize="14sp" />
 
@@ -78,7 +79,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
 
-            android:text="123cm"
+            android:text=""
             android:textColor="@color/black"
             android:textSize="14sp" />
 
@@ -93,7 +94,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
 
-            android:text="Male"
+            android:text=""
             android:textColor="@color/black"
             android:textSize="14sp" />
 
@@ -108,7 +109,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
 
-            android:text="25 year old"
+            android:text=""
             android:textColor="@color/black"
             android:textSize="14sp" />
     </LinearLayout>

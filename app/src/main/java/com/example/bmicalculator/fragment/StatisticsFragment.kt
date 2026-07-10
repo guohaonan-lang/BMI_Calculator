@@ -239,7 +239,8 @@ class StatisticsFragment : Fragment() {
                 bmiChart.xAxis,
                 bmiChart.getTransformer(YAxis.AxisDependency.LEFT),
                 { mBaseTimeZero },
-                { currentTimeMode }
+                { currentTimeMode },
+                requireContext()
             )
         )
 
@@ -332,7 +333,8 @@ class StatisticsFragment : Fragment() {
                 weightChart.xAxis,
                 weightChart.getTransformer(YAxis.AxisDependency.LEFT),
                 { mBaseTimeZero },
-                { currentTimeMode }
+                { currentTimeMode },
+                requireContext()
             )
         )
 

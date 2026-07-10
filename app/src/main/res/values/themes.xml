@@ -15,4 +15,8 @@
         <item name="android:windowBackground">@android:color/transparent</item>
 <!--        <item name="android:windowAnimationStyle">@style/BottomAnim</item>-->
     </style>
+
+    <style name="CircleShape">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

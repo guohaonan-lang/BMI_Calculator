@@ -12,6 +12,6 @@
     android:text="47"
     android:textColor="@color/black"
     android:textSize="32sp"
-    android:alpha="0.2">
+    android:alpha="0.1">
 
 </TextView>

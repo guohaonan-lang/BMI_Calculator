@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 打开时轨道浅蓝半透 -->
+    <item android:state_checked="true" android:color="#B1BFF7"/>
+    <!-- 关闭时轨道浅灰 -->
+    <item android:color="#E5E5E7"/>
+</selector>

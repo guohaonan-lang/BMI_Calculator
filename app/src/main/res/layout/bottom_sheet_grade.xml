@@ -8,7 +8,7 @@
         android:id="@+id/dialog_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="BMI for adults"
+        android:text="@string/bottot_grade_bmi_wheel"
         android:textColor="@color/black"
         android:fontFamily="@font/font_extrabold"
         android:textSize="20sp"

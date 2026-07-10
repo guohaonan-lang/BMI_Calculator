@@ -37,6 +37,7 @@ import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.ui.ResultActivity
 import com.example.bmicalculator.ui.SettingActivity
 import com.example.bmicalculator.util.BmiUtil
+import com.example.bmicalculator.util.TimeUtil
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
@@ -58,12 +59,10 @@ class DataInputFragment : Fragment() {
         weightUnit = false,
         bmiValue = 21.9f,
         bmiColor = 0xFF888888.toInt(), // 临时占位色
-        bmiGrade = "Normal",
         age = 25,
         gender = 1,
         createTime = System.currentTimeMillis(),
         customTime = 0L,
-        timeText = ""
     )
     private var weightPair: Pair<String, String> = "140.00" to "63.50"
     private var heightPair: Pair<Int, String> = 67 to "170.0"
@@ -100,10 +99,11 @@ class DataInputFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "DefaultLocale")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupTime()
         initAgeRecyclerView()
         initWeightAndHeightEdit()
         initConvertWeightAndHeight()
@@ -117,7 +117,7 @@ class DataInputFragment : Fragment() {
                     isFirstData = false
                 } else isFirstData = true
                 // 只初始化一次UI
-                setupTime()
+
                 setupGenderView()
                 setupWeightAndHeight()
                 ageRecyclerView.layoutManager?.scrollToPosition(bmiRecord.age - 2)
@@ -160,7 +160,7 @@ class DataInputFragment : Fragment() {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            if(!bmiRecord.heightUnit){
+            if(bmiRecord.heightUnit){
                 val showText = String.format("%.1f", bmiRecord.height)
                 if (showText == heightPair.second) {
                     bmiRecord.heightFt = heightPair.first / 12
@@ -198,10 +198,8 @@ class DataInputFragment : Fragment() {
 
             bmiRecord.apply {
                 bmiValue = bmi
-                bmiGrade = bmiLevel.levelName
                 createTime = System.currentTimeMillis()
-                customTime = getCustomTimeStamp()
-                timeText = "$selectMonth $selectDay,$selectYear $selectPeriod"
+                customTime = TimeUtil(requireContext()).getCustomTimeStamp(selectYear,selectMonth,selectDay,selectPeriod)
             }
             val intent = Intent(requireContext(), ResultActivity::class.java)
             intent.putExtra("BMI", bmiRecord)
@@ -214,26 +212,6 @@ class DataInputFragment : Fragment() {
             val intent = Intent(requireContext(), SettingActivity::class.java)
             startActivity(intent)
         }
-    }
-
-    private fun getCustomTimeStamp(): Long {
-        val monthMap = mapOf(
-            "Jan" to 0, "Feb" to 1, "Mar" to 2, "Apr" to 3, "May" to 4, "June" to 5,
-            "July" to 6, "Aug" to 7, "Sep" to 8, "Oct" to 9, "Nov" to 10, "Dec" to 11
-        )
-        val calendar = Calendar.getInstance()
-        calendar.set(
-            selectYear.toInt(),
-            monthMap[selectMonth] ?: 0,
-            selectDay.toInt(),
-            when (selectPeriod) {
-                "Morning" -> 9
-                "Afternoon" -> 14
-                "Evening" -> 19
-                else -> 23 // Night
-            }, 0, 0
-        )
-        return calendar.timeInMillis
     }
 
     // 选择性别
@@ -291,6 +269,9 @@ class DataInputFragment : Fragment() {
         val movePx = -(76 * density)
 
         lb.setOnClickListener {
+            if (!checkNumberValid()) {
+                return@setOnClickListener
+            }
             if (bmiRecord.weightUnit) {
                 bmiRecord.weightUnit = false
 
@@ -316,6 +297,9 @@ class DataInputFragment : Fragment() {
             }
         }
         kg.setOnClickListener {
+            if (!checkNumberValid()) {
+                return@setOnClickListener
+            }
             if (!bmiRecord.weightUnit) {
                 bmiRecord.weightUnit = true
                 binding.mergeDateInput.selectorThumbWeight.animate()
@@ -340,6 +324,9 @@ class DataInputFragment : Fragment() {
         }
 
         ft.setOnClickListener {
+            if (!checkNumberValid()) {
+                return@setOnClickListener
+            }
             if (bmiRecord.heightUnit) {
                 bmiRecord.heightUnit = false
                 binding.mergeDateInput.selectorThumbHeight.animate()
@@ -356,11 +343,6 @@ class DataInputFragment : Fragment() {
 
 
                 val showText = String.format("%.1f", bmiRecord.height)
-                Toast.makeText(
-                    requireContext(),
-                    "$showText 为什么不等于 ${heightPair.second}",
-                    Toast.LENGTH_SHORT
-                ).show()
                 if (showText == heightPair.second) {
                     bmiRecord.heightFt = heightPair.first / 12
                     bmiRecord.heightIn = heightPair.first % 12
@@ -383,6 +365,9 @@ class DataInputFragment : Fragment() {
         }
 
         cm.setOnClickListener {
+            if (!checkNumberValid()) {
+                return@setOnClickListener
+            }
             if (!bmiRecord.heightUnit) {
                 bmiRecord.heightUnit = true
                 binding.mergeDateInput.selectorThumbHeight.animate()
@@ -456,10 +441,11 @@ class DataInputFragment : Fragment() {
 
     //选择时间
     private fun setupTime() {
-        initDatePickerBottomSheet()
-        initDate2PickerBottomSheet()
         dayInput = binding.mergeDateInput.inputTime1
         timeInput = binding.mergeDateInput.inputTime2
+
+        initDatePickerBottomSheet()
+        initDate2PickerBottomSheet()
 
         dayInput.setOnClickListener {
             sheetDialog.show()
@@ -483,18 +469,18 @@ class DataInputFragment : Fragment() {
 
         // 1. 基础常量数据源
         val monthData = listOf(
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "June",
-            "July",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec"
+            requireContext().getString(R.string.jan),
+            requireContext().getString(R.string.feb),
+            requireContext().getString(R.string.mar),
+            requireContext().getString(R.string.apr),
+            requireContext().getString(R.string.may),
+            requireContext().getString(R.string.june),
+            requireContext().getString(R.string.july),
+            requireContext().getString(R.string.aug),
+            requireContext().getString(R.string.sep),
+            requireContext().getString(R.string.oct),
+            requireContext().getString(R.string.nov),
+            requireContext().getString(R.string.dec)
         )
         val yearData = (1970..2036).map { it.toString() }
         // ===== 获取当前系统日期，计算对应滚轮下标 =====
@@ -513,10 +499,13 @@ class DataInputFragment : Fragment() {
         val daySelectIndex = currentDay - 1
         selectDay = currentDay.toString()
 
+        dayInput.text = "$selectMonth $selectDay, $selectYear"
+
         val boldTypeface: Typeface? =
             ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
         // 2. 局部通用初始化滚轮方法
+        @SuppressLint("ClickableViewAccessibility")
         fun initWheel(
             wheel: WheelView,
             dataList: List<String>,
@@ -625,10 +614,10 @@ class DataInputFragment : Fragment() {
 
 // 1. 单列数据源
         val periodData = listOf(
-            "Morning",
-            "Afternoon",
-            "Evening",
-            "Night"
+            requireContext().getString(R.string.morning),
+            requireContext().getString(R.string.afternoon),
+            requireContext().getString(R.string.evening),
+            requireContext().getString(R.string.night)
         )
 
 // 根据当前小时自动匹配对应时段下标
@@ -646,7 +635,7 @@ class DataInputFragment : Fragment() {
         }
 
         selectPeriod = periodData[defaultSelectIndex]
-
+        binding.mergeDateInput.inputTime2.text = selectPeriod
         val boldTypeface: Typeface? =
             ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
@@ -812,7 +801,8 @@ class DataInputFragment : Fragment() {
         //  1. 体重安全判定（防御空输入闪退）
         val weightInputStr = edtWeight.text.toString()
         if (weightInputStr.isBlank()) {
-            Toast.makeText(requireContext(), "请输入体重", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "\n" +
+                    getString(R.string.please_enter_your_weight), Toast.LENGTH_SHORT).show()
             edtWeight.setText("140.00")
             return false // 严格拦截，不放行
         }
@@ -826,7 +816,8 @@ class DataInputFragment : Fragment() {
                 edtWeight.setText("551.00")
 
                 bmiRecord.weight = 551f * 0.45359236f
-                Toast.makeText(requireContext(), "体重超出范围( 2 - 551 lb)", Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(), "\n" +
+                        getString(R.string.weight_out_of_range_2_551_lb), Toast.LENGTH_SHORT)
                     .show()
                 return false // 拦截
             }
@@ -835,7 +826,8 @@ class DataInputFragment : Fragment() {
             if (inputWeight !in 1f..250f) {
                 edtWeight.setText("250.00")
                 bmiRecord.weight = 250f // 纯正标准 kg 赋值
-                Toast.makeText(requireContext(), "体重超出范围( 1 - 250 kg)", Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(), "\n" +
+                        getString(R.string.weight_out_of_range_2_250_kg), Toast.LENGTH_SHORT)
                     .show()
                 return false
             }
@@ -854,7 +846,8 @@ class DataInputFragment : Fragment() {
             if (ft !in 1..8) {
                 edtHeightFt.setText("8")
                 bmiRecord.heightFt = 8
-                Toast.makeText(requireContext(), "身高超出范围( 1 - 8 ft)", Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(), "\n" +
+                        getString(R.string.height_out_of_range_1_8_ft), Toast.LENGTH_SHORT)
                     .show()
                 return false
             }
@@ -862,7 +855,8 @@ class DataInputFragment : Fragment() {
             if (inch !in 0..11) {
                 edtHeightIn.setText("11")
                 bmiRecord.heightIn = 11
-                Toast.makeText(requireContext(), "身高超出范围( 0 - 11 in)", Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(), "\n" +
+                        getString(R.string.height_out_of_range_1_11_in), Toast.LENGTH_SHORT)
                     .show()
                 return false
             }
@@ -871,7 +865,8 @@ class DataInputFragment : Fragment() {
             // ----- CM 公制模式验证 -----
             val heightInputStr = edtHeight.text.toString()
             if (heightInputStr.isBlank()) {
-                Toast.makeText(requireContext(), "请输入身高", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(),
+                    getString(R.string.please_enter_your_height), Toast.LENGTH_SHORT).show()
                 return false
             }
             val inputHeight = heightInputStr.toFloatOrNull() ?: 0f
@@ -879,7 +874,8 @@ class DataInputFragment : Fragment() {
             if (inputHeight !in 1f..250.0f) {
                 edtHeight.setText("150.0")
                 bmiRecord.height = 150f
-                Toast.makeText(requireContext(), "身高超出范围( 1 - 250 cm)", Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(), "\n" +
+                        getString(R.string.height_out_of_range_1_250_cm), Toast.LENGTH_SHORT)
                     .show()
                 return false
             }

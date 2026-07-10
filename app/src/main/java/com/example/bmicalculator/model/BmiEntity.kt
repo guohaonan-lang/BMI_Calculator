@@ -20,7 +20,6 @@ data class BmiEntity(
 
     // BMI 计算结果
     var bmiValue: Float,
-    var bmiGrade: String,//等级名称
     var bmiColor: Int,//对应颜色
     // 年龄
     var age: Int,
@@ -31,5 +30,4 @@ data class BmiEntity(
     var createTime: Long = System.currentTimeMillis(),
     // 自定义记录时间（用户手动选择的日期时间戳）
     var customTime: Long,
-    var timeText: String
 ) : Parcelable

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BMI计算器</string>
+    <string name="hello_blank_fragment">你好，空白碎片</string>
+    <string name="database_name">bmi_database</string>
+    <string name="result_activity_data_transmission_failed">数据传输失败！！！</string>
+    <string name="male">男</string>
+    <string name="female">女</string>
+    <string name="input_calculate">计算</string>
+
+    <string name="adults_bmi_very_severely_underweight">极重度消瘦</string>
+    <string name="adults_bmi_range_VerySeverelyUnderweight"><![CDATA[<16.0]]></string>
+    <string name="adults_bmi_severely_underweight">重度消瘦</string>
+    <string name="adults_bmi_range_SeverelyUnderweight">16.0–16.9</string>
+    <string name="adults_bmi_underweight">偏瘦</string>
+    <string name="adults_bmi_range_Underweight">17.0–18.4</string>
+    <string name="adults_bmi_normal">正常</string>
+    <string name="adults_bmi_range_normal">18.5–24.9</string>
+    <string name="adults_bmi_overweight">超重</string>
+    <string name="adults_bmi_range_overweight">25.0–29.9</string>
+    <string name="adult_bmi_obese_class_i">一级肥胖</string>
+    <string name="adult_bmi_range_obese_class_i">30.0–34.9</string>
+    <string name="adults_bmi_obese_class_ii">二级肥胖</string>
+    <string name="adult_bmi_range_obese_class_ii">35.0–39.9</string>
+    <string name="adults_bmi_obese_class_iii">三级肥胖</string>
+    <string name="adult_bmi_range_obese_class_iii">≥ 40.0</string>
+
+    <!-- 成年人评价文案 -->
+    <string name="desc_vsu">请多关爱自己！你需要增加健康的热量摄入，选择高营养密度的食物，并咨询医生寻求增重建议。</string>
+    <string name="desc_su">是时候好好照顾自己了，远离免疫功能低下和骨质疏松的风险。给自己安排均衡的饮食，摄入多种营养素吧。</string>
+    <string name="desc_u">你的身体似乎需要更多能量。除非你天生体型纤瘦，否则可能需要考虑增重方式，因为当前体重可能带来一定健康风险。</string>
+    <string name="desc_n">恭喜！你的体重处于理想状态。请保持健康的生活习惯，维持健康体重。</string>
+    <string name="desc_o">别再拖延了！是时候采取行动达成体重目标了。你的体脂超标，应平衡饮食和运动，实现健康体重。</string>
+    <string name="desc_ob1">请注意！你的体重已超出理想范围，患上各类健康问题的风险增加。是时候养成健康的饮食习惯，增加活动量了。</string>
+    <string name="desc_ob2">是时候做出改变了！你面临着肥胖相关疾病的高风险。应增加运动量，循序渐进地减少热量摄入，定期进行健康筛查也至关重要。</string>
+    <string name="desc_ob3">我们很担心你的健康！你的体重已对健康构成严重且紧迫的威胁。请咨询专业医生，制定科学的减重方案。</string>
+
+    <!-- 青少年专属文案 -->
+    <string name="desc_teen_u">别再挑食了，你的身体需要更多能量来成长。尝试吃一些健康、高热量的零食来增重吧。</string>
+    <string name="desc_teen_n">太棒了！你做得非常好，只需保持健康的生活方式，就能维持这个理想范围。</string>
+    <string name="desc_teen_o">动起来，对垃圾食品说不！超重会增加患上健康问题的几率，哪怕只是少量减重也能带来改变。</string>
+    <string name="desc_teen_ob1">感觉跟不上小伙伴的节奏？是时候通过运动和健康饮食来调理身体了！向父母和健康专业人士寻求建议和支持吧。</string>
+    <string name="bottomsheet_got_it">知道了</string>
+    <string name="day">天</string>
+    <string name="week">周</string>
+    <string name="month">月</string>
+    <string name="setting_privacy_policy">隐私政策</string>
+    <string name="setting_feedback">意见反馈</string>
+    <string name="setting_rate_us">给我们评分</string>
+    <string name="setting_remove_ads">移除广告</string>
+    <string name="setting_connect_to_google_fit">连接到Google Fit</string>
+    <string name="setting_language">语言</string>
+    <string name="setting_backup_restore"><![CDATA[备份 & 恢复]]></string>
+    <string name="setting_synchronize_your_data">同步你的数据</string>
+    <string name="language_options">语言选项</string>
+    <string name="result_discard">放弃</string>
+    <string name="result_save">保存</string>
+    <string name="setting_me">我的</string>
+    <string name="date_picker_date">日期</string>
+    <string name="data_cancel">取消</string>
+    <string name="data_done">完成</string>
+    <string name="bottot_grade_bmi_wheel">BMI转盘</string>
+    <string name="dialog_delete_confirm">删除确认</string>
+    <string name="dialog_delete_text">你确定要删除这条记录吗？</string>
+    <string name="dialog_delete_delete">删除</string>
+    <string name="dialog_delete_cancel_text">取消</string>
+    <string name="input_weight">体重</string>
+    <string name="input_height">身高</string>
+    <string name="input_time">时间</string>
+    <string name="input_age">年龄</string>
+    <string name="result_assessment_weight">对应身高标准体重：</string>
+    <string name="statistics">统计数据</string>
+    <string name="statistics_weight">体重</string>
+    <string name="update">更新</string>
+
+    <string name="jan">1月</string>
+    <string name="feb">2月</string>
+    <string name="mar">3月</string>
+    <string name="apr">4月</string>
+    <string name="may">5月</string>
+    <string name="june">6月</string>
+    <string name="july">7月</string>
+    <string name="aug">8月</string>
+    <string name="sep">9月</string>
+    <string name="oct">10月</string>
+    <string name="nov">11月</string>
+    <string name="dec">12月</string>
+    <string name="morning">早上</string>
+    <string name="afternoon">下午</string>
+    <string name="evening">傍晚</string>
+    <string name="night">夜晚</string>
+    <string name="please_enter_your_weight">请输入您的体重</string>
+    <string name="weight_out_of_range_2_551_lb">体重超出范围（2 – 551 磅）</string>
+    <string name="weight_out_of_range_2_250_kg">体重超出范围（2 – 250 千克）</string>
+    <string name="height_out_of_range_1_8_ft">身高超出范围（1 – 8 英尺）</string>
+    <string name="height_out_of_range_1_11_in">身高超出范围（1 – 11 英寸）</string>
+    <string name="please_enter_your_height">请输入您的身高</string>
+    <string name="height_out_of_range_1_250_cm">身高超出范围（1 – 250 厘米）</string>
+    <string name="years_old">" 岁"</string>
+</resources>

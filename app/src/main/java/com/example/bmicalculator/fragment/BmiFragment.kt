@@ -20,6 +20,7 @@ import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.ui.MainActivity
 import com.example.bmicalculator.ui.RecentActivity
 import com.example.bmicalculator.util.BmiUtil
+import com.example.bmicalculator.util.TimeUtil
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import kotlinx.coroutines.launch
 
@@ -64,6 +65,7 @@ class BmiFragment : Fragment() {
 
     }
 
+    // 读取信息
     private fun updateBmi() {
         val wheel = binding.resultMergeResult.mergeBmiGauge
         // 给仪表盘赋值
@@ -79,8 +81,19 @@ class BmiFragment : Fragment() {
             wheel.gender = record.gender
             wheel.currentBmi = record.bmiValue
 
-            binding.resultTime.text = record.timeText
+
+            val timetext = TimeUtil(requireContext()).parseTimeStamp(record.customTime)
+            val text =
+                "${timetext.selectMonth} ${timetext.selectDay} ${timetext.selectYear}"
+            binding.resultTime.text = text
+
+
             binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", record.bmiValue)
+            binding.resultMergeResult.mergeResultGender.text =
+                if (record.gender == 1) getString(R.string.male) else getString(R.string.female)
+
+            val ageText = record.age.toString() + getString(R.string.years_old)
+            binding.resultMergeResult.mergeResultAge.text = ageText
 
             val bmiInfo =
                 BmiUtil.getBmiFullInfo(requireContext(), record.age, record.gender, record.bmiValue)
@@ -94,16 +107,26 @@ class BmiFragment : Fragment() {
 
     private fun setupBmiGard(levelName: String) {
         var bmiRanges: FloatArray
+
+        val strVerySevere = getString(R.string.adults_bmi_very_severely_underweight)
+        val strSevere = getString(R.string.adults_bmi_severely_underweight)
+        val strUnder = getString(R.string.adults_bmi_underweight)
+        val strNormal = getString(R.string.adults_bmi_normal)
+        val strOver = getString(R.string.adults_bmi_overweight)
+        val strOb1 = getString(R.string.adult_bmi_obese_class_i)
+        val strOb2 = getString(R.string.adults_bmi_obese_class_ii)
+        val strOb3 = getString(R.string.adults_bmi_obese_class_iii)
+
         var grad = 0
         when (levelName) {
-            "Very Severely Underweight" -> grad = 1
-            "Severely Underweight" -> grad = 2
-            "Underweight" -> grad = 3
-            "Normal" -> grad = 4
-            "Overweight" -> grad = 5
-            "Obese Class I" -> grad = 6
-            "Obese Class II" -> grad = 7
-            "Obese Class III" -> grad = 8
+            strVerySevere -> grad = 1
+            strSevere     -> grad = 2
+            strUnder      -> grad = 3
+            strNormal     -> grad = 4
+            strOver       -> grad = 5
+            strOb1        -> grad = 6
+            strOb2        -> grad = 7
+            strOb3        -> grad = 8
         }
         highlightGradeItem(grad)
         bmiRecord?.let { record ->

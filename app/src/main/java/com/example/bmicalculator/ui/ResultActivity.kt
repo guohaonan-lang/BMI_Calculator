@@ -31,6 +31,7 @@ import com.example.bmicalculator.databinding.ActivityResultBinding
 import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.util.BmiColorWheelView
 import com.example.bmicalculator.util.BmiUtil
+import com.example.bmicalculator.util.TimeUtil
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
@@ -77,7 +78,7 @@ class ResultActivity : AppCompatActivity() {
 //        binding.resultAssessment.text2 = "Normal Weight for your height (180cm):"
     }
 
-    @SuppressLint("DefaultLocale")
+    @SuppressLint("DefaultLocale", "SetTextI18n")
     private fun initData() {
         // 1.读取数据
         bmiRecord = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -127,15 +128,16 @@ class ResultActivity : AppCompatActivity() {
             binding.resultMergeResult.mergeResultGrade.backgroundTintList =
                 ColorStateList.valueOf(record.bmiColor)
             binding.assessmentText1.text = bmiInfo.assessment
-            if (bmiInfo.levelName == "Normal") {
+            if (bmiInfo.levelName == getString(R.string.adults_bmi_normal)) {
                 binding.assessmentText2.visibility = View.GONE
                 binding.assessmentRange.visibility = View.GONE
                 binding.assessmentDifference.visibility = View.GONE
             } else {
+                val baseText = getString(R.string.result_assessment_weight)
                 if (record.heightUnit) binding.assessmentText2.text =
-                    "Normal Weight for your height (${record.height}cm):"
+                    "$baseText ${record.height} cm"
                 else binding.assessmentText2.text =
-                    "Normal Weight for your height (${record.heightFt}ft ${record.heightIn}in):"
+                    "$baseText (${record.heightFt}ft ${record.heightIn}in):"
 
 
                 var minBmi: Float
@@ -205,7 +207,13 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun initChangePage() {
+
+        val timetext = TimeUtil(this).parseTimeStamp(bmiRecord?.customTime ?: 0)
+        val text =
+            "${timetext.selectMonth} ${timetext.selectDay} ${timetext.selectYear}  ${timetext.selectPeriod}"
+        binding.resultMergeAd.tvTimeTag.text = text
         if (statusRecent) {
+            // 历史结果图
             binding.resultMergeGrade.root.visibility = View.GONE
             binding.resultSave.visibility = View.GONE
             binding.resultDelete.visibility = View.GONE
@@ -253,6 +261,7 @@ class ResultActivity : AppCompatActivity() {
 
             if (statusFirst) {
                 binding.resultMergeAd.root.visibility = View.GONE
+
             } else {
                 val btn = binding.resultMergeResult.mergeResultGrade
                 // 参数：start, top, end, bottom 资源ID
@@ -276,16 +285,25 @@ class ResultActivity : AppCompatActivity() {
 
     private fun setupBmiGard(levelName: String) {
         var bmiRanges: FloatArray
+
+        val strVerySevere = getString(R.string.adults_bmi_very_severely_underweight)
+        val strSevere = getString(R.string.adults_bmi_severely_underweight)
+        val strUnder = getString(R.string.adults_bmi_underweight)
+        val strNormal = getString(R.string.adults_bmi_normal)
+        val strOver = getString(R.string.adults_bmi_overweight)
+        val strOb1 = getString(R.string.adult_bmi_obese_class_i)
+        val strOb2 = getString(R.string.adults_bmi_obese_class_ii)
+        val strOb3 = getString(R.string.adults_bmi_obese_class_iii)
         var grad = 0
         when (levelName) {
-            "Very Severely Underweight" -> grad = 1
-            "Severely Underweight" -> grad = 2
-            "Underweight" -> grad = 3
-            "Normal" -> grad = 4
-            "Overweight" -> grad = 5
-            "Obese Class I" -> grad = 6
-            "Obese Class II" -> grad = 7
-            "Obese Class III" -> grad = 8
+            strVerySevere -> grad = 1
+            strSevere -> grad = 2
+            strUnder -> grad = 3
+            strNormal -> grad = 4
+            strOver -> grad = 5
+            strOb1 -> grad = 6
+            strOb2 -> grad = 7
+            strOb3 -> grad = 8
         }
         highlightGradeItem(grad)
         bmiRecord?.let { record ->
@@ -316,6 +334,7 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun switchTeenGrade(bmiRanges: FloatArray) {
         val rootLayout = binding.resultMergeGrade.root
         val ctx = rootLayout.context
@@ -422,6 +441,7 @@ class ResultActivity : AppCompatActivity() {
     }
 
     // 初始化bottomDialog
+    @SuppressLint("InflateParams")
     private fun initBottomDialog() {
         sheetDialog = BottomSheetDialog(this)
         val rootView =

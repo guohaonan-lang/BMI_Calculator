@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BMICalculator">
         <activity
+            android:name=".ui.LanguageActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.RecentActivity"
             android:exported="false" />
         <activity

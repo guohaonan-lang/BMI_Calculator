@@ -1,6 +1,8 @@
 package com.example.bmicalculator.util
 
+import android.content.Context
 import android.graphics.Canvas
+import com.example.bmicalculator.R
 import com.example.bmicalculator.fragment.StatisticsFragment
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.renderer.XAxisRenderer
@@ -15,7 +17,8 @@ class SmartXAxisRenderer(
     xAxis: XAxis,
     trans: Transformer,
     private val getBaseTimeZero: () -> Long,
-    private val getCurrentMode: () -> StatisticsFragment.TimeMode
+    private val getCurrentMode: () -> StatisticsFragment.TimeMode,
+    private val context: Context
 ) : XAxisRenderer(viewPortHandler, xAxis, trans) {
 
     private val mCalendar = Calendar.getInstance()
@@ -47,7 +50,7 @@ class SmartXAxisRenderer(
             }
             if (index !in 0 until totalCount) return
 
-            // 🌟【核心纠正】：计算当前格子需要从最新的那天（末尾）倒退多少天/周/月
+            // 计算当前格子需要从最新的那天（末尾）倒退多少天/周/月
             val offsetFromLatest = (totalCount - 1) - index
             mCalendar.timeInMillis = baseTs
 
@@ -57,7 +60,8 @@ class SmartXAxisRenderer(
                     val month = mCalendar.get(Calendar.MONTH) + 1
                     val day = mCalendar.get(Calendar.DAY_OF_MONTH)
                     if (day == 1 || index == 0) {
-                        super.drawLabel(c, "${month}月", x, y, anchor, angleDegrees)
+                        val s = context.getString(R.string.month)
+                        super.drawLabel(c, "${month}$s", x, y, anchor, angleDegrees)
                     }
                 }
                 StatisticsFragment.TimeMode.WEEK -> {
@@ -65,7 +69,8 @@ class SmartXAxisRenderer(
                     val day = mCalendar.get(Calendar.DAY_OF_MONTH)
                     val month = mCalendar.get(Calendar.MONTH) + 1
                     if ((day in 1..7) || index == 0) {
-                        super.drawLabel(c, "${month}月", x, y, anchor, angleDegrees)
+                        val s = context.getString(R.string.month)
+                        super.drawLabel(c, "${month}$s", x, y, anchor, angleDegrees)
                     }
                 }
                 StatisticsFragment.TimeMode.MONTH -> {
