@@ -41,9 +41,9 @@ class RecentAdapter(private var dataList: List<BmiEntity>) :
         val ctx = holder.itemView.context
 
         holder.bmiText.text = String.format("%.1f", item.bmiValue)
-        val timetext = TimeUtil(ctx).parseTimeStamp(item.customTime)
+        val timeText = TimeUtil(ctx).parseTimeStamp(item.customTime)
         val text =
-            "${timetext.selectMonth} ${timetext.selectDay} ${timetext.selectYear}  ${timetext.selectPeriod}"
+            "${timeText.selectMonth} ${timeText.selectDay} ${timeText.selectYear}  ${timeText.selectPeriod}"
         holder.timeText.text = text
         holder.bmiColor.backgroundTintList =
             android.content.res.ColorStateList.valueOf(item.bmiColor)

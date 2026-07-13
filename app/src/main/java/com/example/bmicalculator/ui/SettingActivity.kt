@@ -18,17 +18,16 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySettingBinding
-import com.example.bmicalculator.viewmodel.BmiViewModel
+import com.example.bmicalculator.viewmodel.SettingViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlin.getValue
 
 class SettingActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingBinding
     private lateinit var userBottomSheetDialog: BottomSheetDialog
     private lateinit var autoDialog: Dialog
-    private val viewModel: BmiViewModel by viewModels {
+    private val viewModel: SettingViewModel by viewModels {
         val db = BmiDatabase.getDatabase(this)
-        BmiViewModel.provideFactory(BmiRepository(db.bmiDao()))
+        SettingViewModel.provideFactory(BmiRepository(db.bmiDao()))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,9 +56,10 @@ class SettingActivity : AppCompatActivity() {
         }
         binding.settingUserAutorenew.setOnClickListener {
             autoDialog.show()
+
         }
         binding.settingFeedback.setOnClickListener {
-            val intent = Intent(this, LanguageActivity::class.java)
+            val intent = Intent(this, FeedbackActivity::class.java)
             startActivity(intent)
         }
     }

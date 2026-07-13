@@ -108,4 +108,21 @@
     <string name="ad1_text2">减脂瘦腹</string>
     <string name="ad2_text1">男士居家减重</string>
     <string name="ad2_text2">减脂瘦腹</string>
+    <string name="feedback_or_suggestion">反馈或建议</string>
+    <!-- 月份简写数组 -->
+    <string-array name="month_short_names">
+        <item>@string/jan</item>
+        <item>@string/feb</item>
+        <item>@string/mar</item>
+        <item>@string/apr</item>
+        <item>@string/may</item>
+        <item>@string/june</item>
+        <item>@string/july</item>
+        <item>@string/aug</item>
+        <item>@string/sep</item>
+        <item>@string/oct</item>
+        <item>@string/nov</item>
+        <item>@string/dec</item>
+    </string-array>
+
 </resources>

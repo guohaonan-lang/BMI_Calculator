@@ -108,4 +108,22 @@
     <string name="ad1_text2">Weight Loss, Lose Belly Fat</string>
     <string name="ad2_text1">Lose Weight for Men at Home</string>
     <string name="ad2_text2">Weight Loss, Lose Belly Fat</string>
+    <string name="feedback_or_suggestion">Feedback or suggestion</string>
+
+    <!-- 月份简写数组 -->
+    <string-array name="month_short_names">
+        <item>@string/jan</item>
+        <item>@string/feb</item>
+        <item>@string/mar</item>
+        <item>@string/apr</item>
+        <item>@string/may</item>
+        <item>@string/june</item>
+        <item>@string/july</item>
+        <item>@string/aug</item>
+        <item>@string/sep</item>
+        <item>@string/oct</item>
+        <item>@string/nov</item>
+        <item>@string/dec</item>
+    </string-array>
+
 </resources>

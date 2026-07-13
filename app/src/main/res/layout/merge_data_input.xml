@@ -315,8 +315,6 @@
         android:clipToPadding="false"
 
         android:orientation="horizontal"
-        android:paddingHorizontal="120dp"
-
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         app:layout_constraintEnd_toEndOf="@id/input_time_2"

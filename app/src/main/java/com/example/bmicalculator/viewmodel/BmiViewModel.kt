@@ -12,7 +12,7 @@ class BmiViewModel(private val repository: BmiRepository) :
     ViewModel() {
 
     val allBmiList : Flow<List<BmiEntity>> = repository.getAllBmiRecords()
-    val chartBmiList : Flow<List<BmiEntity>> = repository.getChartBmi()
+
 
 
 

@@ -1,5 +1,6 @@
 package com.example.bmicalculator.fragment
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -21,9 +22,10 @@ import com.example.bmicalculator.ui.MainActivity
 import com.example.bmicalculator.ui.RecentActivity
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
-import com.example.bmicalculator.viewmodel.BmiViewModel
+import com.example.bmicalculator.viewmodel.BmiFragmentViewModel
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n","DefaultLocale")
 class BmiFragment : Fragment() {
 
     private var _binding: FragmentBmiBinding? = null
@@ -31,16 +33,15 @@ class BmiFragment : Fragment() {
 
     private var bmiRecord: BmiEntity? = null
 
-    private val viewModel: BmiViewModel by viewModels {
+    private val viewModel: BmiFragmentViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
-        BmiViewModel.provideFactory(BmiRepository(db.bmiDao()))
+        BmiFragmentViewModel.provideFactory(BmiRepository(db.bmiDao()))
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
         _binding = FragmentBmiBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -61,11 +62,10 @@ class BmiFragment : Fragment() {
             bmiRecord = viewModel.getLatestBmi()
             updateBmi()
         }
-
-
     }
 
     // 读取信息
+
     private fun updateBmi() {
         val wheel = binding.resultMergeResult.mergeBmiGauge
         // 给仪表盘赋值
@@ -82,11 +82,10 @@ class BmiFragment : Fragment() {
             wheel.currentBmi = record.bmiValue
 
 
-            val timetext = TimeUtil(requireContext()).parseTimeStamp(record.customTime)
+            val timeText = TimeUtil(requireContext()).parseTimeStamp(record.customTime)
             val text =
-                "${timetext.selectMonth} ${timetext.selectDay} ${timetext.selectYear}"
+                "${timeText.selectMonth} ${timeText.selectDay} ${timeText.selectYear}"
             binding.resultTime.text = text
-
 
             binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", record.bmiValue)
             binding.resultMergeResult.mergeResultGender.text =
@@ -106,56 +105,18 @@ class BmiFragment : Fragment() {
     }
 
     private fun setupBmiGard(levelName: String) {
-        var bmiRanges: FloatArray
-
-        val strVerySevere = getString(R.string.adults_bmi_very_severely_underweight)
-        val strSevere = getString(R.string.adults_bmi_severely_underweight)
-        val strUnder = getString(R.string.adults_bmi_underweight)
-        val strNormal = getString(R.string.adults_bmi_normal)
-        val strOver = getString(R.string.adults_bmi_overweight)
-        val strOb1 = getString(R.string.adult_bmi_obese_class_i)
-        val strOb2 = getString(R.string.adults_bmi_obese_class_ii)
-        val strOb3 = getString(R.string.adults_bmi_obese_class_iii)
-
-        var grad = 0
-        when (levelName) {
-            strVerySevere -> grad = 1
-            strSevere     -> grad = 2
-            strUnder      -> grad = 3
-            strNormal     -> grad = 4
-            strOver       -> grad = 5
-            strOb1        -> grad = 6
-            strOb2        -> grad = 7
-            strOb3        -> grad = 8
-        }
+        val grad = BmiUtil.
+        getGradeIndex(requireContext(),levelName)
         highlightGradeItem(grad)
         bmiRecord?.let { record ->
-
             if (record.age <= 20) {
-                val teenRange = if (record.gender == 0) {
-                    BmiUtil.femaleTeenTable.firstOrNull { it.age == record.age }
-                } else {
-                    BmiUtil.maleTeenTable.firstOrNull { it.age == record.age }
-                }
-                val minBmi = teenRange?.underweightMax?.minus(1f) ?: 13f
-                val maxBmi = teenRange?.overweightMax?.plus(1f) ?: 33f
-                bmiRanges = if (teenRange != null) {
-                    floatArrayOf(
-                        minBmi,
-                        teenRange.underweightMax,
-                        teenRange.normalMax,
-                        teenRange.overweightMax,
-                        maxBmi
-                    )
-                } else {
-                    floatArrayOf(13f, 15f, 20f, 25f, 33f)
-                }
-                switchTeenGrade(bmiRanges)
-
+                val teenRange = BmiUtil.getTeenBmiRange(record.age,record.gender)
+                switchTeenGrade(teenRange)
             }
 
         }
     }
+
 
     private fun switchTeenGrade(bmiRanges: FloatArray) {
         val rootLayout = binding.resultMergeGrade.root
@@ -173,14 +134,12 @@ class BmiFragment : Fragment() {
                     3 -> {
                         scopeTv.text = " < ${bmiRanges[0]}"
                     }
-
                     6 -> {
                         val s = getString(R.string.adult_bmi_range_obese_class_iii)
                         scopeTv.text = "${s[0]} ${bmiRanges.last()}"
                     }
 
                     else -> {
-
                         scopeTv.text = "${bmiRanges[i - 4]} - ${bmiRanges[i - 3]}"
                     }
                 }
@@ -278,8 +237,7 @@ class BmiFragment : Fragment() {
             textTv.alpha = 0.7f
             scopeTv.alpha = 0.7f
 
-            // ========== 关键修复：恢复圆点原有gradN颜色 ==========
-            // 不要调用 colorView.setBackgroundColor(0)，这会毁掉圆形drawable
+            // 恢复圆点原有gradN颜色
             val gradColorRes = ctx.resources.getIdentifier("grad$i", "color", ctx.packageName)
             val gradTint = ColorStateList.valueOf(ctx.getColor(gradColorRes))
             ViewCompat.setBackgroundTintList(colorView, gradTint)
@@ -297,6 +255,11 @@ class BmiFragment : Fragment() {
             }
 
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
 }

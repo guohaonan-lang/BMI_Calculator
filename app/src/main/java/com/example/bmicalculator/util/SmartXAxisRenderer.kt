@@ -3,7 +3,7 @@ package com.example.bmicalculator.util
 import android.content.Context
 import android.graphics.Canvas
 import com.example.bmicalculator.R
-import com.example.bmicalculator.fragment.StatisticsFragment
+import com.example.bmicalculator.viewmodel.StatisticsFragmentViewModel
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.renderer.XAxisRenderer
 import com.github.mikephil.charting.utils.MPPointF
@@ -17,26 +17,13 @@ class SmartXAxisRenderer(
     xAxis: XAxis,
     trans: Transformer,
     private val getBaseTimeZero: () -> Long,
-    private val getCurrentMode: () -> StatisticsFragment.TimeMode,
+    private val getCurrentMode: () -> StatisticsFragmentViewModel.TimeMode,
     private val context: Context
 ) : XAxisRenderer(viewPortHandler, xAxis, trans) {
 
     private val mCalendar = Calendar.getInstance()
 
-    val monthData = listOf(
-        context.getString(R.string.jan),
-        context.getString(R.string.feb),
-        context.getString(R.string.mar),
-        context.getString(R.string.apr),
-        context.getString(R.string.may),
-        context.getString(R.string.june),
-        context.getString(R.string.july),
-        context.getString(R.string.aug),
-        context.getString(R.string.sep),
-        context.getString(R.string.oct),
-        context.getString(R.string.nov),
-        context.getString(R.string.dec)
-    )
+    val monthData = context.resources.getStringArray(R.array.month_short_names).toList()
     override fun drawLabel(
         c: Canvas?,
         formattedLabel: String?,
@@ -58,9 +45,9 @@ class SmartXAxisRenderer(
 
             // 新倒推架构各个模式的总格数
             val totalCount = when (mode) {
-                StatisticsFragment.TimeMode.DAY -> 90
-                StatisticsFragment.TimeMode.WEEK -> 54
-                StatisticsFragment.TimeMode.MONTH -> 60
+                StatisticsFragmentViewModel.TimeMode.DAY -> 90
+                StatisticsFragmentViewModel.TimeMode.WEEK -> 54
+                StatisticsFragmentViewModel.TimeMode.MONTH -> 60
             }
             if (index !in 0 until totalCount) return
 
@@ -69,7 +56,7 @@ class SmartXAxisRenderer(
             mCalendar.timeInMillis = baseTs
 
             when (mode) {
-                StatisticsFragment.TimeMode.DAY -> {
+                StatisticsFragmentViewModel.TimeMode.DAY -> {
                     mCalendar.add(Calendar.DAY_OF_YEAR, -offsetFromLatest)
                     val month = mCalendar.get(Calendar.MONTH)
                     val day = mCalendar.get(Calendar.DAY_OF_MONTH)
@@ -78,7 +65,7 @@ class SmartXAxisRenderer(
                         super.drawLabel(c, monthData[month], x, y, anchor, angleDegrees)
                     }
                 }
-                StatisticsFragment.TimeMode.WEEK -> {
+                StatisticsFragmentViewModel.TimeMode.WEEK -> {
                     mCalendar.add(Calendar.WEEK_OF_YEAR, -offsetFromLatest)
                     val day = mCalendar.get(Calendar.DAY_OF_MONTH)
                     val month = mCalendar.get(Calendar.MONTH)
@@ -87,7 +74,7 @@ class SmartXAxisRenderer(
                         super.drawLabel(c, monthData[month], x, y, anchor, angleDegrees)
                     }
                 }
-                StatisticsFragment.TimeMode.MONTH -> {
+                StatisticsFragmentViewModel.TimeMode.MONTH -> {
                     mCalendar.add(Calendar.MONTH, -offsetFromLatest)
                     val currYear = mCalendar.get(Calendar.YEAR)
                     // 首刻度直接绘制，不用走对比逻辑

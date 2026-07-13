@@ -109,36 +109,43 @@ object BmiUtil {
                 val desc = context.getString(R.string.desc_vsu)
                 BmiLevel(name, colorMap["VERY_SEVERELY_UNDER"]!!, desc)
             }
+
             bmi <= ADULT_SU_MAX -> {
                 val name = context.getString(R.string.adults_bmi_severely_underweight)
                 val desc = context.getString(R.string.desc_su)
                 BmiLevel(name, colorMap["SEVERELY_UNDER"]!!, desc)
             }
+
             bmi <= ADULT_U_MAX -> {
                 val name = context.getString(R.string.adults_bmi_underweight)
                 val desc = context.getString(R.string.desc_u)
                 BmiLevel(name, colorMap["UNDER"]!!, desc)
             }
+
             bmi <= ADULT_N_MAX -> {
                 val name = context.getString(R.string.adults_bmi_normal)
                 val desc = context.getString(R.string.desc_n)
                 BmiLevel(name, colorMap["NORMAL"]!!, desc)
             }
+
             bmi <= ADULT_O_MAX -> {
                 val name = context.getString(R.string.adults_bmi_overweight)
                 val desc = context.getString(R.string.desc_o)
                 BmiLevel(name, colorMap["OVER"]!!, desc)
             }
+
             bmi <= ADULT_OB1_MAX -> {
                 val name = context.getString(R.string.adult_bmi_obese_class_i)
                 val desc = context.getString(R.string.desc_ob1)
                 BmiLevel(name, colorMap["OBESE1"]!!, desc)
             }
+
             bmi <= ADULT_OB2_MAX -> {
                 val name = context.getString(R.string.adults_bmi_obese_class_ii)
                 val desc = context.getString(R.string.desc_ob2)
                 BmiLevel(name, colorMap["OBESE2"]!!, desc)
             }
+
             else -> {
                 val name = context.getString(R.string.adults_bmi_obese_class_iii)
                 val desc = context.getString(R.string.desc_ob3)
@@ -155,21 +162,69 @@ object BmiUtil {
                 val desc = context.getString(R.string.desc_teen_u)
                 BmiLevel(name, colorMap["UNDER"]!!, desc)
             }
+
             bmi <= r.normalMax -> {
                 val name = context.getString(R.string.adults_bmi_normal)
                 val desc = context.getString(R.string.desc_teen_n)
                 BmiLevel(name, colorMap["NORMAL"]!!, desc)
             }
+
             bmi <= r.overweightMax -> {
                 val name = context.getString(R.string.adults_bmi_overweight)
                 val desc = context.getString(R.string.desc_teen_o)
                 BmiLevel(name, colorMap["OVER"]!!, desc)
             }
+
             else -> {
                 val name = context.getString(R.string.adult_bmi_obese_class_i)
                 val desc = context.getString(R.string.desc_teen_ob1)
                 BmiLevel(name, colorMap["OBESE1"]!!, desc)
             }
         }
+    }
+
+    fun getGradeIndex(context: Context, levelName: String): Int {
+        val strVerySevere = context.getString(R.string.adults_bmi_very_severely_underweight)
+        val strSevere = context.getString(R.string.adults_bmi_severely_underweight)
+        val strUnder = context.getString(R.string.adults_bmi_underweight)
+        val strNormal = context.getString(R.string.adults_bmi_normal)
+        val strOver = context.getString(R.string.adults_bmi_overweight)
+        val strOb1 = context.getString(R.string.adult_bmi_obese_class_i)
+        val strOb2 = context.getString(R.string.adults_bmi_obese_class_ii)
+        val strOb3 = context.getString(R.string.adults_bmi_obese_class_iii)
+        var grad = 0
+        when (levelName) {
+            strVerySevere -> grad = 1
+            strSevere -> grad = 2
+            strUnder -> grad = 3
+            strNormal -> grad = 4
+            strOver -> grad = 5
+            strOb1 -> grad = 6
+            strOb2 -> grad = 7
+            strOb3 -> grad = 8
+        }
+        return grad
+    }
+    fun getTeenBmiRange(age: Int,gender: Int): FloatArray {
+
+        val teenRange = if (gender == 0) {
+            femaleTeenTable.firstOrNull { it.age == age }
+        } else {
+            maleTeenTable.firstOrNull { it.age == age }
+        }
+        val minBmi = teenRange?.underweightMax?.minus(1f) ?: 13f
+        val maxBmi = teenRange?.overweightMax?.plus(1f) ?: 33f
+        val bmiRanges = if (teenRange != null) {
+            floatArrayOf(
+                minBmi,
+                teenRange.underweightMax,
+                teenRange.normalMax,
+                teenRange.overweightMax,
+                maxBmi
+            )
+        } else {
+            floatArrayOf(13f, 15f, 20f, 25f, 33f)
+        }
+        return bmiRanges
     }
 }

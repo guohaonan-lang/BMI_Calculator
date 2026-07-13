@@ -17,12 +17,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
+import com.example.bmicalculator.databinding.FragmentStatisticsBinding
 import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.ui.MainActivity
 import com.example.bmicalculator.util.BmiMarkerView
 import com.example.bmicalculator.util.SmartXAxisRenderer
 import com.example.bmicalculator.util.WeightMarkerView
-import com.example.bmicalculator.viewmodel.BmiViewModel
+import com.example.bmicalculator.viewmodel.StatisticsFragmentViewModel
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
@@ -31,17 +32,13 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 class StatisticsFragment : Fragment() {
+    private var _binding: FragmentStatisticsBinding? = null
+    private val binding get() = checkNotNull(_binding)
     private lateinit var bmiChart: LineChart
     private lateinit var weightChart: LineChart
-    private lateinit var dayOfData: TextView
-    private lateinit var weekOfData: TextView
-    private lateinit var monthOfData: TextView
     private lateinit var thumbTime: TextView
-    private lateinit var update1: TextView
-    private lateinit var update2: TextView
     private val chartFont by lazy {
         ResourcesCompat.getFont(requireContext(), R.font.font_extrabold)
     }
@@ -49,37 +46,30 @@ class StatisticsFragment : Fragment() {
     // 图表X轴日期标签集合
     private val xLabelList = mutableListOf<String>()
 
-    enum class TimeMode { DAY, WEEK, MONTH }
-
-    private var currentTimeMode = TimeMode.DAY // 默认是天
+    private var currentTimeMode = StatisticsFragmentViewModel.TimeMode.DAY // 默认是天
     private var rawBmiData: List<BmiEntity> = emptyList() // 缓存一份从数据库拿到的原始全量数据
 
     private var mBaseTimeZero: Long = 0L // 类级别变量
-    private val viewModel: BmiViewModel by viewModels {
+    private val viewModel: StatisticsFragmentViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
-        BmiViewModel.provideFactory(BmiRepository(db.bmiDao()))
+        StatisticsFragmentViewModel.provideFactory(BmiRepository(db.bmiDao()))
     }
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_statistics, container, false)
-        bmiChart = view.findViewById(R.id.chart_bmi)
-        weightChart = view.findViewById(R.id.chart_weight)
-        dayOfData = view.findViewById(R.id.switch_time_day)
-        weekOfData = view.findViewById(R.id.switch_time_week)
-        monthOfData = view.findViewById(R.id.switch_time_month)
-        thumbTime = view.findViewById(R.id.selector_thumb_time)
-
-        update1 = view.findViewById(R.id.chart_update1)
-        update2 = view.findViewById(R.id.chart_update2)
-        return view
+    ): View {
+        _binding = FragmentStatisticsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        bmiChart = binding.chartBmi
+        weightChart = binding.chartWeight
+        thumbTime = binding.selectorThumbTime
 
         initChartStyle(bmiChart)
         initChartStyle(weightChart)
@@ -90,11 +80,11 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun initUpdate() {
-        update1.setOnClickListener {
+        binding.chartUpdate1.setOnClickListener {
             val mainActivity = requireActivity() as MainActivity
             mainActivity.binding.mainViewpage2.currentItem = 0
         }
-        update2.setOnClickListener {
+        binding.chartUpdate2.setOnClickListener {
             val mainActivity = requireActivity() as MainActivity
             mainActivity.binding.mainViewpage2.currentItem = 0
         }
@@ -104,36 +94,33 @@ class StatisticsFragment : Fragment() {
     private fun initSwitchTime() {
         val density = resources.displayMetrics.density
         val movePx = -(115 * density)
-        dayOfData.setOnClickListener {
+        binding.switchTimeDay.setOnClickListener {
             thumbTime.animate()
                 .translationX(0f)
                 .withLayer()
                 .start()
             thumbTime.text = getString(R.string.day)
 
-            currentTimeMode = TimeMode.DAY
-            processAndRenderData(rawBmiData, bmiChart)
-            processAndRenderData(rawBmiData, weightChart)
+            currentTimeMode = StatisticsFragmentViewModel.TimeMode.DAY
+            processAndRenderData(rawBmiData)
         }
-        weekOfData.setOnClickListener {
+        binding.switchTimeWeek.setOnClickListener {
             thumbTime.animate()
                 .translationX(-movePx)
                 .withLayer()
                 .start()
             thumbTime.text = getString(R.string.week)
-            currentTimeMode = TimeMode.WEEK
-            processAndRenderData(rawBmiData, bmiChart)
-            processAndRenderData(rawBmiData, weightChart)
+            currentTimeMode = StatisticsFragmentViewModel.TimeMode.WEEK
+            processAndRenderData(rawBmiData)
         }
-        monthOfData.setOnClickListener {
+        binding.switchTimeMonth.setOnClickListener {
             thumbTime.animate()
                 .translationX(-movePx * 2)
                 .withLayer()
                 .start()
             thumbTime.text = getString(R.string.month)
-            currentTimeMode = TimeMode.MONTH
-            processAndRenderData(rawBmiData, bmiChart)
-            processAndRenderData(rawBmiData, weightChart)
+            currentTimeMode = StatisticsFragmentViewModel.TimeMode.MONTH
+            processAndRenderData(rawBmiData)
         }
     }
 
@@ -379,160 +366,40 @@ class StatisticsFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.chartBmiList.collect { data ->
                     rawBmiData = data
-                    processAndRenderData(rawBmiData, bmiChart)
-                    processAndRenderData(rawBmiData, weightChart)
+                    processAndRenderData(rawBmiData)
                 }
             }
         }
     }
 
     // 处理数据
-    private fun processAndRenderData(data: List<BmiEntity>, lineChart: LineChart) {
+    private fun processAndRenderData(data: List<BmiEntity>) {
         if (data.isEmpty()) {
-            lineChart.clear()
-            lineChart.invalidate()
+            bmiChart.clear()
+            weightChart.clear()
+            bmiChart.invalidate()
+            weightChart.invalidate()
             return
         }
+        viewLifecycleOwner.lifecycleScope.launch {
+            // 调用VM完成全部计算
+            val result = viewModel.processChartData(data, currentTimeMode)
+            // 页面缓存UI所需数据
+            xLabelList.clear()
+            xLabelList.addAll(result.xLabels)
+            mBaseTimeZero = result.baseTimeZero
 
-        xLabelList.clear()
-        val entries = mutableListOf<Entry>()
-        val indexValueListMap = mutableMapOf<Int, MutableList<Float>>() // 下标 i -> BMI/体重数值
+            // 分别渲染两张图表
+            renderBmiChart(result.bmiEntries as MutableList<Entry>)
+            renderWeightChart(result.weightEntries as MutableList<Entry>)
 
-        // 1. 基准时间：获取最新一条数据，并【严格抹平内部时分秒为凌晨零点】！
-        val latestTime = data.last().customTime
-        val baseCal = Calendar.getInstance().apply {
-            timeInMillis = latestTime
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-
-        val totalCount: Int
-        val calendarStep: Int
-        val calendarUnit: Int
-
-        when (currentTimeMode) {
-            TimeMode.DAY -> {
-                totalCount = 90
-                calendarUnit = Calendar.DAY_OF_YEAR
-                calendarStep = -1
-            }
-
-            TimeMode.WEEK -> {
-                totalCount = 54
-                // 为了周模式完美对齐，强制把基准时间挪到该自然周的第一天（如周一）
-                baseCal.set(Calendar.DAY_OF_WEEK, baseCal.firstDayOfWeek)
-                calendarUnit = Calendar.WEEK_OF_YEAR
-                calendarStep = -1
-            }
-
-            TimeMode.MONTH -> {
-                totalCount = 60
-                // 为了月模式完美对齐，强制把基准时间挪到该月 1 号
-                baseCal.set(Calendar.DAY_OF_MONTH, 1)
-                calendarUnit = Calendar.MONTH
-                calendarStep = -1
-            }
-        }
-
-        // 2. 从最新时间向前倒推，生成【严格无副作用】的刻度轴和时间戳轴
-        val tempCal = baseCal.clone() as Calendar
-        val tempLabelList = mutableListOf<String>()
-        val tempTimeList = mutableListOf<Long>()
-
-        for (i in 0 until totalCount) {
-            tempTimeList.add(tempCal.timeInMillis)
-
-            // 生成标准 X 轴标签文字
-            val label = when (currentTimeMode) {
-                TimeMode.DAY -> tempCal.get(Calendar.DAY_OF_MONTH).toString()
-                TimeMode.WEEK -> "${tempCal.get(Calendar.DAY_OF_MONTH)}"
-                TimeMode.MONTH -> "${tempCal.get(Calendar.MONTH) + 1}"
-            }
-            tempLabelList.add(label)
-
-            // 向前偏移一个周期
-            tempCal.add(calendarUnit, calendarStep)
-        }
-
-        // 反转列表：让下标 i=0 映射最早的时间，i=totalCount-1 映射最新时间
-        tempTimeList.reverse()
-        tempLabelList.reverse()
-        xLabelList.addAll(tempLabelList)
-
-        // 3. 【高性能硬核匹配】：判定记录落在哪个刻度周期内（消灭 O(N^2) 嵌套循环）
-        val entityCal = Calendar.getInstance()
-        data.forEach { entity ->
-            entityCal.timeInMillis = entity.customTime
-            var targetIndex: Int
-
-            // 高性能、100% 精准的区间反查法：计算它与最早时间刻度（tempTimeList[0]）的自然跨度差
-            when (currentTimeMode) {
-                TimeMode.DAY -> {
-                    entityCal.set(Calendar.HOUR_OF_DAY, 0); entityCal.set(
-                        Calendar.MINUTE,
-                        0
-                    ); entityCal.set(Calendar.SECOND, 0); entityCal.set(Calendar.MILLISECOND, 0)
-                    val msDiff = entityCal.timeInMillis - tempTimeList[0]
-                    targetIndex = (msDiff / (1000L * 60 * 60 * 24)).toInt()
-                }
-
-                TimeMode.WEEK -> {
-                    entityCal.set(Calendar.DAY_OF_WEEK, entityCal.firstDayOfWeek)
-                    entityCal.set(Calendar.HOUR_OF_DAY, 0); entityCal.set(
-                        Calendar.MINUTE,
-                        0
-                    ); entityCal.set(Calendar.SECOND, 0); entityCal.set(Calendar.MILLISECOND, 0)
-                    val msDiff = entityCal.timeInMillis - tempTimeList[0]
-                    targetIndex = (msDiff / (1000L * 60 * 60 * 24 * 7)).toInt()
-                }
-
-                TimeMode.MONTH -> {
-                    val startCal = Calendar.getInstance().apply { timeInMillis = tempTimeList[0] }
-                    val yearDiff = entityCal.get(Calendar.YEAR) - startCal.get(Calendar.YEAR)
-                    val monthDiff = entityCal.get(Calendar.MONTH) - startCal.get(Calendar.MONTH)
-                    targetIndex = yearDiff * 12 + monthDiff
+            // X轴区间配置（UI逻辑留在Fragment）
+            listOf(bmiChart, weightChart).forEach { chart ->
+                chart.xAxis.apply {
+                    axisMinimum = 0f
+                    axisMaximum = (result.totalCount - 1).toFloat()
                 }
             }
-
-            // 同一周期内如果存在多条数据，（一天/一周/一月只留一个终点值）
-            if (targetIndex in 0 until totalCount) {
-                val value: Float = if (lineChart == bmiChart) entity.bmiValue
-                else if (entity.weightUnit) entity.weight
-                else entity.weight * 0.45359236f
-                // 存入列表，不覆盖
-
-                indexValueListMap.getOrPut(targetIndex) { mutableListOf() }.add(value)
-            }
-        }
-
-        // 4. 按下标顺序生成 Entry
-        // 生成Entry
-        for (i in 0 until totalCount) {
-            val numList = indexValueListMap[i] ?: continue
-            val yValue = if (currentTimeMode == TimeMode.DAY) {
-                // 升序列表，末尾就是当天最新一条，不用平均
-                numList.last()
-            } else {
-                // 周/月：全部数据求平均值
-                numList.sum() / numList.size
-            }
-            entries.add(Entry(i.toFloat(), yValue))
-        }
-
-        lineChart.xAxis.apply {
-            axisMinimum = 0f
-            axisMaximum = (totalCount - 1).toFloat()
-        }
-
-        mBaseTimeZero = baseCal.timeInMillis
-
-        // 6. 渲染对应图表
-        if (lineChart == bmiChart) {
-            renderBmiChart(entries)
-        } else {
-            renderWeightChart(entries)
         }
     }
 
