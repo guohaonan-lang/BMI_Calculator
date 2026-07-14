@@ -25,7 +25,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
         val totalCount: Int
     )
 
-    suspend fun processChartData(
+    fun processChartData(
         data: List<BmiEntity>,
         currentTimeMode: TimeMode
     ): ChartProcessResult {
@@ -42,7 +42,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
         val xLabelList = mutableListOf<String>()
         val mBaseTimeZero: Long
 
-        // 1. 基准时间：获取最新一条数据，并【严格抹平内部时分秒为凌晨零点】！
+        // 1. 基准时间：获取最新一条数据，并抹平内部时分秒为凌晨零点
         val latestTime = data.last().customTime
         val baseCal = Calendar.getInstance().apply {
             timeInMillis = latestTime
@@ -65,7 +65,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
 
             TimeMode.WEEK -> {
                 totalCount = 54
-                // 为了周模式完美对齐，强制把基准时间挪到该自然周的第一天（如周一）
+                // 为了周模式完美对齐，强制把基准时间挪到该自然周的第一天
                 baseCal.set(Calendar.DAY_OF_WEEK, baseCal.firstDayOfWeek)
                 calendarUnit = Calendar.WEEK_OF_YEAR
                 calendarStep = -1
@@ -80,7 +80,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
             }
         }
 
-        // 2. 从最新时间向前倒推，生成【严格无副作用】的刻度轴和时间戳轴
+        // 2. 从最新时间向前倒推，生成的刻度轴和时间戳轴
         val tempCal = baseCal.clone() as Calendar
         val tempLabelList = mutableListOf<String>()
         val tempTimeList = mutableListOf<Long>()
@@ -91,11 +91,10 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
             // 生成标准 X 轴标签文字
             val label = when (currentTimeMode) {
                 TimeMode.DAY -> tempCal.get(Calendar.DAY_OF_MONTH).toString()
-                TimeMode.WEEK -> "${tempCal.get(Calendar.DAY_OF_MONTH)}"
-                TimeMode.MONTH -> "${tempCal.get(Calendar.MONTH) + 1}"
+                TimeMode.WEEK -> tempCal.get(Calendar.DAY_OF_MONTH).toString()
+                TimeMode.MONTH -> (tempCal.get(Calendar.MONTH) + 1).toString()
             }
             tempLabelList.add(label)
-
             // 向前偏移一个周期
             tempCal.add(calendarUnit, calendarStep)
         }
@@ -105,7 +104,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
         tempLabelList.reverse()
         xLabelList.addAll(tempLabelList)
 
-        // 3. 【高性能硬核匹配】：判定记录落在哪个刻度周期内（消灭 O(N^2) 嵌套循环）
+        // 3.判定记录落在哪个刻度周期内
         val bmiIndexMap = mutableMapOf<Int, MutableList<Float>>()
         val weightIndexMap = mutableMapOf<Int, MutableList<Float>>()
         val entityCal = Calendar.getInstance()
@@ -113,7 +112,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
             entityCal.timeInMillis = entity.customTime
             var targetIndex: Int
 
-            // 高性能、100% 精准的区间反查法：计算它与最早时间刻度（tempTimeList[0]）的自然跨度差
+            // 区间反查法：计算它与最早时间刻度（tempTimeList[0]）的自然跨度差
             when (currentTimeMode) {
                 TimeMode.DAY -> {
                     entityCal.set(Calendar.HOUR_OF_DAY, 0);
@@ -152,7 +151,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
         }
 
         // 4. 按下标顺序生成 Entry
-        // 4. 生成BMI Entry列表
+        // 生成BMI Entry列表
         val bmiEntries = mutableListOf<Entry>()
         for (i in 0 until totalCount) {
             val numList = bmiIndexMap[i] ?: continue
@@ -160,7 +159,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
             bmiEntries.add(Entry(i.toFloat(), yVal))
         }
 
-        // 5. 生成体重Entry列表
+        // 生成体重Entry列表
         val weightEntries = mutableListOf<Entry>()
         for (i in 0 until totalCount) {
             val numList = weightIndexMap[i] ?: continue

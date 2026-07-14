@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
             when (position) {
                 0 -> {
-                    tvText.text = "Calculator"
+                    tvText.text = getString(R.string.app_name)
                     ivIcon.setImageResource(R.drawable.tab_calculator)
                 }
                 1 -> {
@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                     ivIcon.setImageResource(R.drawable.tab_bmi)
                 }
                 2 -> {
-                    tvText.text = "Statistics"
+                    tvText.text = getString(R.string.statistics)
                     ivIcon.setImageResource(R.drawable.tab_discover)
                 }
             }

@@ -148,7 +148,6 @@ class DataInputFragment : Fragment() {
         male.setOnClickListener {
             viewModel.inputBmiRecord.gender = 1
             setupGenderView()
-
         }
         female.setOnClickListener {
             viewModel.inputBmiRecord.gender = 0
@@ -252,9 +251,7 @@ class DataInputFragment : Fragment() {
                 binding.mergeDateInput.inputHeightFt1.visibility = View.VISIBLE
                 binding.mergeDateInput.inputHeightIn1.visibility = View.VISIBLE
 
-
                 viewModel.switchHeightUnitToFtIn()
-
                 binding.mergeDateInput.inputHeightFt.setText(viewModel.inputBmiRecord.heightFt.toString())
                 binding.mergeDateInput.inputHeightIn.setText(viewModel.inputBmiRecord.heightIn.toString())
 
@@ -449,10 +446,12 @@ class DataInputFragment : Fragment() {
             val yearCur = wheelYear.currentItem
             val monthCur = wheelMonth.currentItem
             dayList = getDayList(yearCur, monthCur)
-            wheelDay.adapter = ArrayWheelAdapter(dayList)
+
             if (wheelDay.currentItem >= dayList.size) {
                 wheelDay.currentItem = dayList.size - 1
             }
+            wheelDay.adapter = ArrayWheelAdapter(dayList)
+            wheelDay.invalidate()
             wheelDay.setTypeface(boldTypeface)
         }
         rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog.dismiss() }

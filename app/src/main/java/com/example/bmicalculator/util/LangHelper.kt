@@ -2,9 +2,8 @@ package com.example.bmicalculator.util
 
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
-import java.util.Locale
 import androidx.core.content.edit
+import java.util.Locale
 
 object LangHelper {
     private const val SP_NAME = "lang_sp"

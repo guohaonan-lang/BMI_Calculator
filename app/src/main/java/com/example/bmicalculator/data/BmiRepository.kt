@@ -16,6 +16,10 @@ class BmiRepository(private val bmiDao: BmiDao) {
         return bmiDao.getAllBmiList()
     }
 
+    suspend fun getBmiByTime(time: Long): BmiEntity? {
+        return bmiDao.getBmiByTime(time)
+    }
+
     suspend fun getLatestBmi(): BmiEntity?{
         return bmiDao.getLatestBmiOnce()
     }

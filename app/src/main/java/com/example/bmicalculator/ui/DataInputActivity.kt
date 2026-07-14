@@ -39,7 +39,7 @@ class DataInputActivity : AppCompatActivity() {
         }
     }
 
-//    // 保留Activity独有全局点击收起键盘逻辑（Fragment用根布局touch，这里全局分发）
+//    // Activity独有全局点击收起键盘逻辑（Fragment用根布局touch，这里全局分发）
 //    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
 //        if (ev?.action == MotionEvent.ACTION_DOWN) {
 //            val focusView = currentFocus

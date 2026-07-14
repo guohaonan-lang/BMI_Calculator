@@ -16,16 +16,24 @@ import kotlinx.coroutines.launch
 class SettingViewModel(private val repository: BmiRepository) : ViewModel() {
 
 
-    fun readTestFile(context: Context){
+    fun readTestFile(context: Context) {
         viewModelScope.launch {
             val bmiList = BmiFileUtil.readTestFile(context)
-            repository.insertBmiList(bmiList)
+            for (item in bmiList) {
+                item.id = 0
+                val count = repository.getBmiByTime(item.createTime)
+                if (count != null) {
+                    continue
+                } else {
+                    repository.insertBmiRecord(item)
+                }
+            }
         }
     }
-    fun exportFile(context: Context,list: List<BmiEntity>){
+
+    fun exportFile(context: Context, list: List<BmiEntity>) {
         viewModelScope.launch {
-            BmiFileUtil.exportBmiToFile(context,list)
-            Toast.makeText(context,"写入文件", Toast.LENGTH_SHORT).show()
+            BmiFileUtil.exportBmiToFile(context, list)
         }
     }
 
@@ -39,9 +47,11 @@ class SettingViewModel(private val repository: BmiRepository) : ViewModel() {
             repository.insertBmiList(bmiList)
         }
     }
+
     suspend fun getAllList(): List<BmiEntity> {
         return repository.getAllBmiList()
     }
+
     companion object {
         fun provideFactory(repository: BmiRepository): ViewModelProvider.Factory =
             viewModelFactory {

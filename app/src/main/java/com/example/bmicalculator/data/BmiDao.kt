@@ -26,6 +26,9 @@ interface BmiDao {
     @Query("SELECT COUNT(*) FROM bmi")
     suspend fun countAllBmi(): Long
 
+    @Query("SELECT * FROM bmi WHERE createTime = :time")
+    suspend fun getBmiByTime(time : Long): BmiEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBmi(bmi: BmiEntity): Long
 

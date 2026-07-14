@@ -150,6 +150,7 @@ class StatisticsFragment : Fragment() {
         xAxis.axisLineColor = Color.TRANSPARENT
         xAxis.labelCount = 8
 
+
         xAxis.granularity = 1f
         xAxis.isGranularityEnabled = true
         // 字体
@@ -180,7 +181,7 @@ class StatisticsFragment : Fragment() {
         }
 
         val marker = BmiMarkerView(requireContext())
-        marker.chartView = bmiChart // 必须设置，边缘自动防裁切
+        marker.chartView = bmiChart // 边缘自动防裁切
         bmiChart.marker = marker
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
@@ -252,14 +253,14 @@ class StatisticsFragment : Fragment() {
         bmiChart.notifyDataSetChanged()
         bmiChart.invalidate()
 
-        // ===== 3. 将清除放大矩阵、重新卡死边界与右移安全抛入 post 队列 =====
+        // =====  post 队列 清除放大矩阵、重新设置边界与右移 =====
         bmiChart.post {
             bmiChart.viewPortHandler.matrixTouch.reset()
 
             bmiChart.setVisibleXRangeMaximum(maxShowCount)
             bmiChart.setVisibleXRangeMinimum(maxShowCount)
 
-            // 完美滚动到最新一页
+            // 滚动到最新一页
             bmiChart.moveViewToX(bmiChart.xAxis.axisMaximum - maxShowCount + 1f)
         }
     }
@@ -314,7 +315,6 @@ class StatisticsFragment : Fragment() {
             }
         }
 
-        // ===== 🌟【核心修复：重新注入顶部渲染管线】 =====
         // 必须在设置完 data 之后、调用 invalidate 之前注入，否则顶部不会触发 drawLabel
         weightChart.setXAxisRenderer(
             SmartXAxisRenderer(
@@ -397,7 +397,7 @@ class StatisticsFragment : Fragment() {
             listOf(bmiChart, weightChart).forEach { chart ->
                 chart.xAxis.apply {
                     axisMinimum = 0f
-                    axisMaximum = (result.totalCount - 1).toFloat()
+                    axisMaximum = (result.totalCount ).toFloat()
                 }
             }
         }
