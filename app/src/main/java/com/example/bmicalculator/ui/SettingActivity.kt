@@ -61,6 +61,7 @@ class SettingActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 val bmiList = viewModel.getAllList()
                 viewModel.exportFile(this@SettingActivity, bmiList)
+                viewModel.readTestFile(this@SettingActivity)
             }
         }
 

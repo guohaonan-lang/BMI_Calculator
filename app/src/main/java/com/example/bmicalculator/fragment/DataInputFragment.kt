@@ -90,7 +90,7 @@ class DataInputFragment : Fragment() {
             // 只初始化一次UI
             setupGenderView()
             setupWeightAndHeight()
-            ageRecyclerView.layoutManager?.scrollToPosition(viewModel.inputBmiRecord.age )
+            ageRecyclerView.layoutManager?.scrollToPosition(viewModel.inputBmiRecord.age -2)
         }
 
 
@@ -568,29 +568,34 @@ class DataInputFragment : Fragment() {
             private val maxAlpha = 1f
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                val lm = recyclerView.layoutManager as LinearLayoutManager
-                val rvCenterX = recyclerView.width / 2f
-                val firstVisible = lm.findFirstVisibleItemPosition()
-                val lastVisible = lm.findLastVisibleItemPosition()
 
-                for (pos in firstVisible - 1..lastVisible + 1) {
-                    val itemView = lm.findViewByPosition(pos) ?: continue
+                val rvCenterX = recyclerView.width / 2f
+                val maxDistance = recyclerView.width / 2f
+
+                // 【修改点】直接遍历当前实际存在的子 View
+                val childCount = recyclerView.childCount
+                for (i in 0 until childCount) {
+                    val itemView = recyclerView.getChildAt(i) ?: continue
+
+                    // 计算中心点
                     val itemCenterX = itemView.left + itemView.width / 2f
                     val distance = abs(itemCenterX - rvCenterX)
-                    val maxDistance = recyclerView.width / 2f
+
                     var ratio = 1 - (distance / maxDistance)
-                    ratio = ratio.coerceAtLeast(0f)
-                    val alpha = minAlpha + maxAlpha * ratio
+                    ratio = ratio.coerceIn(0f, 1f) // 限制在 0~1 之间
+
+                    // 映射透明度
+                    val alpha = minAlpha + (maxAlpha - minAlpha) * ratio
                     itemView.alpha = alpha
                 }
             }
 
+
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                // 当列表停止滚动时（SCROLL_STATE_IDLE）
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     val lm = recyclerView.layoutManager as LinearLayoutManager
-                    // 利用 SnapHelper 精准找到当前居中的 View
+                    // 利用 SnapHelper 找到当前居中的 View
                     val centerView = snapHelper.findSnapView(lm)
                     if (centerView != null) {
                         val centerAge = lm.getPosition(centerView) + 2
@@ -601,7 +606,6 @@ class DataInputFragment : Fragment() {
                 }
             }
         })
-
     }
 
     // 身高体重

@@ -15,7 +15,7 @@ import java.io.OutputStreamWriter
 
 object BmiFileUtil {
     private val gson = Gson()
-    private const val BMI_BACKUP_FILE_NAME = "bmi_backup.json"
+    private const val BMI_BACKUP_FILE_NAME = "test_bmi_data.json"
     // assets 内置测试文件名
     private const val ASSETS_TEST_FILE = "test_bmi_data.json"
     // 获取APP私有files目录下的固定文件
@@ -31,9 +31,11 @@ object BmiFileUtil {
             val jsonContext = reader.readText()
 
             val type = object : TypeToken<List<BmiEntity>>(){}
+            Log.d(TAG, "读取成功 ： $jsonContext")
             gson.fromJson(jsonContext,type)
         }catch (e: Exception){
             e.printStackTrace()
+            Log.d(TAG, "读取失败")
             emptyList()
         }
     }
@@ -59,7 +61,7 @@ object BmiFileUtil {
                     writer.flush()
                 }
             }
-            Log.d(TAG, "写入完成，文件大小：${targetFile.length()}")
+            Log.d(TAG, "写入完成，文件大小：${targetFile.absolutePath}")
             true
         } catch (e: Exception) {
             Log.e(TAG, "写入文件失败", e)
