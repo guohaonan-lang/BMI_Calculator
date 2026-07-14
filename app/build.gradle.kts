@@ -60,4 +60,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("io.github.skyofsky:Android-PickerView:4.1.11")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 }

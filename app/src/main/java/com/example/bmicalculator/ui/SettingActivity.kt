@@ -14,12 +14,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySettingBinding
 import com.example.bmicalculator.viewmodel.SettingViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.launch
 
 class SettingActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingBinding
@@ -56,8 +58,12 @@ class SettingActivity : AppCompatActivity() {
         }
         binding.settingUserAutorenew.setOnClickListener {
             autoDialog.show()
-
+            lifecycleScope.launch {
+                val bmiList = viewModel.getAllList()
+                viewModel.exportFile(this@SettingActivity, bmiList)
+            }
         }
+
         binding.settingFeedback.setOnClickListener {
             val intent = Intent(this, FeedbackActivity::class.java)
             startActivity(intent)
@@ -95,9 +101,10 @@ class SettingActivity : AppCompatActivity() {
 
         }
     }
+
     private fun initAutoDialog() {
         autoDialog = Dialog(this)
-        val rootView = LayoutInflater.from(this).inflate(R.layout.dialog_autorenew,null)
+        val rootView = LayoutInflater.from(this).inflate(R.layout.dialog_autorenew, null)
         autoDialog.setContentView(rootView)
         rootView.findViewById<Button>(R.id.auto_done).setOnClickListener {
 

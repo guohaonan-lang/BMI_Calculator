@@ -109,6 +109,7 @@
     <string name="ad2_text1">Lose Weight for Men at Home</string>
     <string name="ad2_text2">Weight Loss, Lose Belly Fat</string>
     <string name="feedback_or_suggestion">Feedback or suggestion</string>
+    <string name="feedback">Thanks for your feedback!  We\'ll do our best to bring a better user experience.</string>
 
     <!-- 月份简写数组 -->
     <string-array name="month_short_names">

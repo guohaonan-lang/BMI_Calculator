@@ -20,11 +20,17 @@ interface BmiDao {
     @Query("SELECT * FROM bmi ORDER BY customTime DESC LIMIT 1")
     suspend fun getLatestBmiOnce(): BmiEntity?
 
+    @Query("SELECT * FROM bmi ORDER BY customTime DESC")
+    suspend fun getAllBmiList(): List<BmiEntity>
+
     @Query("SELECT COUNT(*) FROM bmi")
     suspend fun countAllBmi(): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertbmi(bmi: BmiEntity): Long
+    suspend fun insertBmi(bmi: BmiEntity): Long
+
+    @Insert
+    suspend fun insertBmiList(list: List<BmiEntity>)
 
     @Update
     suspend fun updatebmi(bmi: BmiEntity)

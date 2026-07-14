@@ -90,7 +90,7 @@ class DataInputFragment : Fragment() {
             // 只初始化一次UI
             setupGenderView()
             setupWeightAndHeight()
-            ageRecyclerView.layoutManager?.scrollToPosition(viewModel.inputBmiRecord.age - 2)
+            ageRecyclerView.layoutManager?.scrollToPosition(viewModel.inputBmiRecord.age )
         }
 
 
@@ -435,12 +435,6 @@ class DataInputFragment : Fragment() {
             dayList = getDayList(yearCur, monthCur)
             // 刷新日期适配器
             // 防止原来选中的天数超过当月最大天数，自动修正下标
-            Toast.makeText(
-                requireContext(),
-                "${wheelDay.currentItem} ${dayList.size}",
-                Toast.LENGTH_SHORT
-            )
-                .show()
             if (wheelDay.currentItem >= dayList.size) {
                 wheelDay.currentItem = dayList.size - 1
 

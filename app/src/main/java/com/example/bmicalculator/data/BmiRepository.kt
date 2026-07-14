@@ -12,12 +12,20 @@ class BmiRepository(private val bmiDao: BmiDao) {
         return bmiDao.getChartBmi()
     }
 
+    suspend fun getAllBmiList(): List<BmiEntity> {
+        return bmiDao.getAllBmiList()
+    }
+
     suspend fun getLatestBmi(): BmiEntity?{
         return bmiDao.getLatestBmiOnce()
     }
 
     suspend fun insertBmiRecord(bmi: BmiEntity) {
-        bmiDao.insertbmi(bmi)
+        bmiDao.insertBmi(bmi)
+    }
+
+    suspend fun insertBmiList(list: List<BmiEntity>) {
+        bmiDao.insertBmiList(list)
     }
 
     suspend fun updateBmiRecord(bmi: BmiEntity) {
