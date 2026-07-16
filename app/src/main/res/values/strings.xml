@@ -6,6 +6,7 @@
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="input_calculate">CALCULATE</string>
+    <string name="title_calculate">Calculate</string>
 
     <string name="adults_bmi_very_severely_underweight">Very Severely Underweight</string>
     <string name="adults_bmi_range_VerySeverelyUnderweight"><![CDATA[<16.0]]></string>

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -12,14 +14,16 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -45,14 +49,7 @@ class DataInputFragment : Fragment() {
     private val binding get() = checkNotNull(_binding)
 
 
-    //XML控件
-    private lateinit var edtWeight: EditText
-    private lateinit var edtHeight: EditText
-
-    private lateinit var dayInput: TextView
-    private lateinit var timeInput: TextView
     private lateinit var ageRecyclerView: RecyclerView
-    private lateinit var ageAdapter: InputAgeAdapter
     private lateinit var sheetDialog: BottomSheetDialog
     private lateinit var sheetDialog2: BottomSheetDialog
 
@@ -80,17 +77,18 @@ class DataInputFragment : Fragment() {
         initWeightAndHeightEdit()
         initConvertWeightAndHeight()
         initGender()
+
+        initDataFlow()
         viewLifecycleOwner.lifecycleScope.launch {
+
             // 挂起函数正常await等待查询完成
             val latestBmi = viewModel.getLatestBmi()
             if (latestBmi != null) {
                 viewModel.inputBmiRecord = latestBmi.copy(id = 0)
+                viewModel.initRecord(latestBmi)
                 isFirstData = false
             } else isFirstData = true
-            // 只初始化一次UI
-            setupGenderView()
-            setupWeightAndHeight()
-            ageRecyclerView.layoutManager?.scrollToPosition(viewModel.inputBmiRecord.age -2)
+            ageRecyclerView.layoutManager?.scrollToPosition(viewModel.inputBmiRecord.age - 2)
         }
 
 
@@ -141,26 +139,86 @@ class DataInputFragment : Fragment() {
         }
     }
 
+    private fun initDataFlow() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // 监听英尺
+                launch {
+                    viewModel.heightFtFlow.collect { ft ->
+                        binding.mergeDateInput.inputHeightFt.setText(ft.toString())
+                    }
+                }
+                // 监听英寸
+                launch {
+                    viewModel.heightInFlow.collect { inch ->
+                        binding.mergeDateInput.inputHeightIn.setText(inch.toString())
+                    }
+                }
+                // 监听身高cm
+                launch {
+                    viewModel.heightFlow.collect { height ->
+                        binding.mergeDateInput.inputHeight.setText(height.toString())
+                    }
+                }
+                // 监听体重
+                launch {
+                    viewModel.weightFlow.collect { weight ->
+                        binding.mergeDateInput.inputWeight.setText(weight)
+                    }
+                }
+                // 监听日期1
+                launch {
+                    viewModel.time1.collect { time ->
+                        binding.mergeDateInput.inputTime1.text = time
+                    }
+                }
+                // 监听日期2
+                launch {
+                    viewModel.time2.collect { time ->
+                        binding.mergeDateInput.inputTime2.text = time
+                    }
+                }
+                // 监听性别
+                launch {
+                    viewModel.genderFlow.collect { gender ->
+                        setupGenderView(gender)
+                    }
+                }
+                // 监听WeightThumb
+                launch {
+                    viewModel.weightUnitFlow.collect { unit ->
+                        setupWeightThumb(unit)
+                    }
+                }
+                // 监听HeightThumb
+                launch {
+                    viewModel.heightUnitFlow.collect { unit ->
+                        setupHeightThumb(unit)
+                    }
+                }
+            }
+        }
+
+    }
+
     // 选择性别
     private fun initGender() {
         val male = binding.mergeDateInput.cardMale
         val female = binding.mergeDateInput.cardFemale
         male.setOnClickListener {
-            viewModel.inputBmiRecord.gender = 1
-            setupGenderView()
+            viewModel.setGender(1)
+
         }
         female.setOnClickListener {
-            viewModel.inputBmiRecord.gender = 0
-            setupGenderView()
+            viewModel.setGender(0)
         }
     }
 
     // 性别控件
-    private fun setupGenderView() {
+    private fun setupGenderView(gender: Int) {
         var m: Float
         var f: Float
-
-        if (viewModel.inputBmiRecord.gender == 1) {
+        if (gender == 1) {
             m = 1f
             f = 0.7f
         } else {
@@ -170,7 +228,7 @@ class DataInputFragment : Fragment() {
         binding.mergeDateInput.cardMale.alpha = m
         binding.mergeDateInput.tvMale.alpha = m
         binding.mergeDateInput.ivMaleIcon.alpha = m
-        if (viewModel.inputBmiRecord.gender == 1) {
+        if (gender == 1) {
             binding.mergeDateInput.ivMaleCheck.visibility = View.VISIBLE
             binding.mergeDateInput.ivFemaleCheck.visibility = View.GONE
         } else {
@@ -187,118 +245,80 @@ class DataInputFragment : Fragment() {
     //选择身高体重单位
 
     private fun initConvertWeightAndHeight() {
-        val lb = binding.mergeDateInput.switchWeightLb
-        val kg = binding.mergeDateInput.switchWeightKg
-        val cm = binding.mergeDateInput.switchHeightCm
-        val ft = binding.mergeDateInput.switchHeightFt
-
-        val density = resources.displayMetrics.density
-        val movePx = -(76 * density)
-
         // kg -> lb
-        lb.setOnClickListener {
+        binding.mergeDateInput.switchWeightLb.setOnClickListener {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            if (viewModel.inputBmiRecord.weightUnit) {
-                viewModel.inputBmiRecord.weightUnit = false
-
-                binding.mergeDateInput.selectorThumbWeight.animate()
-                    .translationX(0f)
-                    .withLayer()
-                    .start()
-                binding.mergeDateInput.selectorThumbWeight.text = "lb"
-
-                val showText = viewModel.switchWeightUnitToLb()
-                edtWeight.setText(showText)
-            }
+            viewModel.setWeightThumb(false)
+            viewModel.switchWeightUnitToLb()
         }
 
         // lb -> kg
-        kg.setOnClickListener {
+        binding.mergeDateInput.switchWeightKg.setOnClickListener {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            if (!viewModel.inputBmiRecord.weightUnit) {
-                viewModel.inputBmiRecord.weightUnit = true
-                binding.mergeDateInput.selectorThumbWeight.animate()
-                    .translationX(-movePx)
-                    .withLayer()
-                    .start()
-                binding.mergeDateInput.selectorThumbWeight.text = "kg"
-
-                val showText = viewModel.switchWeightUnitToKg()
-                edtWeight.setText(showText)
-            }
+            viewModel.setWeightThumb(true)
+            viewModel.switchWeightUnitToKg()
         }
 
         // cm -> ft
-        ft.setOnClickListener {
+        binding.mergeDateInput.switchHeightFt.setOnClickListener {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            if (viewModel.inputBmiRecord.heightUnit) {
-                viewModel.inputBmiRecord.heightUnit = false
-                binding.mergeDateInput.selectorThumbHeight.animate()
-                    .translationX(0f)
-                    .withLayer()
-                    .start()
-                binding.mergeDateInput.selectorThumbHeight.text = "ft·in"
-
-                binding.mergeDateInput.inputHeight.visibility = View.GONE
-                binding.mergeDateInput.inputHeightFt.visibility = View.VISIBLE
-                binding.mergeDateInput.inputHeightIn.visibility = View.VISIBLE
-                binding.mergeDateInput.inputHeightFt1.visibility = View.VISIBLE
-                binding.mergeDateInput.inputHeightIn1.visibility = View.VISIBLE
-
-                viewModel.switchHeightUnitToFtIn()
-                binding.mergeDateInput.inputHeightFt.setText(viewModel.inputBmiRecord.heightFt.toString())
-                binding.mergeDateInput.inputHeightIn.setText(viewModel.inputBmiRecord.heightIn.toString())
-
-            }
+            viewModel.setHeightThumb(false)
+            viewModel.switchHeightUnitToFtIn()
         }
 
         // ft -> cm
-        cm.setOnClickListener {
+        binding.mergeDateInput.switchHeightCm.setOnClickListener {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            if (!viewModel.inputBmiRecord.heightUnit) {
-                viewModel.inputBmiRecord.heightUnit = true
-                binding.mergeDateInput.selectorThumbHeight.animate()
-                    .translationX(-movePx)
-                    .withLayer()
-                    .start()
-                binding.mergeDateInput.selectorThumbHeight.text = "cm"
-
-                binding.mergeDateInput.inputHeight.visibility = View.VISIBLE
-                binding.mergeDateInput.inputHeightFt.visibility = View.GONE
-                binding.mergeDateInput.inputHeightIn.visibility = View.GONE
-                binding.mergeDateInput.inputHeightFt1.visibility = View.GONE
-                binding.mergeDateInput.inputHeightIn1.visibility = View.GONE
-
-                val showText = viewModel.switchHeightUnitToCm()
-                binding.mergeDateInput.inputHeight.setText(showText)
-            }
+            viewModel.setHeightThumb(true)
+            viewModel.switchHeightUnitToCm()
         }
 
     }
 
+    private fun setupWeightThumb(unit: Boolean) {
 
-    private fun setupWeightAndHeight() {
-        val density = resources.displayMetrics.density
-        val movePx = -(76 * density)
+        var movePx = -(binding.mergeDateInput.switchWeightLb.width.toFloat())
+        binding.mergeDateInput.inputWeightSwitch.post {
+            movePx = -binding.mergeDateInput.switchWeightLb.width.toFloat()
+            val lp =
+                binding.mergeDateInput.selectorThumbWeight.layoutParams as ConstraintLayout.LayoutParams
+            lp.width = binding.mergeDateInput.switchWeightLb.width
+            binding.mergeDateInput.selectorThumbWeight.layoutParams = lp
+        }
 
-        if (viewModel.inputBmiRecord.weightUnit) {
-            viewModel.inputBmiRecord.weightUnit = true
+        if (unit) {
             binding.mergeDateInput.selectorThumbWeight.animate()
                 .translationX(-movePx)
                 .withLayer()
                 .start()
             binding.mergeDateInput.selectorThumbWeight.text = "kg"
+        } else {
+            binding.mergeDateInput.selectorThumbWeight.animate()
+                .translationX(0f)
+                .withLayer()
+                .start()
+            binding.mergeDateInput.selectorThumbWeight.text = "lb"
         }
-        if (viewModel.inputBmiRecord.heightUnit) {
-            viewModel.inputBmiRecord.heightUnit = true
+    }
+
+    private fun setupHeightThumb(unit: Boolean) {
+        var movePx = -(binding.mergeDateInput.switchHeightFt.width.toFloat())
+        binding.mergeDateInput.inputHeightSwitch.post {
+            movePx = -binding.mergeDateInput.switchHeightCm.width.toFloat()
+            val cm =
+                binding.mergeDateInput.selectorThumbHeight.layoutParams as ConstraintLayout.LayoutParams
+            cm.width = binding.mergeDateInput.switchHeightCm.width
+            binding.mergeDateInput.selectorThumbHeight.layoutParams = cm
+        }
+        if (unit) {
             binding.mergeDateInput.selectorThumbHeight.animate()
                 .translationX(-movePx)
                 .withLayer()
@@ -308,32 +328,27 @@ class DataInputFragment : Fragment() {
             binding.mergeDateInput.inputHeight.visibility = View.VISIBLE
             binding.mergeDateInput.inputHeightFt.visibility = View.GONE
             binding.mergeDateInput.inputHeightIn.visibility = View.GONE
-            binding.mergeDateInput.inputHeightFt1.visibility = View.GONE
-            binding.mergeDateInput.inputHeightIn1.visibility = View.GONE
+        } else {
+            binding.mergeDateInput.selectorThumbHeight.animate()
+                .translationX(0f)
+                .withLayer()
+                .start()
+            binding.mergeDateInput.selectorThumbHeight.text = "ft·in"
+
+            binding.mergeDateInput.inputHeight.visibility = View.GONE
+            binding.mergeDateInput.inputHeightFt.visibility = View.VISIBLE
+            binding.mergeDateInput.inputHeightIn.visibility = View.VISIBLE
         }
-
-        edtWeight.setText(String.format("%.2f", viewModel.inputBmiRecord.weight))
-        edtHeight.setText(viewModel.inputBmiRecord.height.toString())
-
-        val edtHeightFt = binding.mergeDateInput.inputHeightFt
-        val edtHeightIn = binding.mergeDateInput.inputHeightIn
-        edtHeightFt.setText(viewModel.inputBmiRecord.heightFt.toString())
-        edtHeightIn.setText(viewModel.inputBmiRecord.heightIn.toString())
     }
 
     //选择时间
     private fun setupTime() {
-        dayInput = binding.mergeDateInput.inputTime1
-        timeInput = binding.mergeDateInput.inputTime2
-
         initDatePickerBottomSheet()
         initDate2PickerBottomSheet()
-
-        dayInput.setOnClickListener {
+        binding.mergeDateInput.inputTime1.setOnClickListener {
             sheetDialog.show()
-
         }
-        timeInput.setOnClickListener {
+        binding.mergeDateInput.inputTime2.setOnClickListener {
             sheetDialog2.show()
         }
     }
@@ -361,13 +376,13 @@ class DataInputFragment : Fragment() {
 
         // 下标，偏移量
         val yearSelectIndex = currentYear - 1970
-        viewModel.selectYear = currentYear.toString()
         val monthSelectIndex = currentMonth
-        viewModel.selectMonth = monthData[currentMonth]
         val daySelectIndex = currentDay - 1
-        viewModel.selectDay = currentDay.toString()
-
-        dayInput.text = "${viewModel.selectMonth} ${viewModel.selectDay}, ${viewModel.selectYear}"
+        viewModel.setTime1(
+            currentYear.toString(),
+            monthData[currentMonth],
+            currentDay.toString()
+        )
 
         val boldTypeface: Typeface? =
             ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
@@ -454,14 +469,14 @@ class DataInputFragment : Fragment() {
             wheelDay.invalidate()
             wheelDay.setTypeface(boldTypeface)
         }
-        rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog.dismiss() }
+        rootView.findViewById<Button>(R.id.btn_cancel)
+            .setOnClickListener { sheetDialog.dismiss() }
         rootView.findViewById<Button>(R.id.btn_done).setOnClickListener {
-            viewModel.selectMonth = monthData[wheelMonth.currentItem]
-            viewModel.selectDay = dayList[wheelDay.currentItem]
-            viewModel.selectYear = yearData[wheelYear.currentItem]
-
-            dayInput.text =
-                "${viewModel.selectMonth} ${viewModel.selectDay}, ${viewModel.selectYear}"
+            viewModel.setTime1(
+                yearData[wheelYear.currentItem],
+                monthData[wheelMonth.currentItem],
+                dayList[wheelDay.currentItem]
+            )
             // 业务逻辑：回调日期
             sheetDialog.dismiss()
         }
@@ -499,8 +514,8 @@ class DataInputFragment : Fragment() {
             else -> 3
         }
 
-        viewModel.selectPeriod = periodData[defaultSelectIndex]
-        binding.mergeDateInput.inputTime2.text = viewModel.selectPeriod
+        viewModel.setTime2(periodData[defaultSelectIndex])
+
         val boldTypeface: Typeface? =
             ResourcesCompat.getFont(requireContext(), R.font.font_bold_extrabold)
 
@@ -538,10 +553,10 @@ class DataInputFragment : Fragment() {
         initWheel(wheelPeriod, periodData, defaultSelectIndex, boldTypeface)
 
         // 取消、确认按钮逻辑
-        rootView.findViewById<Button>(R.id.btn_cancel).setOnClickListener { sheetDialog2.dismiss() }
+        rootView.findViewById<Button>(R.id.btn_cancel)
+            .setOnClickListener { sheetDialog2.dismiss() }
         rootView.findViewById<Button>(R.id.btn_done).setOnClickListener {
-            viewModel.selectPeriod = periodData[wheelPeriod.currentItem]
-            timeInput.text = viewModel.selectPeriod
+            viewModel.setTime2(periodData[wheelPeriod.currentItem])
             sheetDialog2.dismiss()
         }
     }
@@ -553,7 +568,7 @@ class DataInputFragment : Fragment() {
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         ageRecyclerView.layoutManager = layoutManager
 
-        ageAdapter = InputAgeAdapter(ageRecyclerView) { selectedAgeInt ->
+        val ageAdapter = InputAgeAdapter(ageRecyclerView) { selectedAgeInt ->
             viewModel.inputBmiRecord.age = selectedAgeInt
         }
         ageRecyclerView.adapter = ageAdapter
@@ -571,7 +586,7 @@ class DataInputFragment : Fragment() {
                 val rvCenterX = recyclerView.width / 2f
                 val maxDistance = recyclerView.width / 2f
 
-                // 【修改点】直接遍历当前实际存在的子 View
+                // 直接遍历当前实际存在的子 View
                 val childCount = recyclerView.childCount
                 for (i in 0 until childCount) {
                     val itemView = recyclerView.getChildAt(i) ?: continue
@@ -588,7 +603,6 @@ class DataInputFragment : Fragment() {
                     itemView.alpha = alpha
                 }
             }
-
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
@@ -609,9 +623,9 @@ class DataInputFragment : Fragment() {
 
     // 身高体重
     private fun initWeightAndHeightEdit() {
-        edtWeight = binding.mergeDateInput.inputWeight
-        edtHeight = binding.mergeDateInput.inputHeight
-
+        binding.mergeDateInput.run { }
+        val edtWeight = binding.mergeDateInput.inputWeight
+        val edtHeight = binding.mergeDateInput.inputHeight
         val edtHeightFt = binding.mergeDateInput.inputHeightFt
         val edtHeightIn = binding.mergeDateInput.inputHeightIn
 
@@ -625,8 +639,6 @@ class DataInputFragment : Fragment() {
                     when (et) {
                         edtWeight -> viewModel.inputBmiRecord.weight = text.toFloat()
                         edtHeight -> viewModel.inputBmiRecord.height = text.toFloat()
-                        edtHeightFt -> viewModel.inputBmiRecord.heightFt = text.toInt()
-                        edtHeightIn -> viewModel.inputBmiRecord.heightIn = text.toInt()
                     }
                 } catch (_: NumberFormatException) {
                 }
@@ -651,6 +663,75 @@ class DataInputFragment : Fragment() {
                 false
             }
         }
+        edtHeightFt.addTextChangedListener(object : TextWatcher {
+            private var isUpdating = false
+
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isUpdating) return
+
+                val originalText = s.toString()
+                // 过滤非数字字符
+                val digits = originalText.filter { it.isDigit() }
+                val num = digits.toIntOrNull() ?: 0
+                viewModel.inputBmiRecord.heightFt = num
+                isUpdating = true
+                if (digits.isEmpty()) {
+                    edtHeightFt.setText("")
+                } else {
+                    // 自动拼接单引号
+                    val formatted = "$digits'"
+                    edtHeightFt.setText(formatted)
+
+                    // 把光标锁定在引号前面
+                    edtHeightFt.setSelection(digits.length)
+                }
+                isUpdating = false
+            }
+        })
+        edtHeightIn.addTextChangedListener(object : TextWatcher {
+            private var isUpdating = false
+
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                if (isUpdating) return
+
+                val originalText = s.toString()
+                // 过滤非数字字符
+                val digits = originalText.filter { it.isDigit() }
+                val num = digits.toIntOrNull() ?: 0
+                viewModel.inputBmiRecord.heightIn = num
+                isUpdating = true
+                if (digits.isEmpty()) {
+                    edtHeightIn.setText("")
+                } else {
+                    // 自动拼接引号
+                    val formatted = "$digits''"
+                    edtHeightIn.setText(formatted)
+
+                    // 把光标锁定在单引号前面
+                    edtHeightIn.setSelection(digits.length)
+                }
+                isUpdating = false
+            }
+        })
     }
 
     //检查数值合法
@@ -660,11 +741,6 @@ class DataInputFragment : Fragment() {
             checkRes.toastMsgRes?.let {
                 Toast.makeText(requireContext(), getString(it), Toast.LENGTH_SHORT).show()
             }
-            // 按校验结果重置输入框
-            checkRes.resetWeight?.let { edtWeight.setText(String.format("%.2f", it)) }
-            checkRes.resetFt?.let { binding.mergeDateInput.inputHeightFt.setText(it.toString()) }
-            checkRes.resetInch?.let { binding.mergeDateInput.inputHeightIn.setText(it.toString()) }
-            checkRes.resetHeight?.let { edtHeight.setText(String.format("%.1f", it)) }
         }
         return checkRes.pass
     }

@@ -13,9 +13,6 @@ class BmiViewModel(private val repository: BmiRepository) :
 
     val allBmiList : Flow<List<BmiEntity>> = repository.getAllBmiRecords()
 
-
-
-
     suspend fun insertBmiRecord(bmi: BmiEntity) {
         repository.insertBmiRecord(bmi)
     }

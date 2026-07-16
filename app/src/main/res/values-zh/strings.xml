@@ -7,6 +7,7 @@
     <string name="male">男</string>
     <string name="female">女</string>
     <string name="input_calculate">计算</string>
+    <string name="title_calculate">计算器</string>
 
     <string name="adults_bmi_very_severely_underweight">极重度消瘦</string>
     <string name="adults_bmi_range_VerySeverelyUnderweight"><![CDATA[<16.0]]></string>

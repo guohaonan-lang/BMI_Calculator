@@ -4,4 +4,10 @@
         <!-- 必须加这一行，format="boolean" -->
         <attr name="showPointer" format="boolean"/>
     </declare-styleable>
+
+
+    <declare-styleable name="SmartSuffixEditText">
+        <!-- 支持传入任意字符串作为固定后缀 -->
+        <attr name="appSuffix" format="string" />
+    </declare-styleable>
 </resources>

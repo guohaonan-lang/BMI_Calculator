@@ -115,9 +115,9 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
             // 区间反查法：计算它与最早时间刻度（tempTimeList[0]）的自然跨度差
             when (currentTimeMode) {
                 TimeMode.DAY -> {
-                    entityCal.set(Calendar.HOUR_OF_DAY, 0);
-                    entityCal.set(Calendar.MINUTE, 0);
-                    entityCal.set(Calendar.SECOND, 0);
+                    entityCal.set(Calendar.HOUR_OF_DAY, 0)
+                    entityCal.set(Calendar.MINUTE, 0)
+                    entityCal.set(Calendar.SECOND, 0)
                     entityCal.set(Calendar.MILLISECOND, 0)
                     val msDiff = entityCal.timeInMillis - tempTimeList[0]
                     targetIndex = (msDiff / (1000L * 60 * 60 * 24)).toInt()
@@ -125,9 +125,9 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
 
                 TimeMode.WEEK -> {
                     entityCal.set(Calendar.DAY_OF_WEEK, entityCal.firstDayOfWeek)
-                    entityCal.set(Calendar.HOUR_OF_DAY, 0);
-                    entityCal.set(Calendar.MINUTE, 0);
-                    entityCal.set(Calendar.SECOND, 0);
+                    entityCal.set(Calendar.HOUR_OF_DAY, 0)
+                    entityCal.set(Calendar.MINUTE, 0)
+                    entityCal.set(Calendar.SECOND, 0)
                     entityCal.set(Calendar.MILLISECOND, 0)
                     val msDiff = entityCal.timeInMillis - tempTimeList[0]
                     targetIndex = (msDiff / (1000L * 60 * 60 * 24 * 7)).toInt()

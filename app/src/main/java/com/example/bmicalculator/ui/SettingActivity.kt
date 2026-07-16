@@ -69,6 +69,9 @@ class SettingActivity : AppCompatActivity() {
             val intent = Intent(this, FeedbackActivity::class.java)
             startActivity(intent)
         }
+        binding.settingBack.setOnClickListener {
+            finish()
+        }
     }
 
     private fun initUserDialog() {

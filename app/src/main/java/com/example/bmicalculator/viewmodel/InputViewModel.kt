@@ -12,12 +12,39 @@ import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @SuppressLint("DefaultLocale")
 class InputViewModel(private val repository: BmiRepository) : ViewModel() {
 
+    private val _weight = MutableStateFlow("170.0")
+    val weightFlow: StateFlow<String> = _weight.asStateFlow()
+
+    private val _height = MutableStateFlow(170f)
+    val heightFlow: StateFlow<Float> = _height.asStateFlow()
+
+    private val _heightFt = MutableStateFlow(5)
+    val heightFtFlow: StateFlow<Int> = _heightFt.asStateFlow()
+    private val _heightIn = MutableStateFlow(7)
+    val heightInFlow: StateFlow<Int> = _heightIn.asStateFlow()
+
+    private val _time1 = MutableStateFlow("170.0")
+    val time1: StateFlow<String> = _time1.asStateFlow()
+    private val _time2 = MutableStateFlow("170.0")
+    val time2: StateFlow<String> = _time2.asStateFlow()
+
+    private val _gender = MutableStateFlow(1)
+    val genderFlow: StateFlow<Int> = _gender.asStateFlow()
+
+    private val _weightUnit = MutableStateFlow(false)
+    val weightUnitFlow: StateFlow<Boolean> = _weightUnit.asStateFlow()
+    private val _heightUnit = MutableStateFlow(false)
+    val heightUnitFlow: StateFlow<Boolean> = _heightUnit.asStateFlow()
 
     var inputBmiRecord = BmiEntity(
+        id = 0,
         height = 170f,
         heightFt = 5,
         heightIn = 7,
@@ -40,11 +67,10 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
 
 
     // 1. 体重单位切换逻辑：lb <-> kg
-    fun switchWeightUnitToKg(): String {
+    fun switchWeightUnitToKg() {
         var showText = String.format("%.2f", inputBmiRecord.weight)
         if (showText == weightPair.first) {
             inputBmiRecord.weight = weightPair.second.toFloat()
-            showText = weightPair.second
         } else {
             val originWeight = String.format("%.2f", inputBmiRecord.weight)
             inputBmiRecord.weight *= 0.4536f
@@ -52,52 +78,43 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             val newPair = originWeight to showText
             weightPair = newPair
         }
-        return showText
+        _weight.value = String.format("%.2f", inputBmiRecord.weight)
     }
 
-    fun switchWeightUnitToLb(): String {
+    fun switchWeightUnitToLb() {
         var showText = String.format("%.2f", inputBmiRecord.weight)
-
         if (showText == weightPair.second) {
             inputBmiRecord.weight = weightPair.first.toFloat()
-            showText = weightPair.first
         } else {
             val originWeight = String.format("%.2f", inputBmiRecord.weight)
             inputBmiRecord.weight /= 0.4536f
             showText = String.format("%.2f", inputBmiRecord.weight)
             val newPair = showText to originWeight
             weightPair = newPair
-
         }
-        return showText
+        _weight.value = String.format("%.2f", inputBmiRecord.weight)
     }
 
     // 2. 身高单位切换逻辑：cm <-> ft·in
     fun switchHeightUnitToFtIn() {
         val showText = String.format("%.1f", inputBmiRecord.height)
-        if (showText == heightPair.second) {
-            inputBmiRecord.heightFt = heightPair.first / 12
-            inputBmiRecord.heightIn = heightPair.first % 12
-        } else {
-
+        if (showText != heightPair.second) {
             val originHeight = String.format("%.1f", inputBmiRecord.height)
-
             val totalInch = (inputBmiRecord.height / 2.54f).toInt()
             inputBmiRecord.heightFt = totalInch / 12
             inputBmiRecord.heightIn = totalInch % 12
             val newPair = totalInch to originHeight
             heightPair = newPair
-
         }
+        _heightFt.value = inputBmiRecord.heightFt
+        _heightIn.value = inputBmiRecord.heightIn
     }
 
 
-    fun switchHeightUnitToCm(): String {
+    fun switchHeightUnitToCm() {
         var showText: String
         val totalInch = inputBmiRecord.heightFt * 12 + inputBmiRecord.heightIn
-        if (totalInch == heightPair.first) {
-            showText = heightPair.second
-        } else {
+        if (totalInch != heightPair.first) {
             showText = String.format(
                 "%.1f",
                 ((inputBmiRecord.heightFt * 12) + inputBmiRecord.heightIn) * 2.54f
@@ -105,20 +122,76 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             inputBmiRecord.height = showText.toFloat()
             val newPair = totalInch to showText
             heightPair = newPair
-
         }
-        inputBmiRecord.height = ((inputBmiRecord.heightFt * 12) + inputBmiRecord.heightIn) * 2.54f
-        return showText
+        _height.value = inputBmiRecord.height
+    }
+
+    fun initRecord(record: BmiEntity) {
+        setGender(record.gender)
+        setWeightThumb(record.weightUnit)
+        setWeight(record.weight)
+        setHeightThumb(record.heightUnit)
+        setHeight(record.height)
+        setHeightFt(record.heightFt)
+        setHeightIn(record.heightIn)
+    }
+
+    fun setTime1(year: String, month: String, day: String) {
+        selectYear = year
+        selectMonth = month
+        selectDay = day
+        _time1.value = "$month $day, $year"
+    }
+
+    fun setTime2(period: String) {
+        selectPeriod = period
+        _time2.value = period
+    }
+
+    fun setWeight(weight: Float) {
+        inputBmiRecord.weight = weight
+        _weight.value = String.format("%.2f", inputBmiRecord.weight)
+    }
+
+    fun setHeight(height: Float) {
+        inputBmiRecord.height = height
+        _height.value = height
+    }
+
+    fun setHeightFt(height: Int) {
+        inputBmiRecord.heightFt = height
+        _heightFt.value = height
+    }
+
+    fun setHeightIn(height: Int) {
+        inputBmiRecord.heightIn = height
+        _heightIn.value = height
+    }
+
+    fun setGender(gender: Int) {
+        inputBmiRecord.gender = gender
+        _gender.value = gender
+    }
+
+    fun setWeightThumb(unit: Boolean) {
+        if (inputBmiRecord.weightUnit != unit) {
+            inputBmiRecord.weightUnit = unit
+        }
+        _weightUnit.value = unit
+
+    }
+
+    fun setHeightThumb(unit: Boolean) {
+        if (inputBmiRecord.heightUnit != unit) {
+            inputBmiRecord.heightUnit = unit
+        }
+        _heightUnit.value = unit
     }
 
     //检查数值合法
     data class CheckResult(
         val pass: Boolean,
         val toastMsgRes: Int?, // 提示文案资源ID
-        val resetWeight: Float? = null,
-        val resetFt: Int? = null,
-        val resetInch: Int? = null,
-        val resetHeight: Float? = null
     )
 
     fun checkInputValid(): CheckResult {
@@ -127,19 +200,19 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         if (!record.weightUnit) {
             // LB模式
             if (record.weight !in 2f..551f) {
+                _weight.value = "551.00"
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.weight_out_of_range_2_551_lb,
-                    resetWeight = 551f
                 )
             }
         } else {
             // KG模式
             if (record.weight !in 1f..250f) {
+                _weight.value = "250.00"
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.weight_out_of_range_2_250_kg,
-                    resetWeight = 250f
                 )
             }
         }
@@ -148,26 +221,26 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         if (!record.heightUnit) {
             // 英制 ft/in
             if (record.heightFt !in 1..8) {
+                _heightFt.value = 8
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_8_ft,
-                    resetFt = 8
                 )
             }
             if (record.heightIn !in 0..11) {
+                _heightIn.value = 11
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_11_in,
-                    resetInch = 11
                 )
             }
         } else {
             // 公制 cm
             if (record.height !in 1f..250f) {
+                _height.value = 170f
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_250_cm,
-                    resetHeight = 150f
                 )
             }
         }

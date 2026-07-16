@@ -13,6 +13,7 @@ import android.view.animation.DecelerateInterpolator
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.example.bmicalculator.R
+import androidx.core.content.withStyledAttributes
 
 class BmiColorWheelView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -66,7 +67,7 @@ class BmiColorWheelView @JvmOverloads constructor(
     private var animatedBmi = minBmi
     private var pointerAnimator: ValueAnimator? = null
 
-    // 画笔不变
+    // 画笔
     private val paintArc = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.BUTT
@@ -87,9 +88,9 @@ class BmiColorWheelView @JvmOverloads constructor(
 
     init {
         attrs?.let {
-            val typedArray = context.obtainStyledAttributes(it, R.styleable.BmiColorWheelView)
-            showPointer = typedArray.getBoolean(R.styleable.BmiColorWheelView_showPointer, true)
-            typedArray.recycle()
+            context.withStyledAttributes(it, R.styleable.BmiColorWheelView) {
+                showPointer = getBoolean(R.styleable.BmiColorWheelView_showPointer, true)
+            }
         }
         updateRangeAndColor()
     }
@@ -194,6 +195,7 @@ class BmiColorWheelView @JvmOverloads constructor(
         val centerX = paddingLeft + w / 2f + extraOffset
         val strokeW = dpToPx(80f)
         paintArc.strokeWidth = strokeW
+
         val textMargin = dpToPx(24f)
         val radius = (w - strokeW) / 2f
         val centerY = paddingTop + textMargin + radius + strokeW / 2f

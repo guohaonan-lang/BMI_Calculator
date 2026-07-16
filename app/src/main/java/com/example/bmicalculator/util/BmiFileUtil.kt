@@ -24,7 +24,7 @@ object BmiFileUtil {
         return File(filesDir, BMI_BACKUP_FILE_NAME)
     }
 
-    suspend fun readTestFile(context: Context): List<BmiEntity> {
+    fun readTestFile(context: Context): List<BmiEntity> {
         return try {
             val inputStream = context.assets.open(ASSETS_TEST_FILE)
             val reader = BufferedReader(InputStreamReader(inputStream))
@@ -40,7 +40,7 @@ object BmiFileUtil {
         }
     }
     // 导出数据
-    suspend fun exportBmiToFile(context: Context, recordList: List<BmiEntity>): Boolean {
+    fun exportBmiToFile(context: Context, recordList: List<BmiEntity>): Boolean {
         return try {
             val targetFile = getBmiBackupFile(context)
             Log.d(TAG, "目标文件路径：${targetFile.absolutePath}")
@@ -61,7 +61,7 @@ object BmiFileUtil {
                     writer.flush()
                 }
             }
-            Log.d(TAG, "写入完成，文件大小：${targetFile.absolutePath}")
+            Log.d(TAG, "写入完成，文件大小：${targetFile.length()}")
             true
         } catch (e: Exception) {
             Log.e(TAG, "写入文件失败", e)
@@ -70,7 +70,7 @@ object BmiFileUtil {
     }
 
     // 导入数据
-    suspend fun readBmiFromFile(context: Context): List<BmiEntity> {
+    fun readBmiFromFile(context: Context): List<BmiEntity> {
 
         val targetFile = getBmiBackupFile(context)
         if (!targetFile.exists() || targetFile.length() == 0L) return emptyList()

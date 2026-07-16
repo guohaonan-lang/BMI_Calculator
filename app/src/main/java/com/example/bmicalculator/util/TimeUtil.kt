@@ -22,20 +22,7 @@ class TimeUtil(private val context: Context) {
     )
 
     // Calendar月份索引 -> 资源里的月份文本
-    private val indexToMonthName = mapOf(
-        0 to context.getString(R.string.jan),
-        1 to context.getString(R.string.feb),
-        2 to context.getString(R.string.mar),
-        3 to context.getString(R.string.apr),
-        4 to context.getString(R.string.may),
-        5 to context.getString(R.string.june),
-        6 to context.getString(R.string.july),
-        7 to context.getString(R.string.aug),
-        8 to context.getString(R.string.sep),
-        9 to context.getString(R.string.oct),
-        10 to context.getString(R.string.nov),
-        11 to context.getString(R.string.dec)
-    )
+    private val indexToMonthName = context.resources.getStringArray(R.array.month_short_names).toList()
 
     /**
      * 正向：年月日时段 → 时间戳

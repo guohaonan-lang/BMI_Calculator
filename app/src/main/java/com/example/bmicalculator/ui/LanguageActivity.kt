@@ -58,5 +58,9 @@ class LanguageActivity : AppCompatActivity() {
             startActivity(intent)
             this.finish()
         }
+
+        binding.languageBack.setOnClickListener {
+            finish()
+        }
     }
 }

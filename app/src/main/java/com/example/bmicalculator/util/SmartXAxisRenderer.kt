@@ -32,13 +32,13 @@ class SmartXAxisRenderer(
         anchor: MPPointF?,
         angleDegrees: Float
     ) {
-        // 保持原样判断：如果当前绘制的是顶部的标签
+        // 判断当前绘制的是否是顶部的标签
         if (y < mViewPortHandler.contentTop() + mXAxis.textSize) {
             val baseTs = getBaseTimeZero()
             val mode = getCurrentMode()
             if (baseTs == 0L) return
 
-            // 精准提取当前刻度的物理索引（0 到 totalCount-1）
+            // 提取当前刻度的物理索引
             val positions = floatArrayOf(x, 0f)
             mTrans.pixelsToValue(positions)
             val index = positions[0].roundToInt()
@@ -77,7 +77,7 @@ class SmartXAxisRenderer(
                 StatisticsFragmentViewModel.TimeMode.MONTH -> {
                     mCalendar.add(Calendar.MONTH, -offsetFromLatest)
                     val currYear = mCalendar.get(Calendar.YEAR)
-                    // 首刻度直接绘制，不用走对比逻辑
+                    // 首刻度直接绘制
                     if (index == 0) {
                         super.drawLabel(c, "$currYear", x, y, anchor, angleDegrees)
                         return
