@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -20,7 +19,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bmicalculator.R
@@ -31,7 +32,6 @@ import com.example.bmicalculator.databinding.ActivityResultBinding
 import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.model.Grade
 import com.example.bmicalculator.util.BmiColorWheelView
-import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
 import com.example.bmicalculator.viewmodel.ResultViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -42,6 +42,7 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var binding: ActivityResultBinding
     private lateinit var sheetDialog: BottomSheetDialog
     private lateinit var gradeAdapter: GradeAdapter
+    private lateinit var dialogAdapter: GradeAdapter
     private lateinit var alertDialog: AlertDialog
 
     private val viewModel: ResultViewModel by viewModels {
@@ -71,6 +72,7 @@ class ResultActivity : AppCompatActivity() {
         initDeleteDialog()
         //判断不同的页面，控制部分控件显隐
         initChangePage()
+
         initDataFlow()
     }
 
@@ -83,7 +85,54 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun initDataFlow() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { result ->
+                    renderUi(result)
+                }
+            }
+        }
+    }
 
+    private fun renderUi(state: ResultViewModel.ResultUiState) {
+        ValueAnimator.ofFloat(0f, state.bmiValue).apply {
+            duration = 1000
+            addUpdateListener {
+                binding.resultMergeResult.mergeResultBmi.text =
+                    String.format("%.1f", it.animatedValue as Float)
+            }
+            start()
+
+        }
+
+        val mergeBinding = binding.resultMergeResult
+        // 基础数据绑定
+        mergeBinding.mergeBmiGauge.age = state.ageText.toInt()
+        mergeBinding.mergeBmiGauge.gender = state.age
+        mergeBinding.mergeBmiGauge.currentBmi = state.bmiValue
+        mergeBinding.mergeResultWeight.text = state.weightText
+        mergeBinding.mergeResultHeight.text = state.heightText
+        mergeBinding.mergeResultAge.text = state.ageText
+        mergeBinding.mergeResultGender.text = state.genderText
+
+        // 评估信息绑定
+        mergeBinding.mergeResultGrade.text = state.levelName
+        mergeBinding.mergeResultGrade.backgroundTintList = ColorStateList.valueOf(state.bmiColor)
+        binding.assessmentText1.text = state.assessment1
+
+        // 显隐性
+        val normalVisibility = if (state.isAssessmentNormalHidden) View.GONE else View.VISIBLE
+        binding.assessmentText2.visibility = normalVisibility
+        binding.assessmentRange.visibility = normalVisibility
+        binding.assessmentDifference.visibility = normalVisibility
+
+        binding.assessmentText2.text = state.assessment2Text
+        binding.assessmentRange.text = state.normalRangeText
+        binding.assessmentDifference.text = state.differenceText
+
+        // 列表更新
+        gradeAdapter.update(state.gradeList)
+        dialogAdapter.update(state.gradeList)
     }
 
     @SuppressLint("DefaultLocale", "SetTextI18n")
@@ -98,85 +147,12 @@ class ResultActivity : AppCompatActivity() {
         statusFirst = intent.getBooleanExtra("FATHER", false)
         statusRecent = intent.getBooleanExtra("Recent", false)
 
-        // 2. 非空校验，渲染数据
-        bmiRecord?.let { record ->
-            viewModel.resultBmiRecord = record
-            val targetBmi = record.bmiValue
-            val anim = ValueAnimator.ofFloat(0f, targetBmi)
-            anim.duration = 1000 // 动画时长1.2秒，可自行修改
-            anim.addUpdateListener { animation ->
-                val current = animation.animatedValue as Float
-                binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", current)
-            }
-            anim.start()
-
-            binding.resultMergeResult.mergeBmiGauge.currentBmi = record.bmiValue
-
-            if (record.weightUnit) binding.resultMergeResult.mergeResultWeight.text =
-                "${record.weight} kg"
-            else binding.resultMergeResult.mergeResultWeight.text = "${record.weight} lb"
-            if (record.heightUnit) binding.resultMergeResult.mergeResultHeight.text =
-                "${record.height} cm"
-            else binding.resultMergeResult.mergeResultHeight.text =
-                "${record.heightFt}ft ${record.heightIn}in"
-
-            binding.resultMergeResult.mergeResultAge.text = record.age.toString()
-            binding.resultMergeResult.mergeResultGender.text =
-                if (record.gender == 1) getString(R.string.male) else getString(R.string.female)
-
-            val wheel = binding.resultMergeResult.mergeBmiGauge
-            wheel.age = record.age
-            wheel.gender = record.gender
-            wheel.currentBmi = record.bmiValue
-
-            //  评论
-            val bmiInfo = BmiUtil.getBmiFullInfo(this, record.age, record.gender, record.bmiValue)
-            binding.resultMergeResult.mergeResultGrade.text = bmiInfo.levelName
-            binding.resultMergeResult.mergeResultGrade.backgroundTintList =
-                ColorStateList.valueOf(record.bmiColor)
-            binding.assessmentText1.text = bmiInfo.assessment
-            if (bmiInfo.levelName == getString(R.string.adults_bmi_normal)) {
-                binding.assessmentText2.visibility = View.GONE
-                binding.assessmentRange.visibility = View.GONE
-                binding.assessmentDifference.visibility = View.GONE
-            } else {
-                val baseText = getString(R.string.result_assessment_weight)
-                if (record.heightUnit) binding.assessmentText2.text =
-                    "$baseText ${record.height} cm"
-                else binding.assessmentText2.text =
-                    "$baseText (${record.heightFt}ft ${record.heightIn}in):"
-
-
-                val normalRange = viewModel.calculatorNormalRange()
-                binding.assessmentRange.text = "%.1f %s - %.1f %s".format(
-                    normalRange.min,
-                    normalRange.unit,
-                    normalRange.max,
-                    normalRange.unit
-                )
-                binding.assessmentDifference.text =
-                    "(%s%.1f %s)".format(
-                        normalRange.sign,
-                        normalRange.difference,
-                        normalRange.unit
-                    )
-            }
-
-            val gradeList = BmiUtil.getGradeList(this, record.age, record.gender)
-            val levelIndex =
-                if (record.age > 20) BmiUtil.getGradeIndex(this, bmiInfo.levelName) - 1
-                else BmiUtil.getGradeIndex(this, bmiInfo.levelName) - 3
-
-            gradeList[levelIndex].isSelect = true
-            gradeAdapter.update(gradeList)
-        } ?: run {
-            // 无数据返回输入页
-            Toast.makeText(
-                this,
-                getString(R.string.result_activity_data_transmission_failed), Toast.LENGTH_SHORT
-            ).show()
-            finish()
-        }
+        viewModel.initDataFromIntent(
+            context = this,
+            record = bmiRecord,
+            statusFirst = statusFirst,
+            statusRecent = statusRecent
+        )
     }
 
     private fun initChangePage() {
@@ -203,7 +179,6 @@ class ResultActivity : AppCompatActivity() {
             btn.setOnClickListener {
                 sheetDialog.show()
             }
-            // 参数：start, top, end, bottom 资源ID
             btn.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 0,
                 0,
@@ -223,7 +198,7 @@ class ResultActivity : AppCompatActivity() {
 
             binding.resultSave.setOnClickListener {
                 lifecycleScope.launch {
-                    val newRecord = bmiRecord!!.copy(id = 0) // 清空主键，生成全新记录
+                    val newRecord = bmiRecord!!.copy(id = 0) // 清空主键
                     viewModel.insertBmiRecord(newRecord)
                 }
                 val intent = Intent(this, MainActivity::class.java)
@@ -268,7 +243,7 @@ class ResultActivity : AppCompatActivity() {
         val buttonNo = dialogLayout.findViewById<TextView>(R.id.cancel)
         buttonNo.setOnClickListener { alertDialog.dismiss() }
         buttonYes.setOnClickListener {
-            var sum: Long = 1
+            var sum: Long
             lifecycleScope.launch {
                 sum = viewModel.countBmiRecord()
                 if (statusRecent) {
@@ -284,8 +259,6 @@ class ResultActivity : AppCompatActivity() {
                     finish()
                 }
             }
-
-
         }
         alertDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
     }
@@ -310,7 +283,8 @@ class ResultActivity : AppCompatActivity() {
         recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 //        val gradeList = BmiUtil.getGradeList(this, record.age, record.gender)
         val gradeList = emptyList<Grade>()
-        recycler.adapter = GradeAdapter(gradeList)
+        dialogAdapter = GradeAdapter(gradeList)
+        recycler.adapter =dialogAdapter
 
     }
 

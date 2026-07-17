@@ -14,11 +14,6 @@ import kotlinx.coroutines.launch
 
 class BmiFragmentViewModel(private val repository: BmiRepository) : ViewModel() {
 
-    private val _bmiRecord: MutableStateFlow<BmiEntity?> = MutableStateFlow(null)
-    val bmiRecordFlow: StateFlow<BmiEntity?> = _bmiRecord.asStateFlow()
-
-
-
     // 缓存最新BMI记录，给UI监听
     private val _latestBmiRecord = MutableStateFlow<BmiEntity?>(null)
     val latestBmiRecord: StateFlow<BmiEntity?> = _latestBmiRecord
