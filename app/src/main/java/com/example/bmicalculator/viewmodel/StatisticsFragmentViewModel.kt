@@ -2,12 +2,20 @@ package com.example.bmicalculator.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
 import com.github.mikephil.charting.data.Entry
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
 
 class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
@@ -15,6 +23,33 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
     val chartBmiList: Flow<List<BmiEntity>> = repository.getChartBmi()
 
     enum class TimeMode { DAY, WEEK, MONTH }
+
+    private val _timeMode = MutableStateFlow<TimeMode>(TimeMode.DAY)
+    val timeMode: StateFlow<TimeMode> = _timeMode.asStateFlow()
+
+    // 使用 combine 将两者融合成一个“图表渲染状态流”
+    val chartUiState: StateFlow<ChartProcessResult?> =
+        combine(chartBmiList, timeMode) { data, mode ->
+            if (data.isEmpty()) {
+                null // 如果数据为空，返回 null 作为信号
+            } else {
+                // 直接在后台线程/协程中完成高强度的图表数据计算
+                processChartData(data, mode)
+            }
+        }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null
+            )
+
+    private var currentTimeMode = TimeMode.DAY // 默认是天
+
+    fun setTimeMode(mode: TimeMode) {
+        currentTimeMode = mode
+        _timeMode.value = mode
+    }
 
     // 输出封装好的图表数据
     data class ChartProcessResult(
@@ -155,7 +190,8 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
         val bmiEntries = mutableListOf<Entry>()
         for (i in 0 until totalCount) {
             val numList = bmiIndexMap[i] ?: continue
-            val yVal = if (currentTimeMode == TimeMode.DAY) numList.last() else numList.average().toFloat()
+            val yVal =
+                if (currentTimeMode == TimeMode.DAY) numList.last() else numList.average().toFloat()
             bmiEntries.add(Entry(i.toFloat(), yVal))
         }
 
@@ -163,7 +199,8 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
         val weightEntries = mutableListOf<Entry>()
         for (i in 0 until totalCount) {
             val numList = weightIndexMap[i] ?: continue
-            val yVal = if (currentTimeMode == TimeMode.DAY) numList.last() else numList.average().toFloat()
+            val yVal =
+                if (currentTimeMode == TimeMode.DAY) numList.last() else numList.average().toFloat()
             weightEntries.add(Entry(i.toFloat(), yVal))
         }
 

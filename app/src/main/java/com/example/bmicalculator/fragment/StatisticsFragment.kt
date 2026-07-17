@@ -17,7 +17,6 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.FragmentStatisticsBinding
-import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.ui.MainActivity
 import com.example.bmicalculator.util.BmiMarkerView
 import com.example.bmicalculator.util.SmartXAxisRenderer
@@ -36,13 +35,10 @@ class StatisticsFragment : Fragment() {
     private var _binding: FragmentStatisticsBinding? = null
     private val binding get() = checkNotNull(_binding)
 
+    private var lastRenderedData: List<Entry>? = null
 
     // 图表X轴日期标签集合
     private val xLabelList = mutableListOf<String>()
-
-    private var currentTimeMode = StatisticsFragmentViewModel.TimeMode.DAY // 默认是天
-    private var rawBmiData: List<BmiEntity> = emptyList() // 缓存一份从数据库拿到的原始全量数据
-
     private var mBaseTimeZero: Long = 0L // 类级别变量
     private val viewModel: StatisticsFragmentViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
@@ -64,7 +60,7 @@ class StatisticsFragment : Fragment() {
 
         initChartStyle(binding.chartBmi)
         initChartStyle(binding.chartWeight)
-        setChartData()
+        setChartDataFlow()
 
         initSwitchTime()
         initUpdate()
@@ -91,9 +87,7 @@ class StatisticsFragment : Fragment() {
                 .withLayer()
                 .start()
             binding.selectorThumbTime.text = getString(R.string.day)
-
-            currentTimeMode = StatisticsFragmentViewModel.TimeMode.DAY
-            processAndRenderData(rawBmiData)
+            viewModel.setTimeMode(StatisticsFragmentViewModel.TimeMode.DAY)
         }
         binding.switchTimeWeek.setOnClickListener {
             binding.selectorThumbTime.animate()
@@ -101,8 +95,7 @@ class StatisticsFragment : Fragment() {
                 .withLayer()
                 .start()
             binding.selectorThumbTime.text = getString(R.string.week)
-            currentTimeMode = StatisticsFragmentViewModel.TimeMode.WEEK
-            processAndRenderData(rawBmiData)
+            viewModel.setTimeMode(StatisticsFragmentViewModel.TimeMode.WEEK)
         }
         binding.switchTimeMonth.setOnClickListener {
             binding.selectorThumbTime.animate()
@@ -110,8 +103,7 @@ class StatisticsFragment : Fragment() {
                 .withLayer()
                 .start()
             binding.selectorThumbTime.text = getString(R.string.month)
-            currentTimeMode = StatisticsFragmentViewModel.TimeMode.MONTH
-            processAndRenderData(rawBmiData)
+            viewModel.setTimeMode(StatisticsFragmentViewModel.TimeMode.MONTH)
         }
     }
 
@@ -165,8 +157,8 @@ class StatisticsFragment : Fragment() {
         lineChart.axisRight.isEnabled = false
     }
 
-    //  BMI表格
-    private fun renderBmiChart(bmiChart: LineChart,entries: MutableList<Entry>) {
+    //  表格
+    private fun renderBmiChart(bmiChart: LineChart,entries: MutableList<Entry>,currentTimeMode: StatisticsFragmentViewModel.TimeMode) {
         if (entries.isEmpty()) {
             bmiChart.clear()
             bmiChart.invalidate()
@@ -266,43 +258,44 @@ class StatisticsFragment : Fragment() {
     }
 
     // 监听数据
-    private fun setChartData() {
+    private fun setChartDataFlow() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.chartBmiList.collect { data ->
-                    rawBmiData = data
-                    processAndRenderData(rawBmiData)
-                }
-            }
-        }
-    }
+                // 监听合并后的流
+                viewModel.chartUiState.collect { result ->
+                    if (result == null) {
+                        listOf(binding.chartBmi, binding.chartWeight).forEach { chart ->
+                            chart.clear()
+                            chart.invalidate()
+                        }
+                        lastRenderedData = null
+                        return@collect
+                    }
 
-    // 处理数据
-    private fun processAndRenderData(data: List<BmiEntity>) {
-        if (data.isEmpty()) {
-            binding.chartBmi.clear()
-            binding.chartWeight.clear()
-            binding.chartBmi.invalidate()
-            binding.chartWeight.invalidate()
-            return
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            // 调用VM完成全部计算
-            val result = viewModel.processChartData(data, currentTimeMode)
-            // 页面缓存UI所需数据
-            xLabelList.clear()
-            xLabelList.addAll(result.xLabels)
-            mBaseTimeZero = result.baseTimeZero
+                    if (lastRenderedData == result.bmiEntries) {
+                        return@collect
+                    }
+                    lastRenderedData = result.bmiEntries
 
-            // 分别渲染两张图表
-            renderBmiChart(binding.chartBmi,result.bmiEntries as MutableList<Entry>)
-            renderBmiChart(binding.chartWeight,result.weightEntries as MutableList<Entry>)
+                    // 页面缓存 UI 所需数据
+                    xLabelList.clear()
+                    xLabelList.addAll(result.xLabels)
+                    mBaseTimeZero = result.baseTimeZero
 
-            // X轴区间配置（UI逻辑留在Fragment）
-            listOf(binding.chartBmi, binding.chartWeight).forEach { chart ->
-                chart.xAxis.apply {
-                    axisMinimum = 0f
-                    axisMaximum = (result.totalCount ).toFloat()
+                    // 传入当前的时间模式给渲染函数（假设 result 内部也包了当前 mode，或者直接读 viewModel.timeMode.value）
+                    val currentMode = viewModel.timeMode.value
+
+                    // 分别渲染两张图表
+                    renderBmiChart(binding.chartBmi, result.bmiEntries as MutableList<Entry>, currentMode)
+                    renderBmiChart(binding.chartWeight, result.weightEntries as MutableList<Entry>, currentMode)
+
+                    // X 轴区间配置
+                    listOf(binding.chartBmi, binding.chartWeight).forEach { chart ->
+                        chart.xAxis.apply {
+                            axisMinimum = 0f
+                            axisMaximum = result.totalCount.toFloat()
+                        }
+                    }
                 }
             }
         }

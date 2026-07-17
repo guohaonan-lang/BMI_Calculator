@@ -31,6 +31,7 @@ class BmiFragment : Fragment() {
 
     private var _binding: FragmentBmiBinding? = null
     private val binding get() = checkNotNull(_binding)
+    private lateinit var gradeAdapter: GradeAdapter
 
     private val viewModel: BmiFragmentViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
@@ -66,25 +67,8 @@ class BmiFragment : Fragment() {
         val layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.resultGradeRv.layoutManager = layoutManager
-        val gradeAdapter = GradeAdapter(emptyList())
+        gradeAdapter = GradeAdapter(emptyList())
         binding.resultGradeRv.adapter = gradeAdapter
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.latestBmiRecord.collect { record ->
-                    record?.apply {
-                        val bmiInfo =
-                            BmiUtil.getBmiFullInfo(requireContext(), record.age, record.gender, record.bmiValue)
-                        val gradeList = BmiUtil.getGradeList(requireContext(), record.age, record.gender)
-                        val levelIndex =
-                            if (record.age > 20) BmiUtil.getGradeIndex(requireContext(), bmiInfo.levelName) - 1
-                            else BmiUtil.getGradeIndex(requireContext(), bmiInfo.levelName) - 3
-                        gradeList[levelIndex].isSelect = true
-                        gradeAdapter.update(gradeList)
-                    }
-                }
-            }
-        }
     }
 
     private fun initDataFlow() {
@@ -100,7 +84,6 @@ class BmiFragment : Fragment() {
     }
 
     // 读取信息
-    @SuppressLint("ResourceAsColor")
     private fun updateBmi(record: BmiEntity) {
         val bmiInfo =
             BmiUtil.getBmiFullInfo(requireContext(), record.age, record.gender, record.bmiValue)
@@ -126,7 +109,12 @@ class BmiFragment : Fragment() {
         binding.resultTime.text =
             "${timeText.selectMonth} ${timeText.selectDay} ${timeText.selectYear}"
 
-
+        val gradeList = BmiUtil.getGradeList(requireContext(), record.age, record.gender)
+        val levelIndex =
+            if (record.age > 20) BmiUtil.getGradeIndex(requireContext(), bmiInfo.levelName) - 1
+            else BmiUtil.getGradeIndex(requireContext(), bmiInfo.levelName) - 3
+        gradeList[levelIndex].isSelect = true
+        gradeAdapter.update(gradeList)
     }
 
     override fun onDestroy() {
