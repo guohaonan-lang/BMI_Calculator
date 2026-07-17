@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".MainApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -11,6 +12,10 @@
         android:roundIcon="@drawable/ic_launcher_foreground"
         android:supportsRtl="true"
         android:theme="@style/Theme.BMICalculator">
+        <activity
+            android:name=".ui.BaseActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BMICalculator" />
         <activity
             android:name=".ui.FeedbackActivity"
             android:exported="false" />

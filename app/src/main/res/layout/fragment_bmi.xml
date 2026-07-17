@@ -69,11 +69,12 @@
                 android:id="@+id/result_grade_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="15dp"
                 android:layout_marginTop="20dp"
-                app:layout_constraintTop_toBottomOf="@id/result_merge_result"
+                android:overScrollMode="never"
+                android:paddingHorizontal="15dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintTop_toBottomOf="@id/result_merge_result" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -22,6 +22,6 @@ class WeightMarkerView(context: Context) : MarkerView(context, R.layout.marker_p
 
     override fun getOffset(): MPPointF {
 //        return super.getOffset()
-        return MPPointF(-(width / 2f), -height.toFloat() - 8f)
+        return MPPointF(-(width / 2f), 18f - height.toFloat())
     }
 }

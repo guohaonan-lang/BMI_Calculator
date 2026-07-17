@@ -64,11 +64,11 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
 
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/result_grade_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingHorizontal="15dp"
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -82,6 +82,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="30dp"
                 android:background="@drawable/merge_ad_background"
+                android:overScrollMode="never"
                 android:paddingBottom="25dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

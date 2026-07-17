@@ -29,6 +29,8 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.launch
 
 class StatisticsFragment : Fragment() {
@@ -175,17 +177,21 @@ class StatisticsFragment : Fragment() {
             bmiChart.marker = marker
         }
 
-
+        bmiChart.isHighlightPerDragEnabled = true
+        bmiChart.isHighlightPerTapEnabled = true
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
-            setDrawHighlightIndicators(false)
+            setDrawHighlightIndicators(true)
+            // 2. 关闭原生十字线（需求：不要辅助线）
+            setDrawVerticalHighlightIndicator(false)
+            setDrawHorizontalHighlightIndicator(false)
             mode = LineDataSet.Mode.HORIZONTAL_BEZIER
             lineWidth = 1f
             color = Color.WHITE
 
             circleRadius = 3f
             setCircleColor(Color.WHITE)
-            circleHoleRadius = 1f
-            circleHoleColor = Color.WHITE
+//            circleHoleRadius = 1f
+//            circleHoleColor = Color.WHITE
 
             setDrawFilled(true)
             val gradient = GradientDrawable(
@@ -198,6 +204,7 @@ class StatisticsFragment : Fragment() {
             fillDrawable = gradient
             setDrawValues(false)
         }
+        bmiChart.setOnClickListener {  }
 
         bmiChart.data = LineData(dataSet)
 

@@ -567,7 +567,7 @@ class DataInputFragment : Fragment() {
         ageRecyclerView.layoutManager = layoutManager
 
         val ageAdapter = InputAgeAdapter(ageRecyclerView) { selectedAgeInt ->
-            viewModel.inputBmiRecord.age = selectedAgeInt
+            viewModel.setAge(selectedAgeInt)
         }
         ageRecyclerView.adapter = ageAdapter
 
@@ -610,9 +610,7 @@ class DataInputFragment : Fragment() {
                     val centerView = snapHelper.findSnapView(lm)
                     if (centerView != null) {
                         val centerAge = lm.getPosition(centerView) + 2
-                        if (viewModel.inputBmiRecord.age != centerAge) {
-                            viewModel.inputBmiRecord.age = centerAge
-                        }
+                        viewModel.setAge(centerAge)
                     }
                 }
             }
@@ -642,8 +640,8 @@ class DataInputFragment : Fragment() {
                 if (text.isBlank()) return@doAfterTextChanged
                 try {
                     when (et) {
-                        edtWeight -> viewModel.inputBmiRecord.weight = text.toFloat()
-                        edtHeight -> viewModel.inputBmiRecord.height = text.toFloat()
+                        edtWeight -> viewModel.setWeight(text.toFloat())
+                        edtHeight -> viewModel.setHeight(text.toFloat())
                     }
                 } catch (_: NumberFormatException) {
                 }
@@ -688,7 +686,8 @@ class DataInputFragment : Fragment() {
                 // 过滤非数字字符
                 val digits = originalText.filter { it.isDigit() }
                 val num = digits.toIntOrNull() ?: 0
-                viewModel.inputBmiRecord.heightFt = num
+                viewModel.setHeightFt(num)
+
                 isUpdating = true
                 if (digits.isEmpty()) {
                     edtHeightFt.setText("")
@@ -722,7 +721,7 @@ class DataInputFragment : Fragment() {
                 // 过滤非数字字符
                 val digits = originalText.filter { it.isDigit() }
                 val num = digits.toIntOrNull() ?: 0
-                viewModel.inputBmiRecord.heightIn = num
+                viewModel.setHeightIn(num)
                 isUpdating = true
                 if (digits.isEmpty()) {
                     edtHeightIn.setText("")

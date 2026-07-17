@@ -41,7 +41,7 @@ class SplashActivity : AppCompatActivity() {
 
         // 初始化语言
         val savedLang = LangHelper.getSavedLang(this)
-        LangHelper.setLanguage(this, savedLang)
+        LangHelper.setLanguage(this,savedLang)
 
         var isFirst: Long = 0
         lifecycleScope.launch {

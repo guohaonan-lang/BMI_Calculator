@@ -11,20 +11,22 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.util.BmiFileUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingViewModel(private val repository: BmiRepository) : ViewModel() {
 
 
-    fun readTestFile(context: Context) {
-        viewModelScope.launch {
+
+    suspend fun readTestFile(context: Context) {
+        withContext(Dispatchers.IO) {
             val bmiList = BmiFileUtil.readTestFile(context)
             for (item in bmiList) {
                 item.id = 0
                 val count = repository.getBmiByTime(item.createTime)
-                if (count != null) {
-                    continue
-                } else {
+                // count != null 代表已存在，跳过
+                if (count == null) {
                     repository.insertBmiRecord(item)
                 }
             }

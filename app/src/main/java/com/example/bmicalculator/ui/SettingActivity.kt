@@ -11,7 +11,6 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -23,10 +22,11 @@ import com.example.bmicalculator.viewmodel.SettingViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
 
-class SettingActivity : AppCompatActivity() {
-    private lateinit var binding: ActivitySettingBinding
-    private lateinit var userBottomSheetDialog: BottomSheetDialog
-    private lateinit var autoDialog: Dialog
+class SettingActivity : BaseActivity<ActivitySettingBinding>() {
+    override fun inflateBinding(inflater: LayoutInflater): ActivitySettingBinding {
+        return ActivitySettingBinding.inflate(inflater)
+    }
+
     private val viewModel: SettingViewModel by viewModels {
         val db = BmiDatabase.getDatabase(this)
         SettingViewModel.provideFactory(BmiRepository(db.bmiDao()))
@@ -34,33 +34,30 @@ class SettingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        binding = ActivitySettingBinding.inflate(layoutInflater)
-
-        setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        initUserDialog()
-        initAutoDialog()
         initAllClick()
+        initDataFlow()
+    }
+
+    private fun initDataFlow() {
+
     }
 
     private fun initAllClick() {
         binding.settingUser.setOnClickListener {
-            userBottomSheetDialog.show()
+            initUserDialog()
         }
         binding.settingLanguage.setOnClickListener {
             val intent = Intent(this, LanguageActivity::class.java)
             startActivity(intent)
         }
         binding.settingUserAutorenew.setOnClickListener {
-            autoDialog.show()
+            initAutoDialog()
             lifecycleScope.launch {
-                val bmiList = viewModel.getAllList()
-                viewModel.exportFile(this@SettingActivity, bmiList)
                 viewModel.readTestFile(this@SettingActivity)
             }
         }
@@ -75,7 +72,7 @@ class SettingActivity : AppCompatActivity() {
     }
 
     private fun initUserDialog() {
-        userBottomSheetDialog = BottomSheetDialog(this)
+        val userBottomSheetDialog = BottomSheetDialog(this)
         val rootView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_setting_user, null)
         userBottomSheetDialog.setContentView(rootView)
         rootView.findViewById<Button>(R.id.user_cancel_bt).setOnClickListener {
@@ -104,10 +101,11 @@ class SettingActivity : AppCompatActivity() {
             }
 
         }
+        userBottomSheetDialog.show()
     }
 
     private fun initAutoDialog() {
-        autoDialog = Dialog(this)
+        val autoDialog = Dialog(this)
         val rootView = LayoutInflater.from(this).inflate(R.layout.dialog_autorenew, null)
         autoDialog.setContentView(rootView)
         rootView.findViewById<Button>(R.id.auto_done).setOnClickListener {
@@ -115,6 +113,7 @@ class SettingActivity : AppCompatActivity() {
             autoDialog.dismiss()
         }
         autoDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        autoDialog.show()
     }
 
 }

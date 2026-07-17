@@ -2,6 +2,7 @@ package com.example.bmicalculator.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -18,9 +19,11 @@ import com.example.bmicalculator.databinding.ActivityRecentBinding
 import com.example.bmicalculator.viewmodel.BmiViewModel
 import kotlinx.coroutines.launch
 
-class RecentActivity : AppCompatActivity() {
+class RecentActivity : BaseActivity<ActivityRecentBinding>() {
 
-    private lateinit var binding : ActivityRecentBinding
+    override fun inflateBinding(inflater: LayoutInflater): ActivityRecentBinding {
+        return ActivityRecentBinding.inflate(inflater)
+    }
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: RecentAdapter
 
@@ -32,9 +35,6 @@ class RecentActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        binding = ActivityRecentBinding.inflate(layoutInflater)
-        setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
