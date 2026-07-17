@@ -17,9 +17,6 @@ class BmiViewModel(private val repository: BmiRepository) :
         repository.insertBmiRecord(bmi)
     }
 
-    suspend fun getLatestBmi(): BmiEntity?{
-        return repository.getLatestBmi()
-    }
 
     suspend fun updateBmiRecord(bmi: BmiEntity) {
         repository.updateBmiRecord(bmi)

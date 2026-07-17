@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -18,17 +17,19 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.bmicalculator.R
+import com.example.bmicalculator.adapter.GradeAdapter
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivityResultBinding
 import com.example.bmicalculator.model.BmiEntity
+import com.example.bmicalculator.model.Grade
 import com.example.bmicalculator.util.BmiColorWheelView
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
@@ -40,6 +41,7 @@ class ResultActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityResultBinding
     private lateinit var sheetDialog: BottomSheetDialog
+    private lateinit var gradeAdapter: GradeAdapter
     private lateinit var alertDialog: AlertDialog
 
     private val viewModel: ResultViewModel by viewModels {
@@ -62,11 +64,26 @@ class ResultActivity : AppCompatActivity() {
             insets
         }
 
+        initGradeRecyclerView()
+
         initData()
         initBottomDialog()
         initDeleteDialog()
         //判断不同的页面，控制部分控件显隐
         initChangePage()
+        initDataFlow()
+    }
+
+    private fun initGradeRecyclerView() {
+        val layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        binding.resultGradeRv.layoutManager = layoutManager
+        gradeAdapter = GradeAdapter(emptyList())
+        binding.resultGradeRv.adapter = gradeAdapter
+    }
+
+    private fun initDataFlow() {
+
     }
 
     @SuppressLint("DefaultLocale", "SetTextI18n")
@@ -144,7 +161,14 @@ class ResultActivity : AppCompatActivity() {
                         normalRange.unit
                     )
             }
-            setupBmiGard(bmiInfo.levelName)
+
+            val gradeList = BmiUtil.getGradeList(this, record.age, record.gender)
+            val levelIndex =
+                if (record.age > 20) BmiUtil.getGradeIndex(this, bmiInfo.levelName) - 1
+                else BmiUtil.getGradeIndex(this, bmiInfo.levelName) - 3
+
+            gradeList[levelIndex].isSelect = true
+            gradeAdapter.update(gradeList)
         } ?: run {
             // 无数据返回输入页
             Toast.makeText(
@@ -163,7 +187,7 @@ class ResultActivity : AppCompatActivity() {
         binding.resultMergeAd.tvTimeTag.text = text
         if (statusRecent) {
             // 历史结果图
-            binding.resultMergeGrade.root.visibility = View.GONE
+            binding.resultGradeRv.visibility = View.GONE
             binding.resultSave.visibility = View.GONE
             binding.resultDelete.visibility = View.GONE
             binding.resultRecentDelete.visibility = View.VISIBLE
@@ -224,99 +248,12 @@ class ResultActivity : AppCompatActivity() {
                 }
                 // 图标和文字间距
                 btn.compoundDrawablePadding = 10
-                binding.resultMergeGrade.root.visibility = View.GONE
+                binding.resultGradeRv.visibility = View.GONE
                 binding.resultMergeAd.tvTimeTag.visibility = View.GONE
 
             }
         }
     }
-
-    private fun setupBmiGard(levelName: String) {
-        val grad = BmiUtil.getGradeIndex(this, levelName)
-        highlightGradeItem(grad)
-        bmiRecord?.let { record ->
-            if (record.age <= 20) {
-                val teenRange = BmiUtil.getTeenBmiRange(record.age, record.gender)
-                switchTeenGrade(teenRange)
-            }
-
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun switchTeenGrade(bmiRanges: FloatArray) {
-        val rootLayout = binding.resultMergeGrade.root
-        val ctx = rootLayout.context
-
-        // 重置全部条目
-        for (i in 1..8) {
-            val resetId = ctx.resources.getIdentifier("merge_grade_list_$i", "id", ctx.packageName)
-            val resetItem = rootLayout.findViewById<ViewGroup>(resetId)
-            val scopeId =
-                ctx.resources.getIdentifier("merge_grade_list_scope_$i", "id", ctx.packageName)
-            val scopeTv = resetItem.findViewById<TextView>(scopeId)
-            if (i in 3..6) {
-                when (i) {
-                    3 -> {
-                        scopeTv.text = " < ${bmiRanges[0]}"
-                    }
-
-                    6 -> {
-                        val s = getString(R.string.adult_bmi_range_obese_class_iii)
-                        scopeTv.text = "${s[0]} ${bmiRanges.last()}"
-                    }
-
-                    else -> {
-
-                        scopeTv.text = "${bmiRanges[i - 4]} - ${bmiRanges[i - 3]}"
-                    }
-                }
-
-            } else {
-                resetItem.visibility = View.GONE
-            }
-
-        }
-    }
-
-    private fun highlightGradeItem(grad: Int) {
-        val rootLayout = binding.resultMergeGrade.root
-        val ctx = rootLayout.context
-        val white = ctx.getColor(android.R.color.white)
-
-        // 1. 获取当前条目根ConstraintLayout
-        val itemId = ctx.resources.getIdentifier("merge_grade_list_$grad", "id", ctx.packageName)
-        val targetItem =
-            rootLayout.findViewById<ConstraintLayout>(itemId)
-
-        // 2. 获取内部三个子控件
-        val colorViewId =
-            ctx.resources.getIdentifier("merge_grade_list_color_$grad", "id", ctx.packageName)
-        val textId =
-            ctx.resources.getIdentifier("merge_grade_list_text_$grad", "id", ctx.packageName)
-        val scopeId =
-            ctx.resources.getIdentifier("merge_grade_list_scope_$grad", "id", ctx.packageName)
-
-        val colorView = targetItem.findViewById<View>(colorViewId)
-        val textTv = targetItem.findViewById<TextView>(textId)
-        val scopeTv = targetItem.findViewById<TextView>(scopeId)
-
-        // 3. 设置根布局backgroundTint
-        val colorResId = ctx.resources.getIdentifier("grad$grad", "color", ctx.packageName)
-        val tintColor = ctx.getColor(colorResId)
-        ViewCompat.setBackgroundTintList(targetItem, ColorStateList.valueOf(tintColor))
-
-        // 4. 子控件背景白色
-        ViewCompat.setBackgroundTintList(colorView, ColorStateList.valueOf(white))
-        textTv.setTextColor(white)
-        scopeTv.setTextColor(white)
-        val font = ResourcesCompat.getFont(this, R.font.font_extrabold)
-        textTv.typeface = font
-        scopeTv.typeface = font
-        textTv.alpha = 1f
-        scopeTv.alpha = 1f
-    }
-
 
     // 初始化delete弹窗
     private fun initDeleteDialog() {
@@ -369,6 +306,12 @@ class ResultActivity : AppCompatActivity() {
             wheel.gender = record.gender
             wheel.currentBmi = record.bmiValue
         }
+        val recycler = rootView.findViewById<RecyclerView>(R.id.dialog_grade_rv)
+        recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+//        val gradeList = BmiUtil.getGradeList(this, record.age, record.gender)
+        val gradeList = emptyList<Grade>()
+        recycler.adapter = GradeAdapter(gradeList)
+
     }
 
     //返回监听，触发delete弹窗

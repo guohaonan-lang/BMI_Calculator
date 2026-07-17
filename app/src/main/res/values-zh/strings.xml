@@ -19,12 +19,12 @@
     <string name="adults_bmi_range_normal">18.5–24.9</string>
     <string name="adults_bmi_overweight">超重</string>
     <string name="adults_bmi_range_overweight">25.0–29.9</string>
-    <string name="adult_bmi_obese_class_i">一级肥胖</string>
-    <string name="adult_bmi_range_obese_class_i">30.0–34.9</string>
+    <string name="adults_bmi_obese_class_i">一级肥胖</string>
+    <string name="adults_bmi_range_obese_class_i">30.0–34.9</string>
     <string name="adults_bmi_obese_class_ii">二级肥胖</string>
-    <string name="adult_bmi_range_obese_class_ii">35.0–39.9</string>
+    <string name="adults_bmi_range_obese_class_ii">35.0–39.9</string>
     <string name="adults_bmi_obese_class_iii">三级肥胖</string>
-    <string name="adult_bmi_range_obese_class_iii">≥ 40.0</string>
+    <string name="adults_bmi_range_obese_class_iii">≥ 40.0</string>
 
     <!-- 成年人评价文案 -->
     <string name="desc_vsu">请多关爱自己！你需要增加健康的热量摄入，选择高营养密度的食物，并咨询医生寻求增重建议。</string>

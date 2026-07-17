@@ -7,13 +7,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bmicalculator.R
+import com.example.bmicalculator.adapter.GradeAdapter
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.FragmentBmiBinding
@@ -25,13 +26,11 @@ import com.example.bmicalculator.util.TimeUtil
 import com.example.bmicalculator.viewmodel.BmiFragmentViewModel
 import kotlinx.coroutines.launch
 
-@SuppressLint("SetTextI18n","DefaultLocale")
+@SuppressLint("SetTextI18n", "DefaultLocale")
 class BmiFragment : Fragment() {
 
     private var _binding: FragmentBmiBinding? = null
     private val binding get() = checkNotNull(_binding)
-
-    private var bmiRecord: BmiEntity? = null
 
     private val viewModel: BmiFragmentViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
@@ -49,212 +48,85 @@ class BmiFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 点击转换到输入页
         binding.resultContent.setOnClickListener {
             val mainActivity = requireActivity() as MainActivity
             mainActivity.binding.mainViewpage2.currentItem = 0
         }
-
+        // 点击跳转历史记录
         binding.recent.setOnClickListener {
             val intent = Intent(requireContext(), RecentActivity::class.java)
             startActivity(intent)
         }
+        initGradeRecyclerView()
+        initDataFlow()
+    }
+
+    private fun initGradeRecyclerView() {
+        val layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.resultGradeRv.layoutManager = layoutManager
+        val gradeAdapter = GradeAdapter(emptyList())
+        binding.resultGradeRv.adapter = gradeAdapter
+
         viewLifecycleOwner.lifecycleScope.launch {
-            bmiRecord = viewModel.getLatestBmi()
-            updateBmi()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.latestBmiRecord.collect { record ->
+                    record?.apply {
+                        val bmiInfo =
+                            BmiUtil.getBmiFullInfo(requireContext(), record.age, record.gender, record.bmiValue)
+                        val gradeList = BmiUtil.getGradeList(requireContext(), record.age, record.gender)
+                        val levelIndex =
+                            if (record.age > 20) BmiUtil.getGradeIndex(requireContext(), bmiInfo.levelName) - 1
+                            else BmiUtil.getGradeIndex(requireContext(), bmiInfo.levelName) - 3
+                        gradeList[levelIndex].isSelect = true
+                        gradeAdapter.update(gradeList)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initDataFlow() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.latestBmiRecord.collect { record ->
+                    record?.apply {
+                        updateBmi(record)
+                    }
+                }
+            }
         }
     }
 
     // 读取信息
+    @SuppressLint("ResourceAsColor")
+    private fun updateBmi(record: BmiEntity) {
+        val bmiInfo =
+            BmiUtil.getBmiFullInfo(requireContext(), record.age, record.gender, record.bmiValue)
+        binding.resultMergeResult.apply {
+            mergeBmiGauge.age = record.age
+            mergeBmiGauge.gender = record.gender
+            mergeBmiGauge.currentBmi = record.bmiValue
+            val unit = if (record.weightUnit) "kg" else "lb"
+            mergeResultWeight.text = "${record.weight} $unit"
 
-    private fun updateBmi() {
-        val wheel = binding.resultMergeResult.mergeBmiGauge
-        // 给仪表盘赋值
-        bmiRecord?.let { record ->
-            if (record.weightUnit) binding.resultMergeResult.mergeResultWeight.text =
-                "${record.weight} kg"
-            else binding.resultMergeResult.mergeResultWeight.text = "${record.weight} lb"
-            if (record.heightUnit) binding.resultMergeResult.mergeResultHeight.text =
-                "${record.height} cm"
-            else binding.resultMergeResult.mergeResultHeight.text = "${record.heightFt}ft ${record.heightIn}in"
-
-            wheel.age = record.age
-            wheel.gender = record.gender
-            wheel.currentBmi = record.bmiValue
-
-
-            val timeText = TimeUtil(requireContext()).parseTimeStamp(record.customTime)
-            val text =
-                "${timeText.selectMonth} ${timeText.selectDay} ${timeText.selectYear}"
-            binding.resultTime.text = text
-
-            binding.resultMergeResult.mergeResultBmi.text = String.format("%.1f", record.bmiValue)
-            binding.resultMergeResult.mergeResultGender.text =
+            mergeResultHeight.text = if (record.heightUnit) "${record.height} cm"
+            else "${record.heightFt}ft ${record.heightIn}in"
+            mergeResultBmi.text = String.format("%.1f", record.bmiValue)
+            mergeResultGender.text =
                 if (record.gender == 1) getString(R.string.male) else getString(R.string.female)
-
-            val ageText = record.age.toString() + getString(R.string.years_old)
-            binding.resultMergeResult.mergeResultAge.text = ageText
-
-            val bmiInfo =
-                BmiUtil.getBmiFullInfo(requireContext(), record.age, record.gender, record.bmiValue)
-            binding.resultMergeResult.mergeResultGrade.text = bmiInfo.levelName
-            binding.resultMergeResult.mergeResultGrade.backgroundTintList =
+            mergeResultAge.text = record.age.toString() + getString(R.string.years_old)
+            mergeResultGrade.text = bmiInfo.levelName
+            mergeResultGrade.backgroundTintList =
                 ColorStateList.valueOf(record.bmiColor)
-            initGrade()
-            setupBmiGard(bmiInfo.levelName)
         }
-    }
 
-    private fun setupBmiGard(levelName: String) {
-        val grad = BmiUtil.
-        getGradeIndex(requireContext(),levelName)
-        highlightGradeItem(grad)
-        bmiRecord?.let { record ->
-            if (record.age <= 20) {
-                val teenRange = BmiUtil.getTeenBmiRange(record.age,record.gender)
-                switchTeenGrade(teenRange)
-            }
-
-        }
-    }
+        val timeText = TimeUtil(requireContext()).parseTimeStamp(record.customTime)
+        binding.resultTime.text =
+            "${timeText.selectMonth} ${timeText.selectDay} ${timeText.selectYear}"
 
 
-    private fun switchTeenGrade(bmiRanges: FloatArray) {
-        val rootLayout = binding.resultMergeGrade.root
-        val ctx = rootLayout.context
-
-        // 重置全部条目
-        for (i in 1..8) {
-            val resetId = ctx.resources.getIdentifier("merge_grade_list_$i", "id", ctx.packageName)
-            val resetItem = rootLayout.findViewById<ViewGroup>(resetId)
-            val scopeId =
-                ctx.resources.getIdentifier("merge_grade_list_scope_$i", "id", ctx.packageName)
-            val scopeTv = resetItem.findViewById<TextView>(scopeId)
-            if (i in 3..6) {
-                when (i) {
-                    3 -> {
-                        scopeTv.text = " < ${bmiRanges[0]}"
-                    }
-                    6 -> {
-                        val s = getString(R.string.adult_bmi_range_obese_class_iii)
-                        scopeTv.text = "${s[0]} ${bmiRanges.last()}"
-                    }
-
-                    else -> {
-                        scopeTv.text = "${bmiRanges[i - 4]} - ${bmiRanges[i - 3]}"
-                    }
-                }
-
-            } else {
-                resetItem.visibility = View.GONE
-            }
-
-        }
-    }
-
-    private fun highlightGradeItem(grad: Int) {
-        val rootLayout = binding.resultMergeGrade.root
-        val ctx = rootLayout.context
-        val white = ctx.getColor(android.R.color.white)
-
-        // 1. 获取当前条目根ConstraintLayout
-        val itemId = ctx.resources.getIdentifier("merge_grade_list_$grad", "id", ctx.packageName)
-        val targetItem =
-            rootLayout.findViewById<androidx.constraintlayout.widget.ConstraintLayout>(itemId)
-
-        // 2. 获取内部三个子控件
-        val colorViewId =
-            ctx.resources.getIdentifier("merge_grade_list_color_$grad", "id", ctx.packageName)
-        val textId =
-            ctx.resources.getIdentifier("merge_grade_list_text_$grad", "id", ctx.packageName)
-        val scopeId =
-            ctx.resources.getIdentifier("merge_grade_list_scope_$grad", "id", ctx.packageName)
-
-        val colorView = targetItem.findViewById<View>(colorViewId)
-        val textTv = targetItem.findViewById<TextView>(textId)
-        val scopeTv = targetItem.findViewById<TextView>(scopeId)
-
-        // 3. 设置根布局backgroundTint
-        val colorResId = ctx.resources.getIdentifier("grad$grad", "color", ctx.packageName)
-        val tintColor = ctx.getColor(colorResId)
-        ViewCompat.setBackgroundTintList(targetItem, ColorStateList.valueOf(tintColor))
-
-        // 4. 子控件背景白色
-        ViewCompat.setBackgroundTintList(colorView, ColorStateList.valueOf(white))
-        textTv.setTextColor(white)
-        scopeTv.setTextColor(white)
-        val font = ResourcesCompat.getFont(requireContext(), R.font.font_extrabold)
-        textTv.typeface = font
-        scopeTv.typeface = font
-        textTv.alpha = 1f
-        scopeTv.alpha = 1f
-    }
-
-    private fun initGrade() {
-        val rootLayout = binding.resultMergeGrade.root
-        val ctx = rootLayout.context
-        val blackState = ColorStateList.valueOf(ctx.getColor(R.color.black))
-        val font = ResourcesCompat.getFont(requireContext(), R.font.font_regular)
-        // 重置全部条目
-        for (i in 1..8) {
-            val itemId = ctx.resources.getIdentifier("merge_grade_list_$i", "id", ctx.packageName)
-            val itemRoot = rootLayout.findViewById<ViewGroup>(itemId)
-
-            // 1. 清除根布局高亮底色（只作用外层ConstraintLayout，不影响圆点）
-            ViewCompat.setBackgroundTintList(itemRoot, null)
-
-            // 找到内部控件
-            val colorViewId =
-                ctx.resources.getIdentifier("merge_grade_list_color_$i", "id", ctx.packageName)
-            val textId =
-                ctx.resources.getIdentifier("merge_grade_list_text_$i", "id", ctx.packageName)
-            val scopeId =
-                ctx.resources.getIdentifier("merge_grade_list_scope_$i", "id", ctx.packageName)
-
-            val colorView = itemRoot.findViewById<View>(colorViewId)
-            val textTv = itemRoot.findViewById<TextView>(textId)
-            val scopeTv = itemRoot.findViewById<TextView>(scopeId)
-
-            val s = when (i) {
-                1 -> getString(R.string.adults_bmi_range_VerySeverelyUnderweight)
-                2 -> getString(R.string.adults_bmi_range_SeverelyUnderweight)
-                3 -> getString(R.string.adults_bmi_range_Underweight)
-                4 -> getString(R.string.adults_bmi_range_normal)
-                5 -> getString(R.string.adults_bmi_range_overweight)
-                6 -> getString(R.string.adult_bmi_range_obese_class_i)
-                7 -> getString(R.string.adult_bmi_range_obese_class_ii)
-                8 -> getString(R.string.adult_bmi_range_obese_class_iii)
-                else -> "" // 必须兜底，防止无匹配返回空
-            }
-            scopeTv.text = s
-
-            // 2. 文字控件：清空白色背景、恢复黑色文字
-            textTv.setBackgroundColor(0)
-            scopeTv.setBackgroundColor(0)
-            textTv.setTextColor(blackState)
-            scopeTv.setTextColor(blackState)
-            textTv.typeface = font
-            scopeTv.typeface = font
-            textTv.alpha = 0.7f
-            scopeTv.alpha = 0.7f
-
-            // 恢复圆点原有gradN颜色
-            val gradColorRes = ctx.resources.getIdentifier("grad$i", "color", ctx.packageName)
-            val gradTint = ColorStateList.valueOf(ctx.getColor(gradColorRes))
-            ViewCompat.setBackgroundTintList(colorView, gradTint)
-            itemRoot.visibility = View.VISIBLE
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewLifecycleOwner.lifecycleScope.launch {
-            val newBmiRecord = viewModel.getLatestBmi()
-            if (newBmiRecord != bmiRecord) {
-                bmiRecord = newBmiRecord
-                updateBmi()
-            }
-
-        }
     }
 
     override fun onDestroy() {

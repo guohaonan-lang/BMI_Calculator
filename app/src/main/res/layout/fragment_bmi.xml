@@ -37,12 +37,12 @@
         android:id="@+id/recent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:layout_marginEnd="10dp"
         android:fontFamily="@font/font_regular"
         android:text="@string/recent"
         android:textColor="@color/blue"
         android:textSize="16sp"
-        android:layout_marginTop="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/BMI" />
 
@@ -65,16 +65,15 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent" />
 
-
-            <include
-                android:id="@+id/result_merge_grade"
-                layout="@layout/merge_grade_list"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/result_grade_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingHorizontal="15dp"
                 android:layout_marginTop="20dp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/result_merge_result"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/result_merge_result" />
+                app:layout_constraintEnd_toEndOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

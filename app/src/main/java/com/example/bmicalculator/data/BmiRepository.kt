@@ -20,7 +20,7 @@ class BmiRepository(private val bmiDao: BmiDao) {
         return bmiDao.getBmiByTime(time)
     }
 
-    suspend fun getLatestBmi(): BmiEntity?{
+    fun getLatestBmi(): Flow<BmiEntity?> {
         return bmiDao.getLatestBmiOnce()
     }
 

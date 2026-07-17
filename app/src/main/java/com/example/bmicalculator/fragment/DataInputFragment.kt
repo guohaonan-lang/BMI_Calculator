@@ -47,13 +47,10 @@ class DataInputFragment : Fragment() {
 
     private var _binding: FragmentDataInputBinding? = null
     private val binding get() = checkNotNull(_binding)
-
-
-    private lateinit var ageRecyclerView: RecyclerView
     private lateinit var sheetDialog: BottomSheetDialog
     private lateinit var sheetDialog2: BottomSheetDialog
 
-    private var isFirstData = true
+
 
     private val viewModel: InputViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
@@ -77,20 +74,7 @@ class DataInputFragment : Fragment() {
         initWeightAndHeightEdit()
         initConvertWeightAndHeight()
         initGender()
-
         initDataFlow()
-        viewLifecycleOwner.lifecycleScope.launch {
-
-            // 挂起函数正常await等待查询完成
-            val latestBmi = viewModel.getLatestBmi()
-            if (latestBmi != null) {
-                viewModel.inputBmiRecord = latestBmi.copy(id = 0)
-                viewModel.initRecord(latestBmi)
-                isFirstData = false
-            } else isFirstData = true
-            ageRecyclerView.layoutManager?.scrollToPosition(viewModel.inputBmiRecord.age - 2)
-        }
-
 
         // 根布局监听触摸，仅当前输入页生效
         binding.mergeDateInput.root.setOnTouchListener { _, event ->
@@ -128,7 +112,7 @@ class DataInputFragment : Fragment() {
             val finalBmi = viewModel.computeFullBmi(requireContext())
             val intent = Intent(requireContext(), ResultActivity::class.java)
             intent.putExtra("BMI", finalBmi)
-            intent.putExtra("FATHER", isFirstData)
+            intent.putExtra("FATHER", viewModel.isFirstData)
             startActivity(intent)
         }
 
@@ -136,6 +120,20 @@ class DataInputFragment : Fragment() {
         binding.settingsUser.setOnClickListener {
             val intent = Intent(requireContext(), SettingActivity::class.java)
             startActivity(intent)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            // 挂起函数正常await等待查询完成
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.latestBmiRecord.collect { record ->
+                    if (record != null) {
+                        viewModel.initRecord(record)
+                        viewModel.isFirstData = false
+                    } else {
+                        viewModel.setAge(25)
+                    }
+                }
+            }
         }
     }
 
@@ -563,7 +561,7 @@ class DataInputFragment : Fragment() {
 
     // 年龄选择
     private fun initAgeRecyclerView() {
-        ageRecyclerView = binding.mergeDateInput.inputAge
+        val ageRecyclerView = binding.mergeDateInput.inputAge
         val layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         ageRecyclerView.layoutManager = layoutManager
@@ -619,6 +617,13 @@ class DataInputFragment : Fragment() {
                 }
             }
         })
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.ageFlow.collect { age ->
+                    ageRecyclerView.layoutManager?.scrollToPosition(age - 2)
+                }
+            }
+        }
     }
 
     // 身高体重

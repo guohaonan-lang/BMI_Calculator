@@ -62,14 +62,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent" />
-            
 
-            <include
-                android:id="@+id/result_merge_grade"
-                layout="@layout/merge_grade_list"
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/result_grade_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -82,11 +81,11 @@
                 android:layout_marginStart="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="30dp"
-                android:paddingBottom="25dp"
                 android:background="@drawable/merge_ad_background"
+                android:paddingBottom="25dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/result_merge_grade">
+                app:layout_constraintTop_toBottomOf="@+id/result_grade_rv">
 
                 <TextView
                     android:id="@+id/assessment_text1"
@@ -99,7 +98,7 @@
                     android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/assessment_text2"
@@ -127,18 +126,19 @@
                     android:textSize="14sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/assessment_text2" />
+
                 <TextView
                     android:id="@+id/assessment_difference"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
                     android:fontFamily="@font/font_extrabold"
                     android:text="(+24kg)"
-                    android:layout_marginStart="5dp"
                     android:textColor="@color/red"
                     android:textSize="14sp"
-                    app:layout_constraintStart_toEndOf="@id/assessment_range"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/assessment_range"/>
+                    app:layout_constraintStart_toEndOf="@id/assessment_range"
+                    app:layout_constraintTop_toTopOf="@id/assessment_range" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <include
@@ -163,8 +163,8 @@
         android:backgroundTint="@color/blue"
         android:fontFamily="@font/font_extrabold"
         android:text="@string/result_save"
-        android:textStyle="bold"
         android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

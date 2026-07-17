@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -36,12 +35,7 @@ import kotlinx.coroutines.launch
 class StatisticsFragment : Fragment() {
     private var _binding: FragmentStatisticsBinding? = null
     private val binding get() = checkNotNull(_binding)
-    private lateinit var bmiChart: LineChart
-    private lateinit var weightChart: LineChart
-    private lateinit var thumbTime: TextView
-    private val chartFont by lazy {
-        ResourcesCompat.getFont(requireContext(), R.font.font_extrabold)
-    }
+
 
     // 图表X轴日期标签集合
     private val xLabelList = mutableListOf<String>()
@@ -67,12 +61,9 @@ class StatisticsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        bmiChart = binding.chartBmi
-        weightChart = binding.chartWeight
-        thumbTime = binding.selectorThumbTime
 
-        initChartStyle(bmiChart)
-        initChartStyle(weightChart)
+        initChartStyle(binding.chartBmi)
+        initChartStyle(binding.chartWeight)
         setChartData()
 
         initSwitchTime()
@@ -95,30 +86,30 @@ class StatisticsFragment : Fragment() {
         val density = resources.displayMetrics.density
         val movePx = -(115 * density)
         binding.switchTimeDay.setOnClickListener {
-            thumbTime.animate()
+            binding.selectorThumbTime.animate()
                 .translationX(0f)
                 .withLayer()
                 .start()
-            thumbTime.text = getString(R.string.day)
+            binding.selectorThumbTime.text = getString(R.string.day)
 
             currentTimeMode = StatisticsFragmentViewModel.TimeMode.DAY
             processAndRenderData(rawBmiData)
         }
         binding.switchTimeWeek.setOnClickListener {
-            thumbTime.animate()
+            binding.selectorThumbTime.animate()
                 .translationX(-movePx)
                 .withLayer()
                 .start()
-            thumbTime.text = getString(R.string.week)
+            binding.selectorThumbTime.text = getString(R.string.week)
             currentTimeMode = StatisticsFragmentViewModel.TimeMode.WEEK
             processAndRenderData(rawBmiData)
         }
         binding.switchTimeMonth.setOnClickListener {
-            thumbTime.animate()
+            binding.selectorThumbTime.animate()
                 .translationX(-movePx * 2)
                 .withLayer()
                 .start()
-            thumbTime.text = getString(R.string.month)
+            binding.selectorThumbTime.text = getString(R.string.month)
             currentTimeMode = StatisticsFragmentViewModel.TimeMode.MONTH
             processAndRenderData(rawBmiData)
         }
@@ -126,6 +117,8 @@ class StatisticsFragment : Fragment() {
 
     // 初始化表格样式
     private fun initChartStyle(lineChart: LineChart) {
+
+        val chartFont = ResourcesCompat.getFont(requireContext(), R.font.font_extrabold)
         lineChart.apply {
             description.isEnabled = false
             legend.isEnabled = false
@@ -173,16 +166,23 @@ class StatisticsFragment : Fragment() {
     }
 
     //  BMI表格
-    private fun renderBmiChart(entries: MutableList<Entry>) {
+    private fun renderBmiChart(bmiChart: LineChart,entries: MutableList<Entry>) {
         if (entries.isEmpty()) {
             bmiChart.clear()
             bmiChart.invalidate()
             return
         }
 
-        val marker = BmiMarkerView(requireContext())
-        marker.chartView = bmiChart // 边缘自动防裁切
-        bmiChart.marker = marker
+        if(bmiChart == binding.chartBmi){
+            val marker = BmiMarkerView(requireContext())
+            marker.chartView = bmiChart // 边缘自动防裁切
+            bmiChart.marker = marker
+        }else{
+            val marker = WeightMarkerView(requireContext())
+            marker.chartView = bmiChart // 必须设置，边缘自动防裁切
+            bmiChart.marker = marker
+        }
+
 
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
             setDrawHighlightIndicators(false)
@@ -246,7 +246,7 @@ class StatisticsFragment : Fragment() {
         }
 
         bmiChart.data?.dataSets?.forEach { dataSet ->
-            dataSet.valueTypeface = chartFont
+            dataSet.valueTypeface = ResourcesCompat.getFont(requireContext(), R.font.font_extrabold)
         }
 
         // 通知图表刷新其内部基础状态并执行统一单次重绘
@@ -265,101 +265,6 @@ class StatisticsFragment : Fragment() {
         }
     }
 
-
-    //  体重表格
-    private fun renderWeightChart(entries: MutableList<Entry>) {
-        if (entries.isEmpty()) {
-            weightChart.clear()
-            weightChart.invalidate()
-            return
-        }
-
-        val marker = WeightMarkerView(requireContext())
-        marker.chartView = weightChart // 必须设置，边缘自动防裁切
-        weightChart.marker = marker
-
-        val dataSet = LineDataSet(entries, "BMI曲线").apply {
-            setDrawHighlightIndicators(false)
-            mode = LineDataSet.Mode.HORIZONTAL_BEZIER
-            lineWidth = 1f
-            color = Color.WHITE
-
-            circleRadius = 3f
-            setCircleColor(Color.WHITE)
-            circleHoleRadius = 1f
-            circleHoleColor = Color.WHITE
-
-            setDrawFilled(true)
-            val gradient = GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(
-                    0x80FFFFFF.toInt(),
-                    0x08FFFFFF
-                )
-            )
-            fillDrawable = gradient
-            setDrawValues(false)
-        }
-
-        weightChart.data = LineData(dataSet)
-
-        // ===== 1. 绑定底部的标签转换 =====
-        weightChart.xAxis.valueFormatter = object : ValueFormatter() {
-            override fun getFormattedValue(value: Float): String {
-                val index = value.toInt()
-                return if (index in xLabelList.indices) {
-                    xLabelList[index]
-                } else {
-                    ""
-                }
-            }
-        }
-
-        // 必须在设置完 data 之后、调用 invalidate 之前注入，否则顶部不会触发 drawLabel
-        weightChart.setXAxisRenderer(
-            SmartXAxisRenderer(
-                weightChart.viewPortHandler,
-                weightChart.xAxis,
-                weightChart.getTransformer(YAxis.AxisDependency.LEFT),
-                { mBaseTimeZero },
-                { currentTimeMode },
-                requireContext()
-            )
-        )
-
-        // ===== 2. 根据当前的模式，确定首屏看多少天/周/月 =====
-        val maxShowCount = 8f
-
-        // 锁死横向可见最大格数
-        weightChart.setVisibleXRangeMaximum(maxShowCount)
-
-        weightChart.xAxis.apply {
-            isGranularityEnabled = true
-            granularity = 1f
-            labelCount = maxShowCount.toInt()
-        }
-
-
-
-        weightChart.data?.dataSets?.forEach { dataSet ->
-            dataSet.valueTypeface = chartFont
-        }
-
-        // 通知图表刷新其内部基础状态并执行统一单次重绘
-        weightChart.notifyDataSetChanged()
-        weightChart.invalidate()
-
-        // ===== 3. 将清除放大矩阵、重新卡死边界与右移安全抛入 post 队列 =====
-        weightChart.post {
-            weightChart.viewPortHandler.matrixTouch.reset()
-
-            weightChart.setVisibleXRangeMaximum(maxShowCount)
-            weightChart.setVisibleXRangeMinimum(maxShowCount)
-            // 完美滚动到最新一页
-            weightChart.moveViewToX(weightChart.xAxis.axisMaximum - maxShowCount + 1f)
-        }
-    }
-
     // 监听数据
     private fun setChartData() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -375,10 +280,10 @@ class StatisticsFragment : Fragment() {
     // 处理数据
     private fun processAndRenderData(data: List<BmiEntity>) {
         if (data.isEmpty()) {
-            bmiChart.clear()
-            weightChart.clear()
-            bmiChart.invalidate()
-            weightChart.invalidate()
+            binding.chartBmi.clear()
+            binding.chartWeight.clear()
+            binding.chartBmi.invalidate()
+            binding.chartWeight.invalidate()
             return
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -390,11 +295,11 @@ class StatisticsFragment : Fragment() {
             mBaseTimeZero = result.baseTimeZero
 
             // 分别渲染两张图表
-            renderBmiChart(result.bmiEntries as MutableList<Entry>)
-            renderWeightChart(result.weightEntries as MutableList<Entry>)
+            renderBmiChart(binding.chartBmi,result.bmiEntries as MutableList<Entry>)
+            renderBmiChart(binding.chartWeight,result.weightEntries as MutableList<Entry>)
 
             // X轴区间配置（UI逻辑留在Fragment）
-            listOf(bmiChart, weightChart).forEach { chart ->
+            listOf(binding.chartBmi, binding.chartWeight).forEach { chart ->
                 chart.xAxis.apply {
                     axisMinimum = 0f
                     axisMaximum = (result.totalCount ).toFloat()
@@ -406,9 +311,9 @@ class StatisticsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         // 释放图表资源，避免内存泄漏
-        bmiChart.clear()
-        weightChart.clear()
-        weightChart.data = null
-        bmiChart.data = null
+        binding.chartBmi.clear()
+        binding.chartWeight.clear()
+        binding.chartBmi.data = null
+        binding.chartWeight.data = null
     }
 }

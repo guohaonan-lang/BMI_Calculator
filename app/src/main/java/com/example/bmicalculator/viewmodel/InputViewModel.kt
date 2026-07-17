@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.bmicalculator.R
@@ -15,6 +16,7 @@ import com.example.bmicalculator.util.TimeUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 @SuppressLint("DefaultLocale")
 class InputViewModel(private val repository: BmiRepository) : ViewModel() {
@@ -43,28 +45,88 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
     private val _heightUnit = MutableStateFlow(false)
     val heightUnitFlow: StateFlow<Boolean> = _heightUnit.asStateFlow()
 
-    var inputBmiRecord = BmiEntity(
-        id = 0,
-        height = 170f,
-        heightFt = 5,
-        heightIn = 7,
-        heightUnit = false,
-        weight = 140f,
-        weightUnit = false,
-        bmiValue = 21.9f,
-        bmiColor = 0xFF888888.toInt(), // 临时占位色
-        age = 25,
-        gender = 1,
-        createTime = System.currentTimeMillis(),
-        customTime = 0L,
-    )
+    private val _age = MutableStateFlow(1)
+    val ageFlow: StateFlow<Int> = _age.asStateFlow()
+
+    var inputBmiRecord = BmiEntity()
     var selectMonth: String = "June"
     var selectDay: String = "21"
     var selectYear: String = "2018"
     var selectPeriod: String = "Morning"
     private var weightPair: Pair<String, String> = "140.00" to "63.50"
     private var heightPair: Pair<Int, String> = 67 to "170.0"
+    var isFirstData = true
 
+    // 初始化赋值
+    fun initRecord(record: BmiEntity) {
+        if (record.createTime == inputBmiRecord.createTime) return
+        else inputBmiRecord.createTime = record.createTime
+        setGender(record.gender)
+        setWeightThumb(record.weightUnit)
+        setWeight(record.weight)
+        setHeightThumb(record.heightUnit)
+        setHeight(record.height)
+        setHeightFt(record.heightFt)
+        setHeightIn(record.heightIn)
+        setAge(record.age)
+    }
+
+    fun setAge(age: Int) {
+        inputBmiRecord.age = age
+        _age.value = age
+    }
+
+    fun setTime1(year: String, month: String, day: String) {
+        selectYear = year
+        selectMonth = month
+        selectDay = day
+        _time1.value = "$month $day, $year"
+    }
+
+    fun setTime2(period: String) {
+        selectPeriod = period
+        _time2.value = period
+    }
+
+    fun setWeight(weight: Float) {
+        inputBmiRecord.weight = weight
+        _weight.value = String.format("%.2f", inputBmiRecord.weight)
+    }
+
+    fun setHeight(height: Float) {
+        inputBmiRecord.height = height
+        _height.value = height
+    }
+
+    fun setHeightFt(height: Int) {
+        inputBmiRecord.heightFt = height
+        _heightFt.value = height
+    }
+
+    fun setHeightIn(height: Int) {
+        inputBmiRecord.heightIn = height
+        _heightIn.value = height
+    }
+
+    fun setGender(gender: Int) {
+        inputBmiRecord.gender = gender
+        _gender.value = gender
+    }
+
+    fun setWeightThumb(unit: Boolean) {
+        if (inputBmiRecord.weightUnit != unit) {
+            inputBmiRecord.weightUnit = unit
+        }
+        _weightUnit.value = unit
+
+    }
+
+    fun setHeightThumb(unit: Boolean) {
+        if (inputBmiRecord.heightUnit != unit) {
+            inputBmiRecord.heightUnit = unit
+        }
+        _heightUnit.value = unit
+    }
 
     // 1. 体重单位切换逻辑：lb <-> kg
     fun switchWeightUnitToKg() {
@@ -126,67 +188,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         _height.value = inputBmiRecord.height
     }
 
-    fun initRecord(record: BmiEntity) {
-        setGender(record.gender)
-        setWeightThumb(record.weightUnit)
-        setWeight(record.weight)
-        setHeightThumb(record.heightUnit)
-        setHeight(record.height)
-        setHeightFt(record.heightFt)
-        setHeightIn(record.heightIn)
-    }
 
-    fun setTime1(year: String, month: String, day: String) {
-        selectYear = year
-        selectMonth = month
-        selectDay = day
-        _time1.value = "$month $day, $year"
-    }
-
-    fun setTime2(period: String) {
-        selectPeriod = period
-        _time2.value = period
-    }
-
-    fun setWeight(weight: Float) {
-        inputBmiRecord.weight = weight
-        _weight.value = String.format("%.2f", inputBmiRecord.weight)
-    }
-
-    fun setHeight(height: Float) {
-        inputBmiRecord.height = height
-        _height.value = height
-    }
-
-    fun setHeightFt(height: Int) {
-        inputBmiRecord.heightFt = height
-        _heightFt.value = height
-    }
-
-    fun setHeightIn(height: Int) {
-        inputBmiRecord.heightIn = height
-        _heightIn.value = height
-    }
-
-    fun setGender(gender: Int) {
-        inputBmiRecord.gender = gender
-        _gender.value = gender
-    }
-
-    fun setWeightThumb(unit: Boolean) {
-        if (inputBmiRecord.weightUnit != unit) {
-            inputBmiRecord.weightUnit = unit
-        }
-        _weightUnit.value = unit
-
-    }
-
-    fun setHeightThumb(unit: Boolean) {
-        if (inputBmiRecord.heightUnit != unit) {
-            inputBmiRecord.heightUnit = unit
-        }
-        _heightUnit.value = unit
-    }
 
     //检查数值合法
     data class CheckResult(
@@ -205,7 +207,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
                     pass = false,
                     toastMsgRes = R.string.weight_out_of_range_2_551_lb,
                 )
-            }
+            }else _weight.value = String.format("%.2f", inputBmiRecord.weight)
         } else {
             // KG模式
             if (record.weight !in 1f..250f) {
@@ -214,7 +216,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
                     pass = false,
                     toastMsgRes = R.string.weight_out_of_range_2_250_kg,
                 )
-            }
+            }else _weight.value = String.format("%.2f", inputBmiRecord.weight)
         }
 
         // 校验身高
@@ -226,14 +228,14 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_8_ft,
                 )
-            }
+            }else _heightFt.value = record.heightFt
             if (record.heightIn !in 0..11) {
                 _heightIn.value = 11
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_11_in,
                 )
-            }
+            }else _heightIn.value = record.heightIn
         } else {
             // 公制 cm
             if (record.height !in 1f..250f) {
@@ -242,7 +244,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_250_cm,
                 )
-            }
+            }else _height.value = record.height
         }
         return CheckResult(pass = true, toastMsgRes = null)
     }
@@ -303,8 +305,17 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         return inputBmiRecord
     }
 
-    suspend fun getLatestBmi(): BmiEntity? {
-        return repository.getLatestBmi()
+    // 缓存最新BMI记录，给UI监听
+    private val _latestBmiRecord = MutableStateFlow<BmiEntity?>(null)
+    val latestBmiRecord: StateFlow<BmiEntity?> = _latestBmiRecord
+
+    init {
+        // 全局监听数据库，数据变化自动更新缓存
+        viewModelScope.launch {
+            repository.getLatestBmi().collect { entity ->
+                _latestBmiRecord.value = entity
+            }
+        }
     }
 
 

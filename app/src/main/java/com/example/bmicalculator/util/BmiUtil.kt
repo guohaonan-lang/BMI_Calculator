@@ -3,6 +3,7 @@ package com.example.bmicalculator.util
 import android.content.Context
 import com.example.bmicalculator.R
 import com.example.bmicalculator.model.BmiLevel
+import com.example.bmicalculator.model.Grade
 import com.example.bmicalculator.model.TeenBmiRange
 
 object BmiUtil {
@@ -135,7 +136,7 @@ object BmiUtil {
             }
 
             bmi <= ADULT_OB1_MAX -> {
-                val name = context.getString(R.string.adult_bmi_obese_class_i)
+                val name = context.getString(R.string.adults_bmi_obese_class_i)
                 val desc = context.getString(R.string.desc_ob1)
                 BmiLevel(name, colorMap["OBESE1"]!!, desc)
             }
@@ -176,7 +177,7 @@ object BmiUtil {
             }
 
             else -> {
-                val name = context.getString(R.string.adult_bmi_obese_class_i)
+                val name = context.getString(R.string.adults_bmi_obese_class_i)
                 val desc = context.getString(R.string.desc_teen_ob1)
                 BmiLevel(name, colorMap["OBESE1"]!!, desc)
             }
@@ -189,7 +190,7 @@ object BmiUtil {
         val strUnder = context.getString(R.string.adults_bmi_underweight)
         val strNormal = context.getString(R.string.adults_bmi_normal)
         val strOver = context.getString(R.string.adults_bmi_overweight)
-        val strOb1 = context.getString(R.string.adult_bmi_obese_class_i)
+        val strOb1 = context.getString(R.string.adults_bmi_obese_class_i)
         val strOb2 = context.getString(R.string.adults_bmi_obese_class_ii)
         val strOb3 = context.getString(R.string.adults_bmi_obese_class_iii)
         var grad = 0
@@ -205,7 +206,8 @@ object BmiUtil {
         }
         return grad
     }
-    fun getTeenBmiRange(age: Int,gender: Int): FloatArray {
+
+    fun getTeenBmiRange(age: Int, gender: Int): FloatArray {
 
         val teenRange = if (gender == 0) {
             femaleTeenTable.firstOrNull { it.age == age }
@@ -227,4 +229,87 @@ object BmiUtil {
         }
         return bmiRanges
     }
+
+    fun getGradeList(context: Context, age: Int, gender: Int): List<Grade> {
+        if (age <= 20) return getTeenBmiColorAndRange(context, age, gender)
+        else return getAdultBmiColorAndRange(context)
+    }
+
+    private fun getAdultBmiColorAndRange(context: Context): List<Grade> {
+        val gradeList = listOf(
+            Grade(
+                context.getColor(R.color.grad1),
+                context.getString(R.string.adults_bmi_very_severely_underweight),
+                context.getString(R.string.adults_bmi_range_VerySeverelyUnderweight)
+            ),
+            Grade(
+                context.getColor(R.color.grad2),
+                context.getString(R.string.adults_bmi_severely_underweight),
+                context.getString(R.string.adults_bmi_range_SeverelyUnderweight)
+            ),
+            Grade(
+                context.getColor(R.color.grad3),
+                context.getString(R.string.adults_bmi_underweight),
+                context.getString(R.string.adults_bmi_range_overweight)
+            ),
+            Grade(
+                context.getColor(R.color.grad4),
+                context.getString(R.string.adults_bmi_normal),
+                context.getString(R.string.adults_bmi_range_normal)
+            ),
+            Grade(
+                context.getColor(R.color.grad5),
+                context.getString(R.string.adults_bmi_overweight),
+                context.getString(R.string.adults_bmi_range_overweight)
+            ),
+            Grade(
+                context.getColor(R.color.grad6),
+                context.getString(R.string.adults_bmi_obese_class_i),
+                context.getString(R.string.adults_bmi_range_obese_class_i)
+            ),
+            Grade(
+                context.getColor(R.color.grad7),
+                context.getString(R.string.adults_bmi_obese_class_ii),
+                context.getString(R.string.adults_bmi_range_obese_class_ii)
+            ),
+            Grade(
+                context.getColor(R.color.grad8),
+                context.getString(R.string.adults_bmi_obese_class_iii),
+                context.getString(R.string.adults_bmi_range_obese_class_iii)
+            )
+        )
+        return gradeList
+    }
+
+    private fun getTeenBmiColorAndRange(context: Context, age: Int, gender: Int): List<Grade> {
+        val teenRange = if (gender == 0) {
+            femaleTeenTable.firstOrNull { it.age == age }
+        } else {
+            maleTeenTable.firstOrNull { it.age == age }
+        }
+        val gradeList = listOf(
+            Grade(
+                context.getColor(R.color.grad3),
+                context.getString(R.string.adults_bmi_underweight),
+                " < ${teenRange?.underweightMax}"
+            ),
+            Grade(
+                context.getColor(R.color.grad4),
+                context.getString(R.string.adults_bmi_normal),
+                "${teenRange?.underweightMax}- ${teenRange?.normalMax}"
+            ),
+            Grade(
+                context.getColor(R.color.grad5),
+                context.getString(R.string.adults_bmi_overweight),
+                "${teenRange?.normalMax}- ${teenRange?.overweightMax}"
+            ),
+            Grade(
+                context.getColor(R.color.grad6),
+                context.getString(R.string.adults_bmi_obese_class_i),
+                " ≥ ${teenRange?.overweightMax}"
+            )
+        )
+        return gradeList
+    }
+
 }
