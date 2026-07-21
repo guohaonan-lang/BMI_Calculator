@@ -1,6 +1,5 @@
 package com.example.bmicalculator.util
 
-import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
@@ -29,7 +28,7 @@ object LangHelper {
 
     // 必须传入 baseContext
     fun attachBaseContext(baseContext: Context, langCode: String): Context {
-        val config = Configuration()
+        val config = baseContext.resources.configuration
 
         val locale = when (langCode) {
             LANG_ZH -> Locale.CHINA

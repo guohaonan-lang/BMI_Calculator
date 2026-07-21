@@ -45,6 +45,7 @@ class BmiColorWheelView @JvmOverloads constructor(
                 startPointerAnimation()
             }
         }
+
     // 是否显示指针 true显示 / false隐藏
     var showPointer = true
         set(value) {
@@ -188,17 +189,18 @@ class BmiColorWheelView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        // 画布宽度
         val rawW = width.toFloat() - paddingLeft - paddingRight
         if (rawW <= 0) return
+        // 色轮图边距
         val w = rawW * 0.8f
-        val extraOffset = (rawW - w) / 2f
-        val centerX = paddingLeft + w / 2f + extraOffset
+        val centerX = paddingLeft + rawW / 2f
         val strokeW = dpToPx(80f)
         paintArc.strokeWidth = strokeW
 
         val textMargin = dpToPx(24f)
         val radius = (w - strokeW) / 2f
-        val centerY = paddingTop + textMargin + radius + strokeW / 2f
+        val centerY = paddingTop + textMargin + w / 2f
         rectF.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius)
 
         // 1. 绘制分段彩色圆弧（使用预存的全局 angleList 安全绘制）
@@ -224,7 +226,7 @@ class BmiColorWheelView @JvmOverloads constructor(
                 canvas.translate(centerX, centerY)
                 canvas.rotate(angle + 90f)
                 val fontMetrics = paintText.fontMetrics
-                val baseline = -textDistance - fontMetrics.ascent
+                val baseline = -fontMetrics.ascent - textDistance
                 canvas.drawText(text, 0f, baseline, paintText)
                 canvas.restore()
             }
@@ -245,13 +247,25 @@ class BmiColorWheelView @JvmOverloads constructor(
 
             pathPointer.reset()
             pathPointer.moveTo(0f, -pointerWidth / 2f)
-            pathPointer.quadTo(pointerLength * 0.7f, -pointerWidth * 0.2f, pointerLength - headRadius, -headRadius)
+            pathPointer.quadTo(
+                pointerLength * 0.7f,
+                -pointerWidth * 0.2f,
+                pointerLength - headRadius,
+                -headRadius
+            )
             pathPointer.arcTo(
                 pointerLength - 2 * headRadius, -headRadius,
                 pointerLength, headRadius,
-                -90f, 180f, false
+                -90f,
+                180f,
+                false
             )
-            pathPointer.quadTo(pointerLength * 0.7f, pointerWidth * 0.15f, 0f, pointerWidth / 2f)
+            pathPointer.quadTo(
+                pointerLength * 0.7f,
+                pointerWidth * 0.15f,
+                0f,
+                pointerWidth / 2f
+            )
             pathPointer.close()
 
             paintPointer.pathEffect = null

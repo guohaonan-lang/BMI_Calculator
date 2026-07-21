@@ -16,8 +16,10 @@ import java.io.OutputStreamWriter
 object BmiFileUtil {
     private val gson = Gson()
     private const val BMI_BACKUP_FILE_NAME = "test_bmi_data.json"
+
     // assets 内置测试文件名
     private const val ASSETS_TEST_FILE = "test_bmi_data.json"
+
     // 获取APP私有files目录下的固定文件
     private fun getBmiBackupFile(context: Context): File {
         val filesDir = context.filesDir
@@ -26,19 +28,22 @@ object BmiFileUtil {
 
     fun readTestFile(context: Context): List<BmiEntity> {
         return try {
-            val inputStream = context.assets.open(ASSETS_TEST_FILE)
-            val reader = BufferedReader(InputStreamReader(inputStream))
-            val jsonContext = reader.readText()
+            context.assets.open(ASSETS_TEST_FILE).use { inputStream ->
+                val reader = BufferedReader(InputStreamReader(inputStream))
+                val jsonContext = reader.readText()
+                Log.d(TAG, "成功读取测试文件内容: $jsonContext")
+                val type = object : TypeToken<List<BmiEntity>>() {}.type
 
-            val type = object : TypeToken<List<BmiEntity>>(){}
-            Log.d(TAG, "读取成功 ： $jsonContext")
-            gson.fromJson(jsonContext,type)
-        }catch (e: Exception){
+                val testList: List<BmiEntity> = gson.fromJson(jsonContext, type) ?: emptyList()
+                testList
+            }
+        } catch (e: Exception) {
             e.printStackTrace()
             Log.d(TAG, "读取失败")
             emptyList()
         }
     }
+
     // 导出数据
     fun exportBmiToFile(context: Context, recordList: List<BmiEntity>): Boolean {
         return try {
@@ -80,6 +85,7 @@ object BmiFileUtil {
             return gson.fromJson(reader, type)
         }
     }
+
     // 删除本地备份文件
     fun deleteLocalBackupFile(context: Context): Boolean {
         return getBmiBackupFile(context).delete()

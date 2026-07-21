@@ -26,7 +26,6 @@ class BmiMarkerView(context: Context) : MarkerView(context, R.layout.marker_pop)
         innerCircle.setTint(context.getColor(circleColor))
         markerText.text = String.format("%.1f", yVal)
         super.refreshContent(e, highlight)
-
     }
 
     override fun getOffset(): MPPointF {
