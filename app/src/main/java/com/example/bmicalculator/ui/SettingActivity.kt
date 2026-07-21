@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -20,6 +19,7 @@ import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySettingBinding
 import com.example.bmicalculator.viewmodel.SettingViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SettingActivity : BaseActivity<ActivitySettingBinding>() {
@@ -31,6 +31,7 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
         val db = BmiDatabase.getDatabase(this)
         SettingViewModel.provideFactory(BmiRepository(db.bmiDao()))
     }
+    private lateinit var userBottomSheetDialog: BottomSheetDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,17 +40,13 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        initUserDialog()
         initAllClick()
-        initDataFlow()
-    }
-
-    private fun initDataFlow() {
-
     }
 
     private fun initAllClick() {
         binding.settingUser.setOnClickListener {
-            initUserDialog()
+            userBottomSheetDialog.show()
         }
         binding.settingLanguage.setOnClickListener {
             val intent = Intent(this, LanguageActivity::class.java)
@@ -57,7 +54,7 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
         }
         binding.settingUserAutorenew.setOnClickListener {
             initAutoDialog()
-            lifecycleScope.launch {
+            lifecycleScope.launch(Dispatchers.IO) {
                 viewModel.readTestFile(this@SettingActivity)
             }
         }
@@ -72,7 +69,7 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
     }
 
     private fun initUserDialog() {
-        val userBottomSheetDialog = BottomSheetDialog(this)
+        userBottomSheetDialog = BottomSheetDialog(this)
         val rootView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_setting_user, null)
         userBottomSheetDialog.setContentView(rootView)
         rootView.findViewById<Button>(R.id.user_cancel_bt).setOnClickListener {
@@ -81,27 +78,35 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
         rootView.findViewById<ImageView>(R.id.user_cancel_x).setOnClickListener {
             userBottomSheetDialog.dismiss()
         }
-        rootView.findViewById<Button>(R.id.user_login).setOnClickListener {
-            if (rootView.findViewById<Button>(R.id.user_login).text == getString(R.string.log_out)) {
-                rootView.findViewById<Button>(R.id.user_login).text = getString(R.string.log_in)
-                rootView.findViewById<Button>(R.id.user_login).setTextColor(getColor(R.color.red))
+        val loginButton = rootView.findViewById<Button>(R.id.user_login)
+
+        loginButton.setOnClickListener {
+            // 🏆 【核心修复】：加上 .toString()，确保类型 100% 属于纯 String 文本比对
+            val currentText = loginButton.text.toString()
+            val logoutText = getString(R.string.log_out)
+            val loginText = getString(R.string.log_in)
+
+            if (currentText == logoutText) {
+                // 执行登出逻辑
+                loginButton.text = getString(R.string.log_in)
+                loginButton.setTextColor(getColor(R.color.red))
+
                 userBottomSheetDialog.dismiss()
                 binding.userIv.visibility = View.GONE
                 binding.settingUserText1.text = getString(R.string.setting_backup_restore)
                 binding.settingUserText2.text = getString(R.string.setting_synchronize_your_data)
+            } else if (currentText == loginText) {
+                // 执行登录逻辑
+                loginButton.text = getString(R.string.log_out)
+                loginButton.setTextColor(getColor(R.color.red))
 
-            } else {
-                rootView.findViewById<Button>(R.id.user_login).text = getString(R.string.log_out)
-                rootView.findViewById<Button>(R.id.user_login).setTextColor(getColor(R.color.red))
                 userBottomSheetDialog.dismiss()
                 binding.userIv.visibility = View.VISIBLE
                 binding.settingUserText1.text = "Cassie"
                 binding.settingUserText2.text = "cassiexiao@gmail.com"
                 binding.settingUserText2.alpha = 0.5f
             }
-
         }
-        userBottomSheetDialog.show()
     }
 
     private fun initAutoDialog() {
