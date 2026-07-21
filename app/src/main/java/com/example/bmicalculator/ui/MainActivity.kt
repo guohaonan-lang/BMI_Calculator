@@ -4,21 +4,28 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.viewpager2.widget.ViewPager2
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.adapter.HomeAdapter
 import com.example.bmicalculator.databinding.ActivityMainBinding
+import com.example.bmicalculator.viewmodel.MainViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun inflateBinding(inflater: LayoutInflater): ActivityMainBinding {
         return ActivityMainBinding.inflate(inflater)
     }
-    private lateinit var tabLayout: TabLayout
-    private lateinit var viewPager2: ViewPager2
+
+    private val viewModel: MainViewModel by viewModels {
+        MainViewModel.provideFactory()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,24 +36,33 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             insets
         }
 
-        tabLayout = findViewById(R.id.main_table)
-        viewPager2 = findViewById(R.id.main_viewpage2)
-
         setupViewPage2()
         setupTableLayout()
-        viewPager2.setCurrentItem(1, false)
+        initDataFlow()
+
+    }
+
+    private fun initDataFlow() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.bmi.collect { item ->
+                    binding.mainViewpage2.setCurrentItem(item, false)
+                }
+            }
+        }
     }
 
     private fun setupViewPage2() {
-        val adapter = HomeAdapter(this)
-        viewPager2.adapter = adapter
-        viewPager2.offscreenPageLimit = 1
-        viewPager2.isUserInputEnabled = false
-
+        val homeAdapter = HomeAdapter(this)
+        binding.mainViewpage2.apply {
+            adapter = homeAdapter
+            offscreenPageLimit = 1
+            isUserInputEnabled = false
+        }
     }
 
     private fun setupTableLayout() {
-        TabLayoutMediator(tabLayout, viewPager2) { tab, position ->
+        TabLayoutMediator(binding.mainTable, binding.mainViewpage2) { tab, position ->
             val tabView = layoutInflater.inflate(R.layout.item_tab, null)
             val ivIcon = tabView.findViewById<ImageView>(R.id.tab_iv)
             val tvText = tabView.findViewById<TextView>(R.id.tab_text)
@@ -56,10 +72,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     tvText.text = getString(R.string.title_calculate)
                     ivIcon.setImageResource(R.drawable.tab_calculator)
                 }
+
                 1 -> {
                     tvText.text = "BMI"
                     ivIcon.setImageResource(R.drawable.tab_bmi)
                 }
+
                 2 -> {
                     tvText.text = getString(R.string.statistics)
                     ivIcon.setImageResource(R.drawable.tab_discover)
@@ -68,7 +86,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             tab.customView = tabView
         }.attach()
         // 监听Tab选中切换图标
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        binding.mainTable.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val selectView = tab?.customView
                 val icon = selectView?.findViewById<ImageView>(R.id.tab_iv)

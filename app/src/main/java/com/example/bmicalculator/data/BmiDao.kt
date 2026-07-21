@@ -36,8 +36,8 @@ interface BmiDao {
     suspend fun insertBmiList(list: List<BmiEntity>)
 
     @Update
-    suspend fun updatebmi(bmi: BmiEntity)
+    suspend fun updateBmi(bmi: BmiEntity)
 
     @Delete
-    suspend fun deletebmi(bmi: BmiEntity)
+    suspend fun deleteBmi(bmi: BmiEntity)
 }

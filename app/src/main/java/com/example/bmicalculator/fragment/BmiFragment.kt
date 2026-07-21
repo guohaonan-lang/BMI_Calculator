@@ -62,15 +62,6 @@ class BmiFragment : Fragment() {
         initGradeRecyclerView()
         initDataFlow()
     }
-
-    private fun initGradeRecyclerView() {
-        val layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        binding.resultGradeRv.layoutManager = layoutManager
-        gradeAdapter = GradeAdapter(emptyList())
-        binding.resultGradeRv.adapter = gradeAdapter
-    }
-
     private fun initDataFlow() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -82,6 +73,16 @@ class BmiFragment : Fragment() {
             }
         }
     }
+
+    private fun initGradeRecyclerView() {
+        val layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.resultGradeRv.layoutManager = layoutManager
+        gradeAdapter = GradeAdapter(emptyList())
+        binding.resultGradeRv.adapter = gradeAdapter
+    }
+
+
 
     // 读取信息
     private fun updateBmi(record: BmiEntity) {

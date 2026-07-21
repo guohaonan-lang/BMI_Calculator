@@ -2,7 +2,6 @@ package com.example.bmicalculator.viewmodel
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -125,7 +124,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             _weight.value = String.format("%.2f", weight)
             val newPair = originWeight to _weight.value
             weightPair = newPair
-        }else _weight.value = weightPair.second
+        } else _weight.value = weightPair.second
     }
 
     fun switchWeightUnitToLb() {
@@ -134,10 +133,9 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             val originWeight = _weight.value
             weight /= 0.4536f
             _weight.value = String.format("%.2f", weight)
-            Log.d("放到挥洒积分活动空间啊", "switchWeightUnitToLb: $weight $_weight.value")
             val newPair = _weight.value to originWeight
             weightPair = newPair
-        }else _weight.value = weightPair.first
+        } else _weight.value = weightPair.first
     }
 
     // 2. 身高单位切换逻辑：cm <-> ft·in
@@ -167,6 +165,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             heightPair = newPair
         }
     }
+
     //检查数值合法
     data class CheckResult(
         val pass: Boolean,
@@ -225,7 +224,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         return CheckResult(pass = true, toastMsgRes = null)
     }
 
-    // 4. 完整计算BMI、填充实体信息（原calculate按钮内全部计算逻辑迁移）
+    // 4. 完整计算BMI、填充实体信息
     fun computeFullBmi(context: Context): BmiEntity {
         if (_heightUnit.value) {
             val showText = String.format("%.1f", _height.value)
@@ -235,7 +234,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             } else {
                 val totalInch = (_height.value / 2.54f).toInt()
                 _heightFt.value = totalInch / 12
-                _heightIn.value  = totalInch % 12
+                _heightIn.value = totalInch % 12
             }
         } else {
             _height.value =
@@ -276,19 +275,19 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         )
     }
 
-    // 缓存最新BMI记录，给UI监听
-    private val _latestBmiRecord = MutableStateFlow<BmiEntity?>(null)
-    val latestBmiRecord: StateFlow<BmiEntity?> = _latestBmiRecord
-
     init {
         // 全局监听数据库，数据变化自动更新缓存
         viewModelScope.launch {
             repository.getLatestBmi().collect { entity ->
-                _latestBmiRecord.value = entity
+                if (entity != null) {
+                    initRecord(entity)
+                } else {
+                    setAge(25)
+                }
             }
         }
-    }
 
+    }
 
     companion object {
         fun provideFactory(

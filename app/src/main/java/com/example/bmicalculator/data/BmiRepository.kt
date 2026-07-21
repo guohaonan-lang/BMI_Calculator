@@ -33,11 +33,11 @@ class BmiRepository(private val bmiDao: BmiDao) {
     }
 
     suspend fun updateBmiRecord(bmi: BmiEntity) {
-        bmiDao.updatebmi(bmi)
+        bmiDao.updateBmi(bmi)
     }
 
     suspend fun deleteBmiRecord(bmi: BmiEntity) {
-        bmiDao.deletebmi(bmi)
+        bmiDao.deleteBmi(bmi)
     }
     suspend fun countBmiRecord(): Long{
         return bmiDao.countAllBmi()

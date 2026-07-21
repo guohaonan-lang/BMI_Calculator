@@ -11,11 +11,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -42,6 +41,7 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
     override fun inflateBinding(inflater: LayoutInflater): ActivityResultBinding {
         return ActivityResultBinding.inflate(inflater)
     }
+
     private lateinit var sheetDialog: BottomSheetDialog
     private lateinit var gradeAdapter: GradeAdapter
     private lateinit var dialogAdapter: GradeAdapter
@@ -74,22 +74,35 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
         initDataFlow()
     }
 
+    private fun initDataFlow() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                launch {
+                    viewModel.uiState.collect { result ->
+                        renderUi(result)
+                    }
+                }
+                launch {
+                    viewModel.bimCount.collect { count ->
+                        if (count == 0) {
+                            val intent = Intent(this@ResultActivity, DataInputActivity::class.java)
+                            startActivity(intent)
+                            finishAffinity()
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
     private fun initGradeRecyclerView() {
         val layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.resultGradeRv.layoutManager = layoutManager
         gradeAdapter = GradeAdapter(emptyList())
         binding.resultGradeRv.adapter = gradeAdapter
-    }
-
-    private fun initDataFlow() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { result ->
-                    renderUi(result)
-                }
-            }
-        }
     }
 
     private fun renderUi(state: ResultViewModel.ResultUiState) {
@@ -141,6 +154,9 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
         } else {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra("BMI")
+        }
+        if (bmiRecord != null) {
+            viewModel.resultBmiRecord = bmiRecord!!
         }
         statusFirst = intent.getBooleanExtra("FATHER", false)
         statusRecent = intent.getBooleanExtra("Recent", false)
@@ -241,21 +257,16 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
         val buttonNo = dialogLayout.findViewById<TextView>(R.id.cancel)
         buttonNo.setOnClickListener { alertDialog.dismiss() }
         buttonYes.setOnClickListener {
-            var sum: Long
-            lifecycleScope.launch {
-                sum = viewModel.countBmiRecord()
-                if (statusRecent) {
-                    viewModel.deleteBmiRecord(bmiRecord!!)
-                    sum--
+            if (statusRecent) {
+                lifecycleScope.launch {
+                    val count = viewModel.countBmiRecord()
+                    viewModel.setBmiCount(count.toInt())
                 }
-                if (statusRecent && sum.toInt() == 0) {
-                    val intent = Intent(this@ResultActivity, DataInputActivity::class.java)
-                    startActivity(intent)
-                    finishAffinity()
-                } else {
-                    alertDialog.dismiss()
-                    finish()
-                }
+                viewModel.setBmiCount(-1)
+                finish()
+            } else {
+                alertDialog.dismiss()
+                finish()
             }
         }
         alertDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
@@ -282,7 +293,7 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
 //        val gradeList = BmiUtil.getGradeList(this, record.age, record.gender)
         val gradeList = emptyList<Grade>()
         dialogAdapter = GradeAdapter(gradeList)
-        recycler.adapter =dialogAdapter
+        recycler.adapter = dialogAdapter
 
     }
 

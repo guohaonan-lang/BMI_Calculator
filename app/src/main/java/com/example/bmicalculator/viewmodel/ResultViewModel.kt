@@ -3,6 +3,7 @@ package com.example.bmicalculator.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.bmicalculator.R
@@ -12,7 +13,9 @@ import com.example.bmicalculator.model.Grade
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlin.Long
 import kotlin.math.max
 import kotlin.math.min
@@ -20,6 +23,16 @@ import kotlin.math.min
 class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
 
     var resultBmiRecord = BmiEntity()
+    private val _BmiCount = MutableStateFlow(100)
+    val bimCount: StateFlow<Int> = _BmiCount.asStateFlow()
+    fun setBmiCount(count: Int) {
+        if (count == -1) {
+            viewModelScope.launch {
+                deleteBmiRecord(resultBmiRecord)
+            }
+        }
+        _BmiCount.value += count
+    }
 
     data class ResultUiState(
         val age: Int = 25,
@@ -153,6 +166,7 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
     suspend fun countBmiRecord(): Long {
         return repository.countBmiRecord()
     }
+
 
     data class NormalBmiRange(
         val max: Float,

@@ -1,6 +1,7 @@
 package com.example.bmicalculator.adapter
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,12 +47,13 @@ class RecentAdapter(private var dataList: List<BmiEntity>) :
             "${timeText.selectMonth} ${timeText.selectDay} ${timeText.selectYear}  ${timeText.selectPeriod}"
         holder.timeText.text = text
         holder.bmiColor.backgroundTintList =
-            android.content.res.ColorStateList.valueOf(item.bmiColor)
+            ColorStateList.valueOf(item.bmiColor)
 
 
         val bmiInfo =
             BmiUtil.getBmiFullInfo(ctx, item.age, item.gender, item.bmiValue)
         holder.bmiGrade.text = bmiInfo.levelName
+
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(item)
         }

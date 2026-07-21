@@ -15,7 +15,6 @@ import com.example.bmicalculator.model.Grade
 class GradeAdapter(private var gradeList: List<Grade>) :
     RecyclerView.Adapter<GradeAdapter.ViewHolder>() {
 
-
     fun update(newList: List<Grade>) {
         gradeList = newList
         notifyDataSetChanged()
@@ -39,7 +38,7 @@ class GradeAdapter(private var gradeList: List<Grade>) :
         val grade = gradeList[position]
         val ctx = holder.itemView.context
 
-        if(grade.isSelect){
+        if (grade.isSelect) {
             val white = ctx.getColor(android.R.color.white)
             ViewCompat.setBackgroundTintList(
                 holder.itemView as ConstraintLayout,
@@ -54,7 +53,7 @@ class GradeAdapter(private var gradeList: List<Grade>) :
             val boldFont = ResourcesCompat.getFont(ctx, R.font.font_extrabold)
             holder.grade.typeface = boldFont
             holder.range.typeface = boldFont
-        }else{
+        } else {
             ViewCompat.setBackgroundTintList(
                 holder.itemView as ConstraintLayout,
                 null

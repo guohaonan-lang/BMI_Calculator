@@ -73,7 +73,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
                 totalCount = 0
             )
         }
-        // 把原Fragment processAndRenderData里所有计算搬过来
+
         val xLabelList = mutableListOf<String>()
         val mBaseTimeZero: Long
 

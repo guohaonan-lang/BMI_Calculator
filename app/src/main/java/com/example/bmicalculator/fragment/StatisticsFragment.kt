@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -29,8 +30,6 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.launch
 
 class StatisticsFragment : Fragment() {
@@ -82,7 +81,16 @@ class StatisticsFragment : Fragment() {
     // 切换时间周期
     private fun initSwitchTime() {
         val density = resources.displayMetrics.density
-        val movePx = -(115 * density)
+        var movePx = (115 * density)
+
+        binding.switchTimeDay.post {
+            movePx = binding.switchTimeDay.width.toFloat()
+            val lp =
+                binding.selectorThumbTime.layoutParams as ConstraintLayout.LayoutParams
+            lp.width = binding.switchTimeDay.width
+            binding.selectorThumbTime.layoutParams = lp
+        }
+
         binding.switchTimeDay.setOnClickListener {
             binding.selectorThumbTime.animate()
                 .translationX(0f)
@@ -93,7 +101,7 @@ class StatisticsFragment : Fragment() {
         }
         binding.switchTimeWeek.setOnClickListener {
             binding.selectorThumbTime.animate()
-                .translationX(-movePx)
+                .translationX(movePx)
                 .withLayer()
                 .start()
             binding.selectorThumbTime.text = getString(R.string.week)
@@ -101,7 +109,7 @@ class StatisticsFragment : Fragment() {
         }
         binding.switchTimeMonth.setOnClickListener {
             binding.selectorThumbTime.animate()
-                .translationX(-movePx * 2)
+                .translationX(movePx * 2)
                 .withLayer()
                 .start()
             binding.selectorThumbTime.text = getString(R.string.month)
@@ -177,8 +185,6 @@ class StatisticsFragment : Fragment() {
             bmiChart.marker = marker
         }
 
-        bmiChart.isHighlightPerDragEnabled = true
-        bmiChart.isHighlightPerTapEnabled = true
         val dataSet = LineDataSet(entries, "BMI曲线").apply {
             setDrawHighlightIndicators(true)
             // 2. 关闭原生十字线（需求：不要辅助线）
@@ -190,8 +196,6 @@ class StatisticsFragment : Fragment() {
 
             circleRadius = 3f
             setCircleColor(Color.WHITE)
-//            circleHoleRadius = 1f
-//            circleHoleColor = Color.WHITE
 
             setDrawFilled(true)
             val gradient = GradientDrawable(

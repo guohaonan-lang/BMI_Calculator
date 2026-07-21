@@ -51,7 +51,6 @@ class DataInputFragment : Fragment() {
     private lateinit var sheetDialog2: BottomSheetDialog
 
 
-
     private val viewModel: InputViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
         InputViewModel.provideFactory(BmiRepository(db.bmiDao()))
@@ -74,12 +73,18 @@ class DataInputFragment : Fragment() {
         initWeightAndHeightEdit()
         initConvertWeightAndHeight()
         initGender()
+
         initDataFlow()
 
+        initClickView()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initClickView() {
         // 根布局监听触摸，仅当前输入页生效
         binding.mergeDateInput.root.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) { // 改用UP，不会被子控件抢占DOWN
-                val focusEt = view.findFocus() as? EditText ?: return@setOnTouchListener false
+                val focusEt = view?.findFocus() as? EditText ?: return@setOnTouchListener false
 
                 // 获取EditText在根布局内的局部坐标
                 val loc = IntArray(2)
@@ -120,20 +125,6 @@ class DataInputFragment : Fragment() {
         binding.settingsUser.setOnClickListener {
             val intent = Intent(requireContext(), SettingActivity::class.java)
             startActivity(intent)
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            // 挂起函数正常await等待查询完成
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.latestBmiRecord.collect { record ->
-                    if (record != null) {
-                        viewModel.initRecord(record)
-                        viewModel.isFirstData = false
-                    } else {
-                        viewModel.setAge(25)
-                    }
-                }
-            }
         }
     }
 
@@ -201,13 +192,10 @@ class DataInputFragment : Fragment() {
 
     // 选择性别
     private fun initGender() {
-        val male = binding.mergeDateInput.cardMale
-        val female = binding.mergeDateInput.cardFemale
-        male.setOnClickListener {
+        binding.mergeDateInput.cardMale.setOnClickListener {
             viewModel.setGender(1)
-
         }
-        female.setOnClickListener {
+        binding.mergeDateInput.cardFemale.setOnClickListener {
             viewModel.setGender(0)
         }
     }
@@ -627,24 +615,16 @@ class DataInputFragment : Fragment() {
     // 身高体重
     private fun initWeightAndHeightEdit() {
         binding.mergeDateInput.run { }
-        val edtWeight = binding.mergeDateInput.inputWeight
-        val edtHeight = binding.mergeDateInput.inputHeight
-        val edtHeightFt = binding.mergeDateInput.inputHeightFt
-        val edtHeightIn = binding.mergeDateInput.inputHeightIn
 
-        val editTexts = listOf(edtHeightFt, edtHeightIn, edtWeight, edtHeight)
+        val editTexts = listOf(
+            binding.mergeDateInput.inputHeightFt,
+            binding.mergeDateInput.inputHeightIn,
+            binding.mergeDateInput.inputWeight,
+            binding.mergeDateInput.inputHeight
+        )
         editTexts.forEach { et ->
             et.doAfterTextChanged { editable ->
-                val text = editable.toString()
-                // 空输入直接跳过，避免数字转换崩溃
-                if (text.isBlank()) return@doAfterTextChanged
-                try {
-                    when (et) {
-                        edtWeight -> viewModel.setWeight(text.toFloat())
-                        edtHeight -> viewModel.setHeight(text.toFloat())
-                    }
-                } catch (_: NumberFormatException) {
-                }
+
             }
             et.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
@@ -666,7 +646,7 @@ class DataInputFragment : Fragment() {
                 false
             }
         }
-        edtHeightFt.addTextChangedListener(object : TextWatcher {
+        binding.mergeDateInput.inputHeightFt.addTextChangedListener(object : TextWatcher {
             private var isUpdating = false
 
             override fun beforeTextChanged(
@@ -690,19 +670,19 @@ class DataInputFragment : Fragment() {
 
                 isUpdating = true
                 if (digits.isEmpty()) {
-                    edtHeightFt.setText("")
+                    binding.mergeDateInput.inputHeightFt.setText("")
                 } else {
                     // 自动拼接单引号
                     val formatted = "$digits'"
-                    edtHeightFt.setText(formatted)
+                    binding.mergeDateInput.inputHeightFt.setText(formatted)
 
                     // 把光标锁定在引号前面
-                    edtHeightFt.setSelection(digits.length)
+                    binding.mergeDateInput.inputHeightFt.setSelection(digits.length)
                 }
                 isUpdating = false
             }
         })
-        edtHeightIn.addTextChangedListener(object : TextWatcher {
+        binding.mergeDateInput.inputHeightIn.addTextChangedListener(object : TextWatcher {
             private var isUpdating = false
 
             override fun beforeTextChanged(
@@ -724,14 +704,14 @@ class DataInputFragment : Fragment() {
                 viewModel.setHeightIn(num)
                 isUpdating = true
                 if (digits.isEmpty()) {
-                    edtHeightIn.setText("")
+                    binding.mergeDateInput.inputHeightIn.setText("")
                 } else {
                     // 自动拼接引号
                     val formatted = "$digits''"
-                    edtHeightIn.setText(formatted)
+                    binding.mergeDateInput.inputHeightIn.setText(formatted)
 
                     // 把光标锁定在单引号前面
-                    edtHeightIn.setSelection(digits.length)
+                    binding.mergeDateInput.inputHeightIn.setSelection(digits.length)
                 }
                 isUpdating = false
             }
@@ -740,7 +720,10 @@ class DataInputFragment : Fragment() {
 
     //检查数值合法
     private fun checkNumberValid(): Boolean {
+        viewModel.setWeight(binding.mergeDateInput.inputWeight.text.toString().toFloat())
+        viewModel.setHeight(binding.mergeDateInput.inputHeight.text.toString().toFloat())
         val checkRes = viewModel.checkInputValid()
+
         if (!checkRes.pass) {
             checkRes.toastMsgRes?.let {
                 Toast.makeText(requireContext(), getString(it), Toast.LENGTH_SHORT).show()
