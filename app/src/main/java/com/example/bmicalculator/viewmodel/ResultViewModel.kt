@@ -34,6 +34,12 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
         _BmiCount.value += count
     }
 
+    init {
+        viewModelScope.launch {
+            _BmiCount.value =  repository.countBmiRecord().toInt()
+        }
+    }
+
     data class ResultUiState(
         val age: Int = 25,
         val bmiValue: Float = 0f,

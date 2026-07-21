@@ -83,7 +83,7 @@ class DataInputFragment : Fragment() {
     private fun initClickView() {
         // 根布局监听触摸，仅当前输入页生效
         binding.mergeDateInput.root.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_UP) { // 改用UP，不会被子控件抢占DOWN
+            if (event.action == MotionEvent.ACTION_DOWN) {
                 val focusEt = view?.findFocus() as? EditText ?: return@setOnTouchListener false
 
                 // 获取EditText在根布局内的局部坐标
@@ -236,7 +236,7 @@ class DataInputFragment : Fragment() {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            viewModel.setWeightThumb(false)
+
             viewModel.switchWeightUnitToLb()
         }
 
@@ -245,7 +245,7 @@ class DataInputFragment : Fragment() {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            viewModel.setWeightThumb(true)
+
             viewModel.switchWeightUnitToKg()
         }
 
@@ -254,7 +254,7 @@ class DataInputFragment : Fragment() {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            viewModel.setHeightThumb(false)
+
             viewModel.switchHeightUnitToFtIn()
         }
 
@@ -263,7 +263,6 @@ class DataInputFragment : Fragment() {
             if (!checkNumberValid()) {
                 return@setOnClickListener
             }
-            viewModel.setHeightThumb(true)
             viewModel.switchHeightUnitToCm()
         }
 
@@ -623,7 +622,7 @@ class DataInputFragment : Fragment() {
             binding.mergeDateInput.inputHeight
         )
         editTexts.forEach { et ->
-            et.doAfterTextChanged { editable ->
+            et.doAfterTextChanged { _ ->
 
             }
             et.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->

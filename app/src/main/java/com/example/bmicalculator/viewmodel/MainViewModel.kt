@@ -9,9 +9,12 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 class MainViewModel : ViewModel() {
-    private val _bmi = MutableStateFlow<Int>(1)
+    private val _bmi = MutableStateFlow(1)
     val bmi: StateFlow<Int> = _bmi
 
+    fun setBmi(bmi: Int) {
+        _bmi.value = bmi
+    }
     companion object {
         fun provideFactory(): ViewModelProvider.Factory = viewModelFactory {
             initializer {

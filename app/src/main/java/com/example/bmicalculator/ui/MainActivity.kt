@@ -47,6 +47,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.bmi.collect { item ->
                     binding.mainViewpage2.setCurrentItem(item, false)
+                    refreshTabIconState(item)
                 }
             }
         }
@@ -88,18 +89,25 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         // 监听Tab选中切换图标
         binding.mainTable.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                val selectView = tab?.customView
-                val icon = selectView?.findViewById<ImageView>(R.id.tab_iv)
-                icon?.alpha = 1f
+                val position = tab?.position ?: return
+                // 更新viewmodel的bmi
+                viewModel.setBmi(position)
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-                val unSelectView = tab?.customView
-                val icon = unSelectView?.findViewById<ImageView>(R.id.tab_iv)
-                icon?.alpha = 0.5f
-            }
-
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
+    private fun refreshTabIconState(selectedPos: Int) {
+        for (i in 0 until binding.mainTable.tabCount) {
+            val tab = binding.mainTable.getTabAt(i) ?: continue
+            val iv = tab.customView?.findViewById<ImageView>(R.id.tab_iv)
+            if (i == selectedPos) {
+                iv?.alpha = 1f
+            } else {
+                iv?.alpha = 0.5f
+            }
+        }
+    }
+
 }

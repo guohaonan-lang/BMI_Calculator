@@ -117,6 +117,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
 
     // 1. 体重单位切换逻辑：lb <-> kg
     fun switchWeightUnitToKg() {
+        if (_weightUnit.value) return
         var weight = _weight.value.toFloat()
         if (_weight.value != weightPair.first) {
             val originWeight = _weight.value
@@ -125,9 +126,12 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             val newPair = originWeight to _weight.value
             weightPair = newPair
         } else _weight.value = weightPair.second
+        setWeightThumb(true)
     }
 
+
     fun switchWeightUnitToLb() {
+        if (!_weightUnit.value) return
         var weight = _weight.value.toFloat()
         if (_weight.value != weightPair.second) {
             val originWeight = _weight.value
@@ -136,10 +140,14 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             val newPair = _weight.value to originWeight
             weightPair = newPair
         } else _weight.value = weightPair.first
+        setWeightThumb(false)
+
     }
 
     // 2. 身高单位切换逻辑：cm <-> ft·in
     fun switchHeightUnitToFtIn() {
+
+        if (!_heightUnit.value) return
         val showText = String.format("%.1f", _height.value)
         if (showText != heightPair.second) {
             val originHeight = String.format("%.1f", _height.value)
@@ -149,10 +157,12 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             val newPair = totalInch to originHeight
             heightPair = newPair
         }
+        setHeightThumb(false)
     }
 
 
     fun switchHeightUnitToCm() {
+        if (_heightUnit.value) return
         var showText: String
         val totalInch = _heightFt.value * 12 + _heightIn.value
         if (totalInch != heightPair.first) {
@@ -164,6 +174,8 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             val newPair = totalInch to showText
             heightPair = newPair
         }
+        setHeightThumb(true)
+
     }
 
     //检查数值合法

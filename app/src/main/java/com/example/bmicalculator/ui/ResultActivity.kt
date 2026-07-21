@@ -84,7 +84,7 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
                 }
                 launch {
                     viewModel.bimCount.collect { count ->
-                        if (count == 0) {
+                        if (count == 0 && statusRecent) {
                             val intent = Intent(this@ResultActivity, DataInputActivity::class.java)
                             startActivity(intent)
                             finishAffinity()
@@ -257,10 +257,6 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
         buttonNo.setOnClickListener { alertDialog.dismiss() }
         buttonYes.setOnClickListener {
             if (statusRecent) {
-                lifecycleScope.launch {
-                    val count = viewModel.countBmiRecord()
-                    viewModel.setBmiCount(count.toInt())
-                }
                 viewModel.setBmiCount(-1)
                 finish()
             } else {
