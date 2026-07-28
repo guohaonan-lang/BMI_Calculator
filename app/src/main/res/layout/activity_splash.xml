@@ -52,4 +52,10 @@
         app:layout_constraintBottom_toTopOf="@id/splash_3"
         app:layout_constraintStart_toStartOf="@id/splash_3" />
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,6 +15,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
@@ -68,6 +70,18 @@ class DataInputFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // ========== 方案 A：初始化 Compose 容器 ==========
+        binding.inputComposeView.apply {
+            // 可选：设置 Compose 的 Dispose 策略，随 Fragment View 的生命周期自动销毁
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+            )
+            setContent {
+                MaterialTheme {
+                    InputScreen()
+                }
+            }
+        }
         setupTime()
         initAgeRecyclerView()
         initWeightAndHeightEdit()

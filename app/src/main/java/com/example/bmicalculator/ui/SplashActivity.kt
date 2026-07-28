@@ -6,6 +6,7 @@ import android.view.animation.PathInterpolator
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.MaterialTheme
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -42,6 +43,16 @@ class SplashActivity : AppCompatActivity() {
         // 初始化语言
         val savedLang = LangHelper.getSavedLang(this)
         LangHelper.setLanguage(this,savedLang)
+
+
+        // ========== 方案A：初始化Compose容器 ==========
+        binding.composeView.setContent {
+            MaterialTheme() {
+                // 这里放Compose页面，目前可以先空着，后续逐步迁移UI
+                // 示例：你后续想要增加Compose文字、加载提示等写在这里
+                // SplashComposeOverlay()
+            }
+        }
 
         var isFirst: Long = 0
         lifecycleScope.launch {
