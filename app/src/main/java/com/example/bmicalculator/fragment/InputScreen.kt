@@ -1,6 +1,6 @@
 package com.example.bmicalculator.fragment
 
-import android.R.attr.maxWidth
+import android.view.MotionEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -54,6 +55,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.res.ResourcesCompat
+import com.bigkoo.pickerview.adapter.ArrayWheelAdapter
 import com.contrarywind.view.WheelView
 import com.example.bmicalculator.R
 import com.example.bmicalculator.ui.theme.BMIComposeTheme
@@ -63,6 +66,7 @@ import com.example.bmicalculator.ui.theme.Blue
 import com.example.bmicalculator.ui.theme.Gray
 import com.example.bmicalculator.ui.theme.White
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import kotlin.math.abs
 
 
@@ -82,6 +86,7 @@ fun InputScreen(
         .background(Background),
 ) {
     var heightInput by remember { mutableStateOf("140") }
+    var showDateBottomSheet by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         Row(
@@ -220,30 +225,43 @@ fun InputScreen(
                         shape = RoundedCornerShape(36.dp)
                     )
             ) {
-                Text(
-                    "lb",
-                    Modifier
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable {
+
+                        }
                         .background(
                             color = White,
-                            shape = RoundedCornerShape(36.dp)
                         )
-                        .weight(1f)
                         .fillMaxHeight(),
-                    textAlign = TextAlign.Center,
-                    fontFamily = FontFamily(Font(R.font.font_extrabold))
-                )
-                Text(
-                    "kg",
-                    Modifier
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "lb",
+                        fontFamily = FontFamily(Font(R.font.font_extrabold))
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable {
+
+                        }
                         .background(
                             color = White,
-                            shape = RoundedCornerShape(36.dp)
                         )
-                        .weight(1f)
                         .fillMaxHeight(),
-                    textAlign = TextAlign.Center,
-                    fontFamily = FontFamily(Font(R.font.font_extrabold))
-                )
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "kg",
+                        fontFamily = FontFamily(Font(R.font.font_extrabold))
+                    )
+                }
             }
             // height单位转换
             Row(
@@ -261,30 +279,42 @@ fun InputScreen(
                         shape = RoundedCornerShape(36.dp)
                     )
             ) {
-                Text(
-                    "ft·in",
-                    Modifier
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable {
+
+                        }
                         .background(
                             color = White,
-                            shape = RoundedCornerShape(36.dp)
                         )
-                        .weight(1f)
                         .fillMaxHeight(),
-                    textAlign = TextAlign.Center,
-                    fontFamily = FontFamily(Font(R.font.font_extrabold))
-                )
-                Text(
-                    "cm",
-                    Modifier
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "ft·in",
+                        fontFamily = FontFamily(Font(R.font.font_extrabold))
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable {
+
+                        }
                         .background(
                             color = White,
-                            shape = RoundedCornerShape(36.dp)
                         )
-                        .weight(1f)
                         .fillMaxHeight(),
-                    textAlign = TextAlign.Center,
-                    fontFamily = FontFamily(Font(R.font.font_extrabold))
-                )
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "cm",
+                        fontFamily = FontFamily(Font(R.font.font_extrabold))
+                    )
+                }
             }
         }
         Text(
@@ -312,9 +342,9 @@ fun InputScreen(
                     .height(60.dp)
                     .padding(start = 20.dp, end = 8.dp)
                     .clip(RoundedCornerShape(15.dp))
-                    .background(White )
+                    .background(White)
                     .clickable {
-                        // 整个白色框任意位置点击都会触发
+                        showDateBottomSheet = true
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -324,8 +354,9 @@ fun InputScreen(
                     fontSize = 20.sp,
                     fontFamily = FontFamily(Font(R.font.font_extrabold)),
                     softWrap = false,
-                    maxLines = 1
-                )
+                    maxLines = 1,
+
+                    )
             }
             Box(
                 modifier = Modifier
@@ -335,7 +366,7 @@ fun InputScreen(
                     .clip(RoundedCornerShape(15.dp))
                     .background(White)
                     .clickable {
-                        // 整个白色框任意位置点击都会触发
+                        showDateBottomSheet = true
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -364,7 +395,7 @@ fun InputScreen(
             {}
         )
 
-        // 性别
+        // 性别选择
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -410,6 +441,18 @@ fun InputScreen(
             )
         }
     }
+    DatePickerBottomSheet(
+        show = showDateBottomSheet,
+        onDismiss = {
+            // 关闭弹窗：重置状态
+            showDateBottomSheet = false
+        },
+        onConfirm = { year, month, day ->
+            // 选中日期回调逻辑
+            // TODO 更新文本显示 "July 25,2026"
+            showDateBottomSheet = false
+        }
+    )
 }
 
 /**
@@ -427,8 +470,61 @@ fun DatePickerBottomSheet(
 ) {
     if (!show) return
 
+    val wheelMonthRef = remember { mutableStateOf<WheelView?>(null) }
+    val wheelDayRef = remember { mutableStateOf<WheelView?>(null) }
+    val wheelYearRef = remember { mutableStateOf<WheelView?>(null) }
+
+    // 基础数据源（和旧代码保持一致）
+    val monthArray = stringArrayResource(id = R.array.month_short_names)
+    val monthData = remember(monthArray) {
+        monthArray.toList()
+    }
+    val yearData = remember {
+        (1970..2036).map { it.toString() }
+    }
+
+    // 初始选中日期
+    val initCalendar = remember { Calendar.getInstance() }
+    val initYearIdx = initCalendar.get(Calendar.YEAR) - 1970
+    val initMonthIdx = initCalendar.get(Calendar.MONTH)
+    val initDayIdx = initCalendar.get(Calendar.DAY_OF_MONTH) - 1
+
+    // 通用方法：根据年下标、月下标获取当月天数列表（照搬原有逻辑）
+    fun getDayList(yearPos: Int, monthPos: Int): MutableList<String> {
+        val targetYear = yearData[yearPos].toInt()
+        val targetMonth = monthPos
+        val calendar = Calendar.getInstance()
+        calendar.set(targetYear, targetMonth, 1)
+        val maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+        return (1..maxDay).map { it.toString() }.toMutableList()
+    }
+
+    // 刷新日期滚轮统一函数（年月切换时调用）
+    fun refreshDayWheel() {
+        val wheelYear = wheelYearRef.value ?: return
+        val wheelMonth = wheelMonthRef.value ?: return
+        val wheelDay = wheelDayRef.value ?: return
+
+        val yearCur = wheelYear.currentItem
+        val monthCur = wheelMonth.currentItem
+        val newDayList = getDayList(yearCur, monthCur)
+
+        // 选中值越界修正
+        if (wheelDay.currentItem >= newDayList.size) {
+            wheelDay.currentItem = newDayList.size - 1
+        }
+        wheelDay.adapter = ArrayWheelAdapter(newDayList)
+        wheelDay.invalidate()
+    }
+
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            onDismiss()
+            // 弹窗关闭释放引用，防止内存泄漏
+            wheelMonthRef.value = null
+            wheelDayRef.value = null
+            wheelYearRef.value = null
+        },
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         containerColor = White
     ) {
@@ -453,32 +549,129 @@ fun DatePickerBottomSheet(
                     .fillMaxWidth()
                     .height(180.dp)
             ) {
-                // 月份 Wheel
+                // ========== 月份滚轮 ==========
                 AndroidView(
                     factory = { context ->
+                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_extrabold)
                         WheelView(context).apply {
-                            // 初始化数据、监听选中
+                            adapter = ArrayWheelAdapter(monthData)
+                            currentItem = initMonthIdx
+                            setTypeface(boldTypeface)
+                            setCyclic(false)
+                            setLineSpacingMultiplier(2f)
+                            setAlphaGradient(true)
+                            setTextSize(16f)
+
+                            setDividerColor(android.graphics.Color.LTGRAY)
+                            setTextColorCenter(android.graphics.Color.BLACK)
+
+                            setOnTouchListener { v, event ->
+                                when (event.action) {
+                                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                                        v.parent?.requestDisallowInterceptTouchEvent(true)
+                                    }
+
+                                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                                        v.parent?.requestDisallowInterceptTouchEvent(false)
+                                        v.performClick()
+                                    }
+                                }
+                                false
+                            }
+
+
+                            // 月份切换监听 → 刷新日期滚轮
+                            setOnItemSelectedListener {
+                                refreshDayWheel()
+                            }
                         }
+                    },
+                    update = { wheel ->
+                        wheelMonthRef.value = wheel
                     },
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
                 )
-                // 日期 Wheel
+
+                // ========== 日期滚轮 ==========
                 AndroidView(
                     factory = { context ->
+                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_extrabold)
+                        val initDays = getDayList(initYearIdx, initMonthIdx)
                         WheelView(context).apply {
+                            adapter = ArrayWheelAdapter(initDays)
+                            currentItem = initDayIdx.coerceAtMost(initDays.size - 1)
+                            setTypeface(boldTypeface)
+                            setCyclic(false)
+                            setLineSpacingMultiplier(2f)
+                            setAlphaGradient(true)
+                            setTextSize(16f)
+
+                            setDividerColor(android.graphics.Color.LTGRAY)
+                            setTextColorCenter(android.graphics.Color.BLACK)
+
+                            setOnTouchListener { v, event ->
+                                when (event.action) {
+                                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                                        v.parent?.requestDisallowInterceptTouchEvent(true)
+                                    }
+
+                                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                                        v.parent?.requestDisallowInterceptTouchEvent(false)
+                                        v.performClick()
+                                    }
+                                }
+                                false
+                            }
                         }
+                    },
+                    update = { wheel ->
+                        wheelDayRef.value = wheel
                     },
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
                 )
-                // 年份 Wheel
+
+                // ========== 年份滚轮 ==========
                 AndroidView(
                     factory = { context ->
+                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_extrabold)
                         WheelView(context).apply {
+                            adapter = ArrayWheelAdapter(yearData)
+                            currentItem = initYearIdx
+                            setTypeface(boldTypeface)
+                            setCyclic(false)
+                            setLineSpacingMultiplier(2f)
+                            setAlphaGradient(true)
+                            setTextSize(16f)
+
+                            setDividerColor(android.graphics.Color.LTGRAY)
+                            setTextColorCenter(android.graphics.Color.BLACK)
+
+                            setOnTouchListener { v, event ->
+                                when (event.action) {
+                                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                                        v.parent?.requestDisallowInterceptTouchEvent(true)
+                                    }
+
+                                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                                        v.parent?.requestDisallowInterceptTouchEvent(false)
+                                        v.performClick()
+                                    }
+                                }
+                                false
+                            }
+
+                            // 年份切换监听 → 刷新日期滚轮（处理闰年）
+                            setOnItemSelectedListener {
+                                refreshDayWheel()
+                            }
                         }
+                    },
+                    update = { wheel ->
+                        wheelYearRef.value = wheel
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -510,7 +703,15 @@ fun DatePickerBottomSheet(
                 Button(
                     onClick = {
                         // 在这里读取滚轮选中值，向上回调
-                        onConfirm("month", "day", "year")
+                        val wYear = wheelYearRef.value ?: return@Button
+                        val wMonth = wheelMonthRef.value ?: return@Button
+                        val wDay = wheelDayRef.value ?: return@Button
+
+                        val selYear = yearData[wYear.currentItem]
+                        val selMonth = monthData[wMonth.currentItem]
+                        val selDay =
+                            getDayList(wYear.currentItem, wMonth.currentItem)[wDay.currentItem]
+                        onConfirm(selYear, selMonth, selDay)
                         onDismiss()
                     },
                     modifier = Modifier.size(120.dp, 56.dp),
@@ -527,6 +728,7 @@ fun DatePickerBottomSheet(
             }
         }
     }
+
 }
 
 @Composable
@@ -626,41 +828,7 @@ fun AgeHorizontalPicker(
     }
 }
 
-
-@Preview(widthDp = 441, heightDp = 891, showBackground = true)
-@Composable
-fun PreviewGenderSelectCard() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        GenderSelectCard(
-            iconRes = R.drawable.ic_male,
-            text = stringResource(R.string.male),
-            selected = false,
-            onClick = { },
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp)
-                .height(90.dp)
-        )
-
-        GenderSelectCard(
-            iconRes = R.drawable.ic_female,
-            text = stringResource(R.string.female),
-            selected = true,
-            onClick = {},
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
-                .height(90.dp)
-        )
-    }
-
-}
-
+// 性别选择（）
 @Composable
 fun GenderSelectCard(
     iconRes: Int,
