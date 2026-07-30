@@ -1,9 +1,12 @@
 package com.example.bmicalculator.fragment
 
+import android.content.Intent
 import android.view.MotionEvent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +35,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,9 +44,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -55,16 +64,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bigkoo.pickerview.adapter.ArrayWheelAdapter
 import com.contrarywind.view.WheelView
 import com.example.bmicalculator.R
+import com.example.bmicalculator.ui.ResultActivity
+import com.example.bmicalculator.ui.SettingActivity
 import com.example.bmicalculator.ui.theme.BMIComposeTheme
 import com.example.bmicalculator.ui.theme.Background
 import com.example.bmicalculator.ui.theme.Black
 import com.example.bmicalculator.ui.theme.Blue
 import com.example.bmicalculator.ui.theme.Gray
 import com.example.bmicalculator.ui.theme.White
+import com.example.bmicalculator.util.BmiUtil
+import com.example.bmicalculator.util.TimeUtil
+import com.example.bmicalculator.viewmodel.InputViewModel
+import com.example.bmicalculator.viewmodel.InputViewModel.DataInputIntent
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import kotlin.math.abs
@@ -74,21 +92,55 @@ import kotlin.math.abs
 @Composable
 fun PreviewInputScreen() {
     BMIComposeTheme {
-        InputScreen()
+//        InputScreen()
     }
 
 }
 
 @Composable
 fun InputScreen(
+    viewModel: InputViewModel,
     modifier: Modifier = Modifier
         .fillMaxSize()
         .background(Background),
 ) {
-    var heightInput by remember { mutableStateOf("140") }
-    var showDateBottomSheet by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-    Column(modifier = modifier) {
+    val uiState = viewModel.state.collectAsStateWithLifecycle()
+    val eventFlow = viewModel.event
+
+    var showDateBottomSheet by remember { mutableStateOf(false) }
+    var showDate2BottomSheet by remember { mutableStateOf(false) }
+
+
+    val focusManager = LocalFocusManager.current
+    val keyboardCtrl = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(uiState.value.customTime) {
+        val timeStr = TimeUtil(context).parseTimeStamp(uiState.value.customTime)
+        viewModel.processIntent(
+            DataInputIntent.SetTime1(
+                timeStr.selectYear,
+                timeStr.selectMonth,
+                timeStr.selectDay
+            )
+        )
+        viewModel.processIntent(DataInputIntent.SetTime2(timeStr.selectPeriod))
+    }
+
+
+    Column(
+        modifier = modifier
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    // 主动清除所有焦点、收起键盘
+                    focusManager.clearFocus()
+                    keyboardCtrl?.hide()
+                    viewModel.processIntent(DataInputIntent.CheckInputValid)
+                }
+            }
+    ) {
+        // 标题，个人页面跳转
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
@@ -107,8 +159,15 @@ fun InputScreen(
                     .padding(start = 15.dp, top = 18.dp)
                     .padding(end = 15.dp)
                     .size(30.dp)
+                    .clickable(
+                        onClick = {
+                            val intent = Intent(context, SettingActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    )
             )
         }
+        // 身高，体重-标题
         Row(
             horizontalArrangement = Arrangement.SpaceAround,
             modifier = Modifier
@@ -121,11 +180,12 @@ fun InputScreen(
                 fontSize = 14.sp,
             )
             Text(
-                stringResource(R.string.input_weight),
+                stringResource(R.string.input_height),
                 fontFamily = FontFamily(Font(R.font.font_regular)),
                 fontSize = 14.sp,
             )
         }
+        // 身高，体重，输入
         Row(
             horizontalArrangement = Arrangement.SpaceAround,
             modifier = Modifier
@@ -133,9 +193,9 @@ fun InputScreen(
                 .padding(top = 10.dp)
         ) {
             TextField(
-                value = "140",
+                value = uiState.value.weight.toString(),
                 onValueChange = {
-                    heightInput = it
+                    viewModel.processIntent(DataInputIntent.SetWeight(it.toFloat()))
                 },
                 modifier = Modifier
                     .weight(1f)
@@ -146,12 +206,9 @@ fun InputScreen(
                 textStyle = TextStyle(
                     color = Black,
                     fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
-                    fontSize = 30.sp,
+                    fontSize = 28.sp,
                     textAlign = TextAlign.Center
                 ),
-                suffix = {
-                    Text("")
-                },
                 isError = false,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
@@ -167,41 +224,116 @@ fun InputScreen(
                     disabledIndicatorColor = Background,
                 )
             )
-            TextField(
-                value = "140",
-                onValueChange = {
-                    heightInput = it
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(
-                        start = 8.dp,
-                        end = 20.dp,
+            if (uiState.value.heightUnit) {
+                TextField(
+                    value = uiState.value.height.toString(),
+                    onValueChange = {
+                        viewModel.processIntent(DataInputIntent.SetHeight(it.toFloat()))
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(
+                            start = 8.dp,
+                            end = 20.dp,
+                        ),
+                    textStyle = TextStyle(
+                        color = Black,
+                        fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                        fontSize = 28.sp,
+                        textAlign = TextAlign.Center
                     ),
-                textStyle = TextStyle(
-                    color = Black,
-                    fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
-                    fontSize = 30.sp,
-                    textAlign = TextAlign.Center
-                ),
-                suffix = {
-                    Text("")
-                },
-                isError = false,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                interactionSource = remember { MutableInteractionSource() },
-                shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = White,
-                    unfocusedContainerColor = White,
-                    disabledContainerColor = White,
+                    isError = false,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    interactionSource = remember { MutableInteractionSource() },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = White,
+                        unfocusedContainerColor = White,
+                        disabledContainerColor = White,
 
-                    focusedIndicatorColor = Background,
-                    unfocusedIndicatorColor = Background,
-                    disabledIndicatorColor = Background,
+                        focusedIndicatorColor = Background,
+                        unfocusedIndicatorColor = Background,
+                        disabledIndicatorColor = Background,
+                    )
                 )
-            )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .weight(1f),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                ) {
+                    TextField(
+                        value = uiState.value.heightFt.toString(),
+                        onValueChange = {
+                            viewModel.processIntent(DataInputIntent.SetHeightFt(it.toInt()))
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(
+                                start = 8.dp,
+                                end = 5.dp,
+                            ),
+                        textStyle = TextStyle(
+                            color = Black,
+                            fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                            fontSize = 28.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        isError = false,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        interactionSource = remember { MutableInteractionSource() },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = White,
+                            unfocusedContainerColor = White,
+                            disabledContainerColor = White,
+
+                            focusedIndicatorColor = Background,
+                            unfocusedIndicatorColor = Background,
+                            disabledIndicatorColor = Background,
+                        )
+                    )
+                    TextField(
+                        value = uiState.value.heightIn.toString(),
+                        onValueChange = { rawText ->
+                            // 只保留数字，限制最多3位
+                            val text = rawText.filter { it.isDigit() }.take(2)
+                            val num = text.toIntOrNull() ?: 0
+                            viewModel.processIntent(DataInputIntent.SetHeightIn(num))
+                        },
+                        modifier = Modifier
+                            .weight(1.4f)
+                            .padding(
+                                start = 5.dp,
+                                end = 20.dp,
+                            ),
+                        textStyle = TextStyle(
+                            color = Black,
+                            fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                            fontSize = 28.sp,
+                            textAlign = TextAlign.Center,
+                        ),
+                        isError = false,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        interactionSource = remember { MutableInteractionSource() },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = White,
+                            unfocusedContainerColor = White,
+                            disabledContainerColor = White,
+
+                            focusedIndicatorColor = Background,
+                            unfocusedIndicatorColor = Background,
+                            disabledIndicatorColor = Background,
+                        ),
+                    )
+                }
+            }
+
+
         }
         // weight单位转换
         Row(
@@ -230,17 +362,18 @@ fun InputScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(15.dp))
                         .clickable {
-
+                            viewModel.processIntent(DataInputIntent.SwitchWeightUnitToLb)
                         }
                         .background(
-                            color = White,
+                            color = if (!uiState.value.weightUnit) White else Gray,
                         )
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "lb",
-                        fontFamily = FontFamily(Font(R.font.font_extrabold))
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        modifier = Modifier.alpha(if (!uiState.value.weightUnit) 1f else 0.3f)
                     )
                 }
 
@@ -249,17 +382,18 @@ fun InputScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(15.dp))
                         .clickable {
-
+                            viewModel.processIntent(DataInputIntent.SwitchWeightUnitToKg)
                         }
                         .background(
-                            color = White,
+                            color = if (uiState.value.weightUnit) White else Gray,
                         )
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "kg",
-                        fontFamily = FontFamily(Font(R.font.font_extrabold))
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        modifier = Modifier.alpha(if (uiState.value.weightUnit) 1f else 0.3f)
                     )
                 }
             }
@@ -284,17 +418,18 @@ fun InputScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(15.dp))
                         .clickable {
-
+                            viewModel.processIntent(DataInputIntent.SwitchHeightUnitToFtIn)
                         }
                         .background(
-                            color = White,
+                            color = if (!uiState.value.heightUnit) White else Gray,
                         )
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "ft·in",
-                        fontFamily = FontFamily(Font(R.font.font_extrabold))
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        modifier = Modifier.alpha(if (!uiState.value.heightUnit) 1f else 0.3f)
                     )
                 }
                 Box(
@@ -302,17 +437,18 @@ fun InputScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(15.dp))
                         .clickable {
-
+                            viewModel.processIntent(DataInputIntent.SwitchHeightUnitToCm)
                         }
                         .background(
-                            color = White,
+                            color = if (uiState.value.heightUnit) White else Gray,
                         )
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "cm",
-                        fontFamily = FontFamily(Font(R.font.font_extrabold))
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        modifier = Modifier.alpha(if (uiState.value.heightUnit) 1f else 0.3f)
                     )
                 }
             }
@@ -326,6 +462,7 @@ fun InputScreen(
                 .align(Alignment.CenterHorizontally),
             color = Black,
         )
+        // 时间选择
         Row(
             modifier = Modifier
                 .padding(
@@ -349,7 +486,7 @@ fun InputScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "July 25,2026",
+                    text = "${uiState.value.timeMonth} ${uiState.value.timeDay}, ${uiState.value.timeYear}",
                     color = Black,
                     fontSize = 20.sp,
                     fontFamily = FontFamily(Font(R.font.font_extrabold)),
@@ -366,12 +503,12 @@ fun InputScreen(
                     .clip(RoundedCornerShape(15.dp))
                     .background(White)
                     .clickable {
-                        showDateBottomSheet = true
+                        showDate2BottomSheet = true
                     },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Morning",
+                    text = uiState.value.timePeriod,
                     color = Black,
                     fontSize = 20.sp,
                     fontFamily = FontFamily(Font(R.font.font_extrabold)),
@@ -390,9 +527,13 @@ fun InputScreen(
                 .align(Alignment.CenterHorizontally),
             color = Black,
         )
+        // 年龄选择
         AgeHorizontalPicker(
             25,
-            {}
+            { age ->
+                viewModel.processIntent(DataInputIntent.SetAge(age))
+
+            }
         )
 
         // 性别选择
@@ -402,11 +543,12 @@ fun InputScreen(
                 .padding(top = 30.dp, start = 20.dp, end = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val selectGender = uiState.value.gender == 1
             GenderSelectCard(
                 iconRes = R.drawable.ic_male,
                 text = stringResource(R.string.male),
-                selected = false,
-                onClick = { },
+                selected = selectGender,
+                onClick = { viewModel.processIntent(DataInputIntent.SetGender(1)) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp)
@@ -416,16 +558,33 @@ fun InputScreen(
             GenderSelectCard(
                 iconRes = R.drawable.ic_female,
                 text = stringResource(R.string.female),
-                selected = true,
-                onClick = {},
+                selected = !selectGender,
+                onClick = { viewModel.processIntent(DataInputIntent.SetGender(0)) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp)
                     .height(90.dp)
             )
         }
+        // 跳转计算结果页
         Button(
-            onClick = { },
+            onClick = {
+                val bmiLevel =
+                    BmiUtil.getBmiFullInfo(
+                        context,
+                        uiState.value.age,
+                        uiState.value.gender,
+                        uiState.value.bmiValue
+                    )
+                val bmiColor = ContextCompat.getColor(context, bmiLevel.colorInt)
+                val custime = TimeUtil(context).getCustomTimeStamp(
+                    uiState.value.timeYear,
+                    uiState.value.timeMonth,
+                    uiState.value.timeDay,
+                    uiState.value.timePeriod,
+                )
+                viewModel.processIntent(DataInputIntent.ComputeFullBmi(bmiColor, custime))
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 30.dp, start = 20.dp, end = 20.dp)
@@ -441,6 +600,7 @@ fun InputScreen(
             )
         }
     }
+    // 时间选择窗口
     DatePickerBottomSheet(
         show = showDateBottomSheet,
         onDismiss = {
@@ -449,10 +609,37 @@ fun InputScreen(
         },
         onConfirm = { year, month, day ->
             // 选中日期回调逻辑
-            // TODO 更新文本显示 "July 25,2026"
-            showDateBottomSheet = false
+            viewModel.processIntent(DataInputIntent.SetTime1(year, month, day))
         }
     )
+    PeriodPickerBottomSheet(
+        show = showDate2BottomSheet,
+        onDismiss = {
+            // 关闭弹窗：重置状态
+            showDate2BottomSheet = false
+        },
+        onConfirm = { selectPeriod ->
+            viewModel.processIntent(DataInputIntent.SetTime2(selectPeriod))
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        eventFlow.collect { event ->
+            when (event) {
+                is InputViewModel.CheckEvent.ShowToast ->
+                    event.msgResId?.let { id ->
+                        val str = context.getString(id)
+                        Toast.makeText(context, str, Toast.LENGTH_SHORT).show()
+                    }
+                is InputViewModel.CheckEvent.NavToResult ->{
+                    val intent = Intent(context, ResultActivity::class.java)
+                    intent.putExtra("BMI", event.bmiEntity)
+                    intent.putExtra("FATHER", event.isFirst)
+                    context.startActivity(intent)
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -731,16 +918,158 @@ fun DatePickerBottomSheet(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PeriodPickerBottomSheet(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    if (!show) return
+
+    val wheelRef = remember { mutableStateOf<WheelView?>(null) }
+
+    // 时段数据源（多语言）
+    val periodList =
+        listOf(
+            stringResource(R.string.morning),
+            stringResource(R.string.afternoon),
+            stringResource(R.string.evening),
+            stringResource(R.string.night)
+        )
+    val periodData = remember {
+        periodList
+    }
+
+    // 根据当前小时自动计算默认选中下标
+    val defaultSelectIndex = remember {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        when (hour) {
+            in 6..11 -> 0
+            in 12..17 -> 1
+            in 18..22 -> 2
+            else -> 3
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = {
+            onDismiss()
+            wheelRef.value = null
+        },
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        containerColor = White
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(top = 24.dp, bottom = 16.dp)
+        ) {
+            Text(
+                stringResource(R.string.date_picker_date), // 你自行替换对应标题string
+                fontSize = 28.sp,
+                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                color = Black,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+
+            // 单列滚轮区域
+            AndroidView(
+                factory = { context ->
+                    val boldTypeface = ResourcesCompat.getFont(context, R.font.font_bold_extrabold)
+                    WheelView(context).apply {
+                        adapter = ArrayWheelAdapter(periodData)
+                        currentItem = defaultSelectIndex
+                        setTypeface(boldTypeface)
+                        setCyclic(false)
+                        setLineSpacingMultiplier(2f)
+                        setAlphaGradient(true)
+                        setTextSize(16f)
+                        setDividerColor(android.graphics.Color.LTGRAY)
+                        setTextColorCenter(android.graphics.Color.BLACK)
+
+                        // 触摸拦截，解决BottomSheet滑动冲突（和你原始逻辑完全一致）
+                        setOnTouchListener { v, event ->
+                            when (event.action) {
+                                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                                }
+
+                                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                                    v.parent?.requestDisallowInterceptTouchEvent(false)
+                                    v.performClick()
+                                }
+                            }
+                            false
+                        }
+                    }
+                },
+                update = { wheel ->
+                    wheelRef.value = wheel
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+            )
+
+            // 底部按钮栏
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(120.dp, 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Gray),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.data_cancel),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        color = Black
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        val wheel = wheelRef.value ?: return@Button
+                        val selectedText = periodData[wheel.currentItem]
+                        onConfirm(selectedText)
+                        onDismiss()
+                    },
+                    modifier = Modifier.size(120.dp, 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2962FF)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.data_done),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        color = White
+                    )
+                }
+            }
+        }
+    }
+}
+
+
 @Composable
 fun AgeHorizontalPicker(
     initSelectedIndex: Int,
     onSelectChanged: (index: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val ageList = (1..120).map { it.toString() }
+    val ageList = (2..100).map { it.toString() }
     val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = initSelectedIndex - 2)
     val snapFling = rememberSnapFlingBehavior(lazyListState = lazyListState)
     val scope = rememberCoroutineScope()
+
 
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         val viewportWidth = maxWidth - 30.dp
@@ -772,7 +1101,6 @@ fun AgeHorizontalPicker(
                         .width(itemWidth)
                         .clickable {
                             scope.launch {
-                                // ✅ 带上scrollOffset，实现居中滚动
                                 lazyListState.animateScrollToItem(
                                     index = index,
                                 )
@@ -797,17 +1125,28 @@ fun AgeHorizontalPicker(
                 ) {
                     Text(
                         text = ageText,
-                        fontSize = 20.sp,
+                        fontSize = 28.sp,
                         fontFamily = FontFamily(Font(R.font.font_extrabold)),
                         color = Black
                     )
                 }
             }
         }
+        Image(
+            painter = painterResource(R.drawable.input_age_indicator),
+            contentDescription = null,
+            modifier = Modifier
+                .size(width = 15.dp, height = 10.dp)
+                .align(Alignment.BottomCenter)
+        )
         LaunchedEffect(lazyListState) {
-            snapshotFlow { lazyListState.layoutInfo }
-                .collect { layoutInfo ->
-                    if (!lazyListState.isScrollInProgress) {
+            val scrollState = derivedStateOf { lazyListState.isScrollInProgress }
+            snapshotFlow { scrollState.value }
+                .distinctUntilChanged() // 只有滚动状态发生变化才发射（true ↔ false）
+                .collect { scrolling ->
+                    if (!scrolling) {
+                        // 滚动完全停止，计算中心条目
+                        val layoutInfo = lazyListState.layoutInfo
                         val viewportCenter =
                             layoutInfo.viewportStartOffset + layoutInfo.viewportSize.width / 2f
                         var minDist = Float.MAX_VALUE
@@ -820,10 +1159,11 @@ fun AgeHorizontalPicker(
                                 centerIndex = item.index
                             }
                         }
-                        onSelectChanged(centerIndex)
+                        onSelectChanged(centerIndex + 2)
                     }
                 }
         }
+
 
     }
 }

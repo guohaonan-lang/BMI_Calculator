@@ -76,7 +76,6 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
     private fun initDataFlow() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-
                 launch {
                     viewModel.uiState.collect { result ->
                         renderUi(result)
