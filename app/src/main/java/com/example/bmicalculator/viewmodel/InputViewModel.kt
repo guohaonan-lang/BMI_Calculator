@@ -26,10 +26,10 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             DataInputIntent()
 
         data class SetTime2(val period: String) : DataInputIntent()
-        data class SetWeight(val weight: Float) : DataInputIntent()
-        data class SetHeight(val height: Float) : DataInputIntent()
-        data class SetHeightFt(val height: Int) : DataInputIntent()
-        data class SetHeightIn(val height: Int) : DataInputIntent()
+        data class SetWeight(val weight: String) : DataInputIntent()
+        data class SetHeight(val height: String) : DataInputIntent()
+        data class SetHeightFt(val height: String) : DataInputIntent()
+        data class SetHeightIn(val height: String) : DataInputIntent()
         data class SetGender(val gender: Int) : DataInputIntent()
         data class ComputeFullBmi(val color: Int, val cusTime: Long) : DataInputIntent()
         object SwitchWeightUnitToKg : DataInputIntent()
@@ -62,12 +62,12 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
 
     // 用户列表状态
     data class UserListState(
-        var weight: Float = 140f,
+        var weight: String = "140.00",
         var weightUnit: Boolean = false,
 
-        var height: Float = 170f,
-        var heightFt: Int = 5,
-        var heightIn: Int = 7,
+        var height: String = "170.0",
+        var heightFt: String = "5",
+        var heightIn: String = "7",
         var heightUnit: Boolean = false,
 
         // BMI 计算结果
@@ -90,18 +90,19 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             get() {
                 // 1. 统一转换成 kg
                 val weightKg = if (!weightUnit) {
-                    weight * 0.45359237f // 磅转kg
+                    weight.toFloat() * 0.45359237f // 磅转kg
                 } else {
-                    weight
+                    weight.toFloat()
                 }
 
                 // 2. 统一转换成 m
                 val heightM = if (!heightUnit) {
                     // ft + in → cm → m
-                    val cm = heightFt * 30.48f + heightIn * 2.54f
+                    val cm = (heightFt.toIntOrNull() ?: 1) * 30.48f + (heightFt.toIntOrNull()
+                        ?: 0) * 2.54f
                     cm / 100f
                 } else {
-                    height / 100f
+                    height.toFloat() / 100f
                 }
 
                 // 防止除0（身高0异常保护）
@@ -143,11 +144,11 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         else createTime = record.createTime
         setGender(record.gender)
         setWeightThumb(record.weightUnit)
-        setWeight(record.weight)
+        setWeight(record.weight.toString())
         setHeightThumb(record.heightUnit)
-        setHeight(record.height)
-        setHeightFt(record.heightFt)
-        setHeightIn(record.heightIn)
+        setHeight(record.height.toString())
+        setHeightFt(record.heightFt.toString())
+        setHeightIn(record.heightIn.toString())
         setAge(record.age)
         setCustomTime(record.customTime)
     }
@@ -176,19 +177,19 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         _state.update { it.copy(timePeriod = period) }
     }
 
-    private fun setWeight(weight: Float) {
+    private fun setWeight(weight: String) {
         _state.update { it.copy(weight = weight) }
     }
 
-    private fun setHeight(height: Float) {
+    private fun setHeight(height: String) {
         _state.update { it.copy(height = height) }
     }
 
-    private fun setHeightFt(height: Int) {
+    private fun setHeightFt(height: String) {
         _state.update { it.copy(heightFt = height) }
     }
 
-    private fun setHeightIn(height: Int) {
+    private fun setHeightIn(height: String) {
         _state.update { it.copy(heightIn = height) }
     }
 
@@ -208,28 +209,28 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
     private fun switchWeightUnitToKg() {
 
         if (_state.value.weightUnit) return
-        var weight = _state.value.weight
-        if (_state.value.weight.toString() != weightPair.first) {
-            val originWeight = _state.value.weight.toString()
+        var weight = _state.value.weight.toFloat()
+        if (_state.value.weight != weightPair.first) {
+            val originWeight = _state.value.weight
             weight *= 0.4536f
-            _state.value.weight = String.format("%.2f", weight).toFloat()
-            val newPair = originWeight to _state.value.weight.toString()
+            _state.value.weight = String.format("%.2f", weight)
+            val newPair = originWeight to _state.value.weight
             weightPair = newPair
-        } else _state.value.weight = weightPair.second.toFloat()
+        } else _state.value.weight = weightPair.second
         setWeightThumb(true)
     }
 
 
     private fun switchWeightUnitToLb() {
         if (!_state.value.weightUnit) return
-        var weight = _state.value.weight
-        if (_state.value.weight.toString() != weightPair.second) {
-            val originWeight = _state.value.weight.toString()
+        var weight = _state.value.weight.toFloat()
+        if (_state.value.weight != weightPair.second) {
+            val originWeight = _state.value.weight
             weight /= 0.4536f
-            _state.value.weight = String.format("%.2f", weight).toFloat()
-            val newPair = _state.value.weight.toString() to originWeight
+            _state.value.weight = String.format("%.2f", weight)
+            val newPair = _state.value.weight to originWeight
             weightPair = newPair
-        } else _state.value.weight = weightPair.first.toFloat()
+        } else _state.value.weight = weightPair.first
         setWeightThumb(false)
 
     }
@@ -238,12 +239,12 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
     private fun switchHeightUnitToFtIn() {
 
         if (!_state.value.heightUnit) return
-        val showText = String.format("%.1f", _state.value.height)
+        val showText = _state.value.height
         if (showText != heightPair.second) {
-            val originHeight = String.format("%.1f", _state.value.height)
-            val totalInch = (_state.value.height / 2.54f).toInt()
-            _state.value.heightFt = totalInch / 12
-            _state.value.heightIn = totalInch % 12
+            val originHeight = _state.value.height
+            val totalInch = (_state.value.height.toFloat() / 2.54f).toInt()
+            _state.value.heightFt = (totalInch / 12).toString()
+            _state.value.heightIn = (totalInch % 12).toString()
             val newPair = totalInch to originHeight
             heightPair = newPair
         }
@@ -254,13 +255,15 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
     private fun switchHeightUnitToCm() {
         if (_state.value.heightUnit) return
         var showText: String
-        val totalInch = _state.value.heightFt * 12 + _state.value.heightIn
+        val hft = (_state.value.heightFt.toIntOrNull() ?: 1)
+        val hin = (_state.value.heightIn.toIntOrNull() ?: 0)
+        val totalInch = hft * 12 + hin
         if (totalInch != heightPair.first) {
             showText = String.format(
                 "%.1f",
-                ((_state.value.heightFt * 12) + _state.value.heightIn) * 2.54f
+                ((hft * 12) + hin) * 2.54f
             )
-            _state.value.height = showText.toFloat()
+            _state.value.height = showText
             val newPair = totalInch to showText
             heightPair = newPair
         }
@@ -282,10 +285,11 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
 
     fun checkInputValid(): CheckResult {
         // 校验体重
+        val w = (_state.value.weight.toFloatOrNull() ?: 0f)
         if (!_state.value.weightUnit) {
             // LB模式
-            if (_state.value.weight !in 2f..551f) {
-                _state.update { it.copy(weight = 551f) }
+            if (w !in 2f..551f) {
+                _state.update { it.copy(weight = "551.00") }
                 sendEvent(CheckEvent.ShowToast(msgResId = R.string.weight_out_of_range_2_551_lb))
                 return CheckResult(
                     pass = false,
@@ -294,8 +298,8 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             }
         } else {
             // KG模式
-            if (_state.value.weight !in 1f..250f) {
-                _state.update { it.copy(weight = 250f) }
+            if (w !in 1f..250f) {
+                _state.update { it.copy(weight = "250.00") }
                 sendEvent(CheckEvent.ShowToast(msgResId = R.string.weight_out_of_range_2_250_kg))
                 return CheckResult(
                     pass = false,
@@ -305,18 +309,20 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         }
 
         // 校验身高
+        val hft = (_state.value.heightFt.toIntOrNull() ?: 0)
+        val hin = (_state.value.heightIn.toIntOrNull() ?: 0)
         if (!_state.value.heightUnit) {
             // 英制 ft/in
-            if (_state.value.heightFt !in 1..8) {
-                _state.update { it.copy(heightFt = 8) }
+            if (hft !in 1..8) {
+                _state.update { it.copy(heightFt = "8") }
                 sendEvent(CheckEvent.ShowToast(R.string.height_out_of_range_1_8_ft))
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_8_ft,
                 )
             }
-            if (_state.value.heightIn !in 0..11) {
-                _state.update { it.copy(heightIn = 11) }
+            if (hin !in 0..11) {
+                _state.update { it.copy(heightIn = "11") }
                 sendEvent(CheckEvent.ShowToast(R.string.height_out_of_range_1_11_in))
                 return CheckResult(
                     pass = false,
@@ -325,8 +331,8 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             }
         } else {
             // 公制 cm
-            if (_state.value.height !in 1f..250f) {
-                _state.update { it.copy(height = 170f) }
+            if (_state.value.height.toFloat() !in 1f..250f) {
+                _state.update { it.copy(height = "170.0") }
                 sendEvent(CheckEvent.ShowToast(R.string.height_out_of_range_1_250_cm))
                 return CheckResult(
                     pass = false,
@@ -345,11 +351,11 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         val bmiData =
             BmiEntity(
                 id = 0,
-                weight = _state.value.weight,
+                weight = _state.value.weight.toFloat(),
                 weightUnit = _state.value.weightUnit,
-                height = _state.value.height,
-                heightFt = _state.value.heightFt,
-                heightIn = _state.value.heightIn,
+                height = _state.value.height.toFloat(),
+                heightFt = _state.value.heightFt.toIntOrNull()?:1,
+                heightIn = _state.value.heightIn.toIntOrNull()?:0,
                 heightUnit = _state.value.heightUnit,
                 bmiValue = bmi,
                 bmiColor = bmiColor,
