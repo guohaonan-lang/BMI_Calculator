@@ -1,6 +1,5 @@
 package com.example.bmicalculator.fragment
 
-import android.content.Context
 import android.content.Intent
 import android.view.MotionEvent
 import android.widget.Toast
@@ -9,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -25,16 +25,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -94,6 +94,7 @@ fun PreviewInputScreen() {
     BMIComposeTheme {
 //        InputScreen()
     }
+
 }
 
 @Composable
@@ -127,24 +128,6 @@ fun InputScreen(
         viewModel.processIntent(DataInputIntent.SetTime2(timeStr.selectPeriod))
     }
 
-    LaunchedEffect(Unit) {
-        eventFlow.collect { event ->
-            when (event) {
-                is InputViewModel.CheckEvent.ShowToast ->
-                    event.msgResId?.let { id ->
-                        val str = context.getString(id)
-                        Toast.makeText(context, str, Toast.LENGTH_SHORT).show()
-                    }
-
-                is InputViewModel.CheckEvent.NavToResult -> {
-                    val intent = Intent(context, ResultActivity::class.java)
-                    intent.putExtra("BMI", event.bmiEntity)
-                    intent.putExtra("FATHER", event.isFirst)
-                    context.startActivity(intent)
-                }
-            }
-        }
-    }
 
     Column(
         modifier = modifier
@@ -158,21 +141,392 @@ fun InputScreen(
             }
     ) {
         // 标题，个人页面跳转
-        TitleText(context)
-
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                stringResource(R.string.title_calculate),
+                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontSize = 24.sp,
+                color = Black,
+                modifier = Modifier.padding(start = 15.dp, top = 18.dp)
+            )
+            Image(
+                painter = painterResource(R.drawable.settings_user),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 18.dp)
+                    .padding(end = 15.dp)
+                    .size(30.dp)
+                    .clickable(
+                        onClick = {
+                            val intent = Intent(context, SettingActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    )
+            )
+        }
+        // 身高，体重-标题
+        Row(
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp)
+        ) {
+            Text(
+                stringResource(R.string.input_weight),
+                fontFamily = FontFamily(Font(R.font.font_regular)),
+                fontSize = 14.sp,
+            )
+            Text(
+                stringResource(R.string.input_height),
+                fontFamily = FontFamily(Font(R.font.font_regular)),
+                fontSize = 14.sp,
+            )
+        }
         // 身高，体重，输入
-        WeightAndHeightInput(viewModel, uiState)
+        Row(
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+        ) {
+            TextField(
+                value = uiState.value.weight.toString(),
+                onValueChange = {
+                    viewModel.processIntent(DataInputIntent.SetWeight(it.toFloat()))
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(
+                        start = 20.dp,
+                        end = 8.dp,
+                    ),
+                textStyle = TextStyle(
+                    color = Black,
+                    fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                    fontSize = 28.sp,
+                    textAlign = TextAlign.Center
+                ),
+                isError = false,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+                interactionSource = remember { MutableInteractionSource() },
+                shape = RoundedCornerShape(12.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = White,
+                    unfocusedContainerColor = White,
+                    disabledContainerColor = White,
 
+                    focusedIndicatorColor = Background,
+                    unfocusedIndicatorColor = Background,
+                    disabledIndicatorColor = Background,
+                )
+            )
+            if (uiState.value.heightUnit) {
+                TextField(
+                    value = uiState.value.height.toString(),
+                    onValueChange = {
+                        viewModel.processIntent(DataInputIntent.SetHeight(it.toFloat()))
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(
+                            start = 8.dp,
+                            end = 20.dp,
+                        ),
+                    textStyle = TextStyle(
+                        color = Black,
+                        fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                        fontSize = 28.sp,
+                        textAlign = TextAlign.Center
+                    ),
+                    isError = false,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    interactionSource = remember { MutableInteractionSource() },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = White,
+                        unfocusedContainerColor = White,
+                        disabledContainerColor = White,
+
+                        focusedIndicatorColor = Background,
+                        unfocusedIndicatorColor = Background,
+                        disabledIndicatorColor = Background,
+                    )
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .weight(1f),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                ) {
+                    TextField(
+                        value = uiState.value.heightFt.toString(),
+                        onValueChange = {
+                            viewModel.processIntent(DataInputIntent.SetHeightFt(it.toInt()))
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(
+                                start = 8.dp,
+                                end = 5.dp,
+                            ),
+                        textStyle = TextStyle(
+                            color = Black,
+                            fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                            fontSize = 28.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        isError = false,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        interactionSource = remember { MutableInteractionSource() },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = White,
+                            unfocusedContainerColor = White,
+                            disabledContainerColor = White,
+
+                            focusedIndicatorColor = Background,
+                            unfocusedIndicatorColor = Background,
+                            disabledIndicatorColor = Background,
+                        )
+                    )
+                    TextField(
+                        value = uiState.value.heightIn.toString(),
+                        onValueChange = { rawText ->
+                            // 只保留数字，限制最多3位
+                            val text = rawText.filter { it.isDigit() }.take(2)
+                            val num = text.toIntOrNull() ?: 0
+                            viewModel.processIntent(DataInputIntent.SetHeightIn(num))
+                        },
+                        modifier = Modifier
+                            .weight(1.4f)
+                            .padding(
+                                start = 5.dp,
+                                end = 20.dp,
+                            ),
+                        textStyle = TextStyle(
+                            color = Black,
+                            fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                            fontSize = 28.sp,
+                            textAlign = TextAlign.Center,
+                        ),
+                        isError = false,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        interactionSource = remember { MutableInteractionSource() },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = White,
+                            unfocusedContainerColor = White,
+                            disabledContainerColor = White,
+
+                            focusedIndicatorColor = Background,
+                            unfocusedIndicatorColor = Background,
+                            disabledIndicatorColor = Background,
+                        ),
+                    )
+                }
+            }
+
+
+        }
         // weight单位转换
-        UnitSwitch(viewModel, uiState)
+        Row(
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(
+                        start = 20.dp,
+                        end = 8.dp,
+                    )
+                    .fillMaxWidth()
+                    .height(36.dp)
+                    .background(
+                        color = Gray,
+                        shape = RoundedCornerShape(36.dp)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable {
+                            viewModel.processIntent(DataInputIntent.SwitchWeightUnitToLb)
+                        }
+                        .background(
+                            color = if (!uiState.value.weightUnit) White else Gray,
+                        )
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "lb",
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        modifier = Modifier.alpha(if (!uiState.value.weightUnit) 1f else 0.3f)
+                    )
+                }
 
-        // 时间选择
-        TimeSelect(
-            { showDateBottomSheet = true },
-            { showDate2BottomSheet = true },
-            uiState
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable {
+                            viewModel.processIntent(DataInputIntent.SwitchWeightUnitToKg)
+                        }
+                        .background(
+                            color = if (uiState.value.weightUnit) White else Gray,
+                        )
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "kg",
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        modifier = Modifier.alpha(if (uiState.value.weightUnit) 1f else 0.3f)
+                    )
+                }
+            }
+            // height单位转换
+            Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(
+                        start = 8.dp,
+                        end = 20.dp,
+                    )
+                    .fillMaxWidth()
+                    .height(36.dp)
+                    .background(
+                        color = Gray,
+                        shape = RoundedCornerShape(36.dp)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable {
+                            viewModel.processIntent(DataInputIntent.SwitchHeightUnitToFtIn)
+                        }
+                        .background(
+                            color = if (!uiState.value.heightUnit) White else Gray,
+                        )
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "ft·in",
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        modifier = Modifier.alpha(if (!uiState.value.heightUnit) 1f else 0.3f)
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable {
+                            viewModel.processIntent(DataInputIntent.SwitchHeightUnitToCm)
+                        }
+                        .background(
+                            color = if (uiState.value.heightUnit) White else Gray,
+                        )
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "cm",
+                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        modifier = Modifier.alpha(if (uiState.value.heightUnit) 1f else 0.3f)
+                    )
+                }
+            }
+        }
+        Text(
+            stringResource(R.string.input_time),
+            fontFamily = FontFamily(Font(R.font.font_regular)),
+            fontSize = 14.sp,
+            modifier = Modifier
+                .padding(top = 30.dp)
+                .align(Alignment.CenterHorizontally),
+            color = Black,
         )
+        // 时间选择
+        Row(
+            modifier = Modifier
+                .padding(
+                    top = 30.dp
+                )
+                .height(60.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(60.dp)
+                    .padding(start = 20.dp, end = 8.dp)
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(White)
+                    .clickable {
+                        showDateBottomSheet = true
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${uiState.value.timeMonth} ${uiState.value.timeDay}, ${uiState.value.timeYear}",
+                    color = Black,
+                    fontSize = 20.sp,
+                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    softWrap = false,
+                    maxLines = 1,
 
+                    )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(60.dp)
+                    .padding(start = 8.dp, end = 20.dp)
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(White)
+                    .clickable {
+                        showDate2BottomSheet = true
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = uiState.value.timePeriod,
+                    color = Black,
+                    fontSize = 20.sp,
+                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    softWrap = false,
+                    maxLines = 1
+                )
+            }
+        }
+
+        Text(
+            stringResource(R.string.input_age),
+            fontFamily = FontFamily(Font(R.font.font_regular)),
+            fontSize = 14.sp,
+            modifier = Modifier
+                .padding(top = 30.dp)
+                .align(Alignment.CenterHorizontally),
+            color = Black,
+        )
         // 年龄选择
         AgeHorizontalPicker(
             25,
@@ -183,8 +537,35 @@ fun InputScreen(
         )
 
         // 性别选择
-        genderSelect(viewModel, uiState)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 30.dp, start = 20.dp, end = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            val selectGender = uiState.value.gender == 1
+            GenderSelectCard(
+                iconRes = R.drawable.ic_male,
+                text = stringResource(R.string.male),
+                selected = selectGender,
+                onClick = { viewModel.processIntent(DataInputIntent.SetGender(1)) },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+                    .height(90.dp)
+            )
 
+            GenderSelectCard(
+                iconRes = R.drawable.ic_female,
+                text = stringResource(R.string.female),
+                selected = !selectGender,
+                onClick = { viewModel.processIntent(DataInputIntent.SetGender(0)) },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp)
+                    .height(90.dp)
+            )
+        }
         // 跳转计算结果页
         Button(
             onClick = {
@@ -241,406 +622,22 @@ fun InputScreen(
             viewModel.processIntent(DataInputIntent.SetTime2(selectPeriod))
         }
     )
-}
 
-@Composable
-fun TitleText(context: Context) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            stringResource(R.string.title_calculate),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
-            fontSize = 24.sp,
-            color = Black,
-            modifier = Modifier.padding(start = 15.dp, top = 18.dp)
-        )
-        Image(
-            painter = painterResource(R.drawable.settings_user),
-            contentDescription = null,
-            modifier = Modifier
-                .padding(start = 15.dp, top = 18.dp)
-                .padding(end = 15.dp)
-                .size(30.dp)
-                .clickable(
-                    onClick = {
-                        val intent = Intent(context, SettingActivity::class.java)
-                        context.startActivity(intent)
+    LaunchedEffect(Unit) {
+        eventFlow.collect { event ->
+            when (event) {
+                is InputViewModel.CheckEvent.ShowToast ->
+                    event.msgResId?.let { id ->
+                        val str = context.getString(id)
+                        Toast.makeText(context, str, Toast.LENGTH_SHORT).show()
                     }
-                )
-        )
-    }
-}
-
-
-@Composable
-fun WeightAndHeightInput(viewModel: InputViewModel, uiState: State<InputViewModel.UserListState>) {
-    // 身高，体重-标题
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp)
-    ) {
-        Text(
-            stringResource(R.string.input_weight),
-            fontFamily = FontFamily(Font(R.font.font_regular)),
-            fontSize = 14.sp,
-        )
-        Text(
-            stringResource(R.string.input_height),
-            fontFamily = FontFamily(Font(R.font.font_regular)),
-            fontSize = 14.sp,
-        )
-    }
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp)
-    ) {
-        InputText(
-            value = uiState.value.weight,
-            valueBack = { text ->
-                // 1. 只保留数字与小数点
-                var temp = text.replace(Regex("[^0-9.]"), "")
-                // 2. 多个小数点：只保留第一个
-                if (temp.count { it == '.' } > 1) {
-                    temp =
-                        temp.substringBefore('.') + "." + temp.substring(temp.indexOf('.') + 1)
-                            .replace(".", "")
+                is InputViewModel.CheckEvent.NavToResult ->{
+                    val intent = Intent(context, ResultActivity::class.java)
+                    intent.putExtra("BMI", event.bmiEntity)
+                    intent.putExtra("FATHER", event.isFirst)
+                    context.startActivity(intent)
                 }
-                // 3. 如果存在小数点，截断小数部分，最多保留2位
-                val dotPosition = temp.indexOf('.')
-                if (dotPosition != -1) {
-                    val integerPart = temp.substring(0, dotPosition)
-                    val decimalPart = temp.substring(dotPosition + 1).take(2)
-                    temp = "$integerPart.$decimalPart"
-                }
-                viewModel.processIntent(DataInputIntent.SetWeight(temp))
-            },
-            modifier = Modifier
-                .weight(1f)
-                .height(65.dp)
-                .padding(
-                    start = 20.dp,
-                    end = 8.dp
-                )
-                .background(
-                    color = White,
-                    shape = RoundedCornerShape(15.dp)
-                ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-
-            )
-        if (uiState.value.heightUnit) {
-            InputText(
-                value = uiState.value.height,
-                valueBack = { text ->
-                    // 1. 只保留数字与小数点
-                    var temp = text.replace(Regex("[^0-9.]"), "")
-                    // 2. 多个小数点：只保留第一个
-                    if (temp.count { it == '.' } > 1) {
-                        temp =
-                            temp.substringBefore('.') + "." + temp.substring(temp.indexOf('.') + 1)
-                                .replace(".", "")
-                    }
-                    // 3. 如果存在小数点，截断小数部分，最多保留2位
-                    val dotPosition = temp.indexOf('.')
-                    if (dotPosition != -1) {
-                        val integerPart = temp.substring(0, dotPosition)
-                        val decimalPart = temp.substring(dotPosition + 1).take(2)
-                        temp = "$integerPart.$decimalPart"
-                    }
-                    viewModel.processIntent(DataInputIntent.SetHeight(temp))
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(65.dp)
-                    .padding(
-                        start = 8.dp,
-                        end = 20.dp,
-                    )
-                    .background(
-                        color = White,
-                        shape = RoundedCornerShape(15.dp)
-                    ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-            )
-        } else {
-            Row(
-                modifier = Modifier
-                    .weight(1f),
-                horizontalArrangement = Arrangement.SpaceAround,
-            ) {
-                InputText(
-                    value = uiState.value.heightFt + "'",
-                    valueBack = { rawText ->
-                        val text = rawText.filter { it.isDigit() }.take(1)
-                        viewModel.processIntent(DataInputIntent.SetHeightFt(text))
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(65.dp)
-                        .padding(
-                            start = 8.dp,
-                            end = 5.dp,
-                        )
-                        .background(
-                            color = White,
-                            shape = RoundedCornerShape(15.dp)
-                        ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                )
-                InputText(
-                    value = uiState.value.heightIn.toString() + "\"",
-                    valueBack = { rawText ->
-                        val text = rawText.filter { it.isDigit() }.take(2)
-                        viewModel.processIntent(DataInputIntent.SetHeightIn(text))
-                    },
-                    modifier = Modifier
-                        .weight(1.4f)
-                        .height(65.dp)
-                        .padding(
-                            start = 5.dp,
-                            end = 20.dp,
-                        )
-                        .background(
-                            color = White,
-                            shape = RoundedCornerShape(15.dp)
-                        ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                )
             }
-        }
-    }
-}
-
-@Composable
-fun InputText(
-    modifier: Modifier = Modifier,
-    value: String,
-    valueBack: (String) -> Unit,
-    keyboardOptions: KeyboardOptions
-) {
-    BasicTextField(
-        value = value,
-        onValueChange = { text ->
-            valueBack(text)
-        },
-        modifier = modifier,
-        textStyle = TextStyle(
-            color = Black,
-            fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
-            fontSize = 28.sp,
-            textAlign = TextAlign.Center
-        ),
-        keyboardOptions = keyboardOptions,
-        singleLine = true,
-        decorationBox = { innerTextField ->
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                innerTextField()
-            }
-        },
-    )
-}
-
-@Composable
-fun UnitSwitch(viewModel: InputViewModel, uiState: State<InputViewModel.UserListState>) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceAround,
-            modifier = Modifier
-                .weight(1f)
-                .padding(
-                    start = 20.dp,
-                    end = 8.dp,
-                )
-                .fillMaxWidth()
-                .height(36.dp)
-                .background(
-                    color = Gray,
-                    shape = RoundedCornerShape(36.dp)
-                )
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(15.dp))
-                    .clickable {
-                        viewModel.processIntent(DataInputIntent.SwitchWeightUnitToLb)
-                    }
-                    .background(
-                        color = if (!uiState.value.weightUnit) White else Gray,
-                    )
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "lb",
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
-                    modifier = Modifier.alpha(if (!uiState.value.weightUnit) 1f else 0.3f)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(15.dp))
-                    .clickable {
-                        viewModel.processIntent(DataInputIntent.SwitchWeightUnitToKg)
-                    }
-                    .background(
-                        color = if (uiState.value.weightUnit) White else Gray,
-                    )
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "kg",
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
-                    modifier = Modifier.alpha(if (uiState.value.weightUnit) 1f else 0.3f)
-                )
-            }
-        }
-        // height单位转换
-        Row(
-            horizontalArrangement = Arrangement.SpaceAround,
-            modifier = Modifier
-                .weight(1f)
-                .padding(
-                    start = 8.dp,
-                    end = 20.dp,
-                )
-                .fillMaxWidth()
-                .height(36.dp)
-                .background(
-                    color = Gray,
-                    shape = RoundedCornerShape(36.dp)
-                )
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(15.dp))
-                    .clickable {
-                        viewModel.processIntent(DataInputIntent.SwitchHeightUnitToFtIn)
-                    }
-                    .background(
-                        color = if (!uiState.value.heightUnit) White else Gray,
-                    )
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "ft·in",
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
-                    modifier = Modifier.alpha(if (!uiState.value.heightUnit) 1f else 0.3f)
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(15.dp))
-                    .clickable {
-                        viewModel.processIntent(DataInputIntent.SwitchHeightUnitToCm)
-                    }
-                    .background(
-                        color = if (uiState.value.heightUnit) White else Gray,
-                    )
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "cm",
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
-                    modifier = Modifier.alpha(if (uiState.value.heightUnit) 1f else 0.3f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun TimeSelect(
-    onFirstBoxClick: () -> Unit,
-    onSecondBoxClick: () -> Unit,
-    uiState: State<InputViewModel.UserListState>
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp)
-    ) {
-        Text(
-            stringResource(R.string.input_time),
-            fontFamily = FontFamily(Font(R.font.font_regular)),
-            fontSize = 14.sp,
-            modifier = Modifier
-                .padding(top = 30.dp),
-            color = Black,
-        )
-    }
-
-    Row(
-        modifier = Modifier
-            .padding(
-                top = 30.dp
-            )
-            .height(60.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(60.dp)
-                .padding(start = 20.dp, end = 8.dp)
-                .clip(RoundedCornerShape(15.dp))
-                .background(White)
-                .clickable(onClick = onFirstBoxClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "${uiState.value.timeMonth} ${uiState.value.timeDay}, ${uiState.value.timeYear}",
-                color = Black,
-                fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
-                softWrap = false,
-                maxLines = 1,
-
-                )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(60.dp)
-                .padding(start = 8.dp, end = 20.dp)
-                .clip(RoundedCornerShape(15.dp))
-                .background(White)
-                .clickable(onClick = onSecondBoxClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = uiState.value.timePeriod,
-                color = Black,
-                fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
-                softWrap = false,
-                maxLines = 1
-            )
         }
     }
 }
@@ -1068,22 +1065,6 @@ fun AgeHorizontalPicker(
     onSelectChanged: (index: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp)
-    ) {
-        Text(
-            stringResource(R.string.input_age),
-            fontFamily = FontFamily(Font(R.font.font_regular)),
-            fontSize = 14.sp,
-            modifier = Modifier
-                .padding(top = 30.dp),
-            color = Black,
-        )
-    }
-
     val ageList = (2..100).map { it.toString() }
     val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = initSelectedIndex - 2)
     val snapFling = rememberSnapFlingBehavior(lazyListState = lazyListState)
@@ -1184,39 +1165,6 @@ fun AgeHorizontalPicker(
         }
 
 
-    }
-}
-
-@Composable
-fun genderSelect(viewModel: InputViewModel, uiState: State<InputViewModel.UserListState>) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 30.dp, start = 20.dp, end = 20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        val selectGender = uiState.value.gender == 1
-        GenderSelectCard(
-            iconRes = R.drawable.ic_male,
-            text = stringResource(R.string.male),
-            selected = selectGender,
-            onClick = { viewModel.processIntent(DataInputIntent.SetGender(1)) },
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp)
-                .height(90.dp)
-        )
-
-        GenderSelectCard(
-            iconRes = R.drawable.ic_female,
-            text = stringResource(R.string.female),
-            selected = !selectGender,
-            onClick = { viewModel.processIntent(DataInputIntent.SetGender(0)) },
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
-                .height(90.dp)
-        )
     }
 }
 
