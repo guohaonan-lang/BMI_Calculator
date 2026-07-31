@@ -44,7 +44,7 @@ class DataInputFragment : Fragment() {
             )
             setContent {
                 MaterialTheme {
-                    InputScreen(viewModel)
+                    InputScreen(viewModel = viewModel)
                 }
             }
         }

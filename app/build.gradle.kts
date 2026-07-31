@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.ui)
+    implementation(libs.androidx.compose.ui.text)
     debugImplementation(libs.androidx.compose.ui.tooling)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
@@ -84,4 +85,5 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("com.google.android.material:material:1.12.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.7.0")
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 }

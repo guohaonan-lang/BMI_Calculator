@@ -107,7 +107,6 @@ fun InputScreen(
 
     val uiState = viewModel.state.collectAsStateWithLifecycle()
     val eventFlow = viewModel.event
-
     var showDateBottomSheet by remember { mutableStateOf(false) }
     var showDate2BottomSheet by remember { mutableStateOf(false) }
 

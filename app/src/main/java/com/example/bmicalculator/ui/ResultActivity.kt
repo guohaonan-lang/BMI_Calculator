@@ -14,6 +14,8 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -60,6 +62,16 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        binding.resultCompose.apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+            )
+            setContent {
+                    ResultScreen()
+
+            }
         }
 
         initGradeRecyclerView()
