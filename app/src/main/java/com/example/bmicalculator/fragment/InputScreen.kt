@@ -24,14 +24,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -155,6 +158,8 @@ fun InputScreen(
                     viewModel.processIntent(DataInputIntent.CheckInputValid)
                 }
             }
+            .verticalScroll(rememberScrollState())
+
     ) {
         // 标题，个人页面跳转
         TitleText(context)
@@ -586,8 +591,6 @@ fun TimeSelect(
             stringResource(R.string.input_time),
             fontFamily = FontFamily(Font(R.font.font_regular)),
             fontSize = 14.sp,
-            modifier = Modifier
-                .padding(top = 30.dp),
             color = Black,
         )
     }
@@ -705,7 +708,7 @@ fun DatePickerBottomSheet(
         wheelDay.adapter = ArrayWheelAdapter(newDayList)
         wheelDay.invalidate()
     }
-
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = {
             onDismiss()
@@ -715,7 +718,8 @@ fun DatePickerBottomSheet(
             wheelYearRef.value = null
         },
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        containerColor = White
+        containerColor = White,
+        sheetState = sheetState
     ) {
         Column(
             modifier = Modifier
@@ -955,13 +959,15 @@ fun PeriodPickerBottomSheet(
         }
     }
 
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = {
             onDismiss()
             wheelRef.value = null
         },
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        containerColor = White
+        containerColor = White,
+        sheetState = sheetState
     ) {
         Column(
             modifier = Modifier
