@@ -118,15 +118,15 @@ fun InputScreen(
     val keyboardCtrl = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(uiState.value.customTime) {
-        val timeStr = TimeUtil(context).parseTimeStamp(uiState.value.customTime)
+        val timeStr = TimeUtil().parseTimeStamp(uiState.value.customTime)
         viewModel.processIntent(
             DataInputIntent.SetTime1(
                 timeStr.selectYear,
-                timeStr.selectMonth,
+                timeStr.selectMonthInt,
                 timeStr.selectDay
             )
         )
-        viewModel.processIntent(DataInputIntent.SetTime2(timeStr.selectPeriod))
+        viewModel.processIntent(DataInputIntent.SetTime2(timeStr.selectPeriodInt))
     }
 
     LaunchedEffect(Unit) {
@@ -194,17 +194,16 @@ fun InputScreen(
             onClick = {
                 val bmiLevel =
                     BmiUtil.getBmiFullInfo(
-                        context,
                         uiState.value.age,
                         uiState.value.gender,
                         uiState.value.bmiValue
                     )
                 val bmiColor = ContextCompat.getColor(context, bmiLevel.colorInt)
-                val custime = TimeUtil(context).getCustomTimeStamp(
+                val custime = TimeUtil().getCustomTimeStamp(
                     uiState.value.timeYear,
-                    uiState.value.timeMonth,
+                    uiState.value.timeMonthInt,
                     uiState.value.timeDay,
-                    uiState.value.timePeriod,
+                    uiState.value.timePeriodInt,
                 )
                 viewModel.processIntent(DataInputIntent.ComputeFullBmi(bmiColor, custime))
             },
@@ -616,7 +615,7 @@ fun TimeSelect(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "${uiState.value.timeMonth} ${uiState.value.timeDay}, ${uiState.value.timeYear}",
+                text = "${stringResource(uiState.value.timeMonthInt)} ${uiState.value.timeDay}, ${uiState.value.timeYear}",
                 color = Black,
                 fontSize = 20.sp,
                 fontFamily = FontFamily(Font(R.font.font_extrabold)),
@@ -636,7 +635,7 @@ fun TimeSelect(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = uiState.value.timePeriod,
+                text = stringResource(uiState.value.timePeriodInt),
                 color = Black,
                 fontSize = 20.sp,
                 fontFamily = FontFamily(Font(R.font.font_extrabold)),
@@ -658,7 +657,7 @@ fun TimeSelect(
 fun DatePickerBottomSheet(
     show: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String) -> Unit
+    onConfirm: (String, Int, String) -> Unit
 ) {
     if (!show) return
 
@@ -667,6 +666,20 @@ fun DatePickerBottomSheet(
     val wheelYearRef = remember { mutableStateOf<WheelView?>(null) }
 
     // 基础数据源（和旧代码保持一致）
+    val monthArrayInt = listOf(
+        R.string.jan,
+        R.string.feb,
+        R.string.mar,
+        R.string.apr,
+        R.string.may,
+        R.string.june,
+        R.string.july,
+        R.string.aug,
+        R.string.sep,
+        R.string.oct,
+        R.string.nov,
+        R.string.dec
+    )
     val monthArray = stringArrayResource(id = R.array.month_short_names)
     val monthData = remember(monthArray) {
         monthArray.toList()
@@ -901,7 +914,7 @@ fun DatePickerBottomSheet(
                         val wDay = wheelDayRef.value ?: return@Button
 
                         val selYear = yearData[wYear.currentItem]
-                        val selMonth = monthData[wMonth.currentItem]
+                        val selMonth = monthArrayInt[wMonth.currentItem]
                         val selDay =
                             getDayList(wYear.currentItem, wMonth.currentItem)[wDay.currentItem]
                         onConfirm(selYear, selMonth, selDay)
@@ -929,12 +942,20 @@ fun DatePickerBottomSheet(
 fun PeriodPickerBottomSheet(
     show: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (Int) -> Unit
 ) {
     if (!show) return
 
     val wheelRef = remember { mutableStateOf<WheelView?>(null) }
 
+    // 时段数据源
+    val periodListInt =
+        listOf(
+            R.string.morning,
+            R.string.afternoon,
+            R.string.evening,
+            R.string.night
+        )
     // 时段数据源（多语言）
     val periodList =
         listOf(
@@ -1046,8 +1067,8 @@ fun PeriodPickerBottomSheet(
                 Button(
                     onClick = {
                         val wheel = wheelRef.value ?: return@Button
-                        val selectedText = periodData[wheel.currentItem]
-                        onConfirm(selectedText)
+                        val selectedInt = periodListInt[wheel.currentItem]
+                        onConfirm(selectedInt)
                         onDismiss()
                     },
                     modifier = Modifier.size(120.dp, 56.dp),

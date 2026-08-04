@@ -113,7 +113,6 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
             )
         )
         viewModel.initDataFromIntent(
-            context = this,
             record = bmiRecord,
         )
     }

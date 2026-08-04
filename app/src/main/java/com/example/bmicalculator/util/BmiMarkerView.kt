@@ -20,7 +20,7 @@ class BmiMarkerView(context: Context) : MarkerView(context, R.layout.marker_pop)
 
         e ?: return
         val yVal = e.y
-        val circleColor = BmiUtil.getBmiFullInfo(context, 25, 1, yVal).colorInt
+        val circleColor = BmiUtil.getBmiFullInfo(25, 1, yVal).colorInt
         val layerDrawable = markerCircle.background as LayerDrawable
         val innerCircle = layerDrawable.findDrawableByLayerId(R.id.inner_circle)
         innerCircle.setTint(context.getColor(circleColor))

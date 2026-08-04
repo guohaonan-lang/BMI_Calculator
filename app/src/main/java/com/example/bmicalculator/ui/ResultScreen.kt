@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -93,20 +94,25 @@ fun ResultScreen(viewModel: ResultViewModel) {
             )
             DescribeText(
                 bmiValue = uiState.value.bmiData?.bmiValue ?: 1f,
-                bmiLevel = uiState.value.levelName,
+                bmiLevel = stringResource(uiState.value.levelNameInt),
                 weightText = uiState.value.weightText,
                 heightText = uiState.value.heightText,
-                genderText = uiState.value.genderText,
+                genderText = stringResource(uiState.value.genderTextInt),
                 ageText = uiState.value.bmiData?.age.toString(),
-            ){ bottomShow = true }
+            ) { bottomShow = true }
             if (uiState.value.isFirst) GradeList(gradeList = uiState.value.gradeList)
             ResultAssessment(
-                assessment1Text = uiState.value.assessment1,
+                assessment1Text = stringResource(uiState.value.assessment1Int),
                 assessment2Text = uiState.value.assessment2Text,
                 rangeText = uiState.value.normalRangeText,
                 differenceText = uiState.value.differenceText
             )
-            TimeLine(uiState.value.timeTagText)
+            val timeTagText =
+                "${stringResource(uiState.value.timeMonthInt)} ${uiState.value.timeDay}, ${uiState.value.timeYear} ${
+                    stringResource(uiState.value.timePeriodInt)
+                }"
+
+            TimeLine(timeTagText)
             if (!uiState.value.isFirst) AdText()
 
         }
@@ -130,7 +136,7 @@ fun ResultScreen(viewModel: ResultViewModel) {
         }
         BmiLevelBottom(bottomShow, { bottomShow = false }, uiState)
 
-        BackHandler {
+        BackHandler(enabled = !uiState.value.isRecent) {
             deleteShow = !deleteShow
         }
         if (deleteShow) {
@@ -300,7 +306,7 @@ fun GradeItem(
             .height(30.dp)
             .padding(horizontal = 16.dp)
             .background(
-                color = (if (grade.isSelect) Color(grade.color) else White),
+                color = (if (grade.isSelect) colorResource(grade.color) else White),
                 shape = RoundedCornerShape(15.dp)
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -311,7 +317,7 @@ fun GradeItem(
             modifier = Modifier
                 .size(10.dp)
                 .clip(CircleShape)
-                .background((if (grade.isSelect) White else Color(grade.color)))
+                .background((if (grade.isSelect) White else colorResource(grade.color)))
                 .padding(start = 10.dp)
         )
 
@@ -323,7 +329,7 @@ fun GradeItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = grade.gradeName,
+                text = stringResource(grade.gradeNameInt),
                 fontFamily = FontFamily(
                     Font(
                         if (grade.isSelect) R.font.font_extrabold

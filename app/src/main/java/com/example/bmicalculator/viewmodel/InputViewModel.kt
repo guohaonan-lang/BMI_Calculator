@@ -22,10 +22,10 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
 
     sealed class DataInputIntent {
         data class SetAge(val age: Int) : DataInputIntent()
-        data class SetTime1(val year: String, val month: String, val day: String) :
+        data class SetTime1(val year: String, val month: Int, val day: String) :
             DataInputIntent()
 
-        data class SetTime2(val period: String) : DataInputIntent()
+        data class SetTime2(val period: Int) : DataInputIntent()
         data class SetWeight(val weight: String) : DataInputIntent()
         data class SetHeight(val height: String) : DataInputIntent()
         data class SetHeightFt(val height: String) : DataInputIntent()
@@ -80,10 +80,10 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         // 自定义记录时间（用户手动选择的日期时间戳）
         var customTime: Long = 0,
         var timeYear: String = "114514",
-        var timeMonth: String = "114514",
+        var timeMonthInt: Int = R.string.load,
         var timeDay: String = "114514",
 
-        var timePeriod: String = "350234",
+        var timePeriodInt: Int = R.string.load,
         var isFirstData: Boolean = true,
     ) {
         val bmiValue: Float
@@ -163,18 +163,18 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
         _state.update { it.copy(age = newAge) }
     }
 
-    private fun setTime1(year: String, month: String, day: String) {
+    private fun setTime1(year: String, month: Int, day: String) {
         _state.update {
             it.copy(
                 timeYear = year,
-                timeMonth = month,
+                timeMonthInt = month,
                 timeDay = day
             )
         }
     }
 
-    private fun setTime2(period: String) {
-        _state.update { it.copy(timePeriod = period) }
+    private fun setTime2(period: Int) {
+        _state.update { it.copy(timePeriodInt = period) }
     }
 
     private fun setWeight(weight: String) {

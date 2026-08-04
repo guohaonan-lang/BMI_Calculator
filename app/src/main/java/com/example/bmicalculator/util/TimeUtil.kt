@@ -1,28 +1,40 @@
 package com.example.bmicalculator.util
 
-import android.content.Context
 import com.example.bmicalculator.R
 import java.util.Calendar
 
-class TimeUtil(private val context: Context) {
+class TimeUtil() {
     // 月份英文简写 -> Calendar月份索引(0~11)
     private val monthNameToIndex = mapOf(
-        context.getString(R.string.jan) to 0,
-        context.getString(R.string.feb) to 1,
-        context.getString(R.string.mar) to 2,
-        context.getString(R.string.apr) to 3,
-        context.getString(R.string.may) to 4,
-        context.getString(R.string.june) to 5,
-        context.getString(R.string.july) to 6,
-        context.getString(R.string.aug) to 7,
-        context.getString(R.string.sep) to 8,
-        context.getString(R.string.oct) to 9,
-        context.getString(R.string.nov) to 10,
-        context.getString(R.string.dec) to 11
+        R.string.jan to 0,
+        R.string.feb to 1,
+        R.string.mar to 2,
+        R.string.apr to 3,
+        R.string.may to 4,
+        R.string.june to 5,
+        R.string.july to 6,
+        R.string.aug to 7,
+        R.string.sep to 8,
+        R.string.oct to 9,
+        R.string.nov to 10,
+        R.string.dec to 11
     )
 
     // Calendar月份索引 -> 资源里的月份文本
-    private val indexToMonthName = context.resources.getStringArray(R.array.month_short_names).toList()
+    private val indexToMonthName = listOf(
+        R.string.jan,
+        R.string.feb,
+        R.string.mar,
+        R.string.apr,
+        R.string.may,
+        R.string.june,
+        R.string.july,
+        R.string.aug,
+        R.string.sep,
+        R.string.oct,
+        R.string.nov,
+        R.string.dec
+    )
 
     /**
      * 正向：年月日时段 → 时间戳
@@ -34,19 +46,19 @@ class TimeUtil(private val context: Context) {
      */
     fun getCustomTimeStamp(
         selectYear: String,
-        selectMonth: String,
+        selectMonthInt: Int,
         selectDay: String,
-        selectPeriod: String
+        selectPeriod: Int
     ): Long {
         val calendar = Calendar.getInstance()
         calendar.set(
             selectYear.toInt(),
-            monthNameToIndex[selectMonth] ?: 0,
+            monthNameToIndex[selectMonthInt] ?: 0,
             selectDay.toInt(),
             when (selectPeriod) {
-                context.getString(R.string.morning) -> 9
-                context.getString(R.string.afternoon) -> 14
-                context.getString(R.string.evening) -> 19
+                R.string.morning -> 9
+                R.string.afternoon -> 14
+                R.string.evening -> 19
                 else -> 23
             },
             0,
@@ -64,15 +76,15 @@ class TimeUtil(private val context: Context) {
         }
         val year = calendar.get(Calendar.YEAR).toString()
         val monthIdx = calendar.get(Calendar.MONTH)
-        val month = indexToMonthName[monthIdx] ?: context.getString(R.string.jan)
+        val month = indexToMonthName[monthIdx]
         val day = calendar.get(Calendar.DAY_OF_MONTH).toString()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
 
         val period = when (hour) {
-            9 -> context.getString(R.string.morning)
-            14 -> context.getString(R.string.afternoon)
-            19 -> context.getString(R.string.evening)
-            else -> context.getString(R.string.night)
+            9 -> R.string.morning
+            14 -> R.string.afternoon
+            19 -> R.string.evening
+            else -> R.string.night
         }
         return TimeParseResult(year, month, day, period)
     }
@@ -83,7 +95,7 @@ class TimeUtil(private val context: Context) {
  */
 data class TimeParseResult(
     val selectYear: String,
-    val selectMonth: String,
+    val selectMonthInt: Int,
     val selectDay: String,
-    val selectPeriod: String
+    val selectPeriodInt: Int
 )

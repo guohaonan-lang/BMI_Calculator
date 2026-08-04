@@ -42,17 +42,21 @@ class RecentAdapter(private var dataList: List<BmiEntity>) :
         val ctx = holder.itemView.context
 
         holder.bmiText.text = String.format("%.1f", item.bmiValue)
-        val timeText = TimeUtil(ctx).parseTimeStamp(item.customTime)
+        val timeText = TimeUtil().parseTimeStamp(item.customTime)
         val text =
-            "${timeText.selectMonth} ${timeText.selectDay} ${timeText.selectYear}  ${timeText.selectPeriod}"
+            "${ctx.getString(timeText.selectMonthInt)} ${timeText.selectDay} ${timeText.selectYear}  ${
+                ctx.getString(
+                    timeText.selectPeriodInt
+                )
+            }"
         holder.timeText.text = text
         holder.bmiColor.backgroundTintList =
             ColorStateList.valueOf(item.bmiColor)
 
 
         val bmiInfo =
-            BmiUtil.getBmiFullInfo(ctx, item.age, item.gender, item.bmiValue)
-        holder.bmiGrade.text = bmiInfo.levelName
+            BmiUtil.getBmiFullInfo(item.age, item.gender, item.bmiValue)
+        holder.bmiGrade.text = ctx.getString(bmiInfo.levelNameInt)
 
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(item)

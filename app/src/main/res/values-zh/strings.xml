@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="load">加载</string>
     <string name="app_name">BMI计算器</string>
     <string name="hello_blank_fragment">你好，空白碎片</string>
     <string name="database_name">bmi_database</string>

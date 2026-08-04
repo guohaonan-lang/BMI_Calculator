@@ -8,77 +8,9 @@
     android:paddingTop="30dp"
     tools:context=".fragment.BmiFragment">
 
-    <TextView
-        android:id="@+id/result_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:fontFamily="@font/font_regular"
-        android:text="Discard"
-        android:textColor="@color/black"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@id/BMI"
-        app:layout_constraintTop_toBottomOf="@id/BMI" />
-
-    <TextView
-        android:id="@+id/BMI"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="18dp"
-        android:fontFamily="@font/font_bold_extrabold"
-        android:text="BMI"
-        android:textColor="@color/black"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/recent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="10dp"
-        android:fontFamily="@font/font_regular"
-        android:text="@string/recent"
-        android:textColor="@color/blue"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/BMI" />
-
-    <ScrollView
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/Bmi_compose"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/result_time">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/result_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <include
-                android:id="@+id/result_merge_result"
-                layout="@layout/merge_result"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/result_grade_rv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:overScrollMode="never"
-                android:paddingHorizontal="15dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/result_merge_result" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </ScrollView>
-
+        android:layout_height="match_parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

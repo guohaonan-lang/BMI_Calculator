@@ -1,6 +1,5 @@
 package com.example.bmicalculator.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,12 +13,10 @@ import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.Long
 import kotlin.math.max
 import kotlin.math.min
 
@@ -101,25 +98,28 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
         val bmiData: BmiEntity? = null,
         val isRecent: Boolean = false,
         val isFirst: Boolean = false,
-        val levelName: String = "",
+        val levelNameInt: Int = R.string.load,
         val weightText: String = "",
         val heightText: String = "",
-        val genderText: String = "",
+        val genderTextInt: Int = R.string.load,
         val ageText: String = "",
-        val assessment1: String = "",
+        val assessment1Int: Int = R.string.load,
         val assessment2Text: String = "",
         val isAssessmentNormalHidden: Boolean = false, // 正常状态下隐藏部分UI
         val normalRangeText: String = "",
         val differenceText: String = "",
-        val timeTagText: String = "",
-        val gradeList: List<Grade> = emptyList()
+        val timeYear: String = "",
+        val timeMonthInt: Int = R.string.load,
+        val timeDay: String = "",
+        val timePeriodInt: Int = R.string.load,
+        val gradeList: List<Grade> = emptyList(),
+        val baseTextInt: Int = R.string.load
     )
 
     private val _uiState = MutableStateFlow(ResultUiState())
     val uiState = _uiState.asStateFlow()
 
     fun initDataFromIntent(
-        context: Context,
         record: BmiEntity?,
     ) {
         if (record == null) {
@@ -130,16 +130,16 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
         val weightStr = if (record.weightUnit) "${record.weight} kg" else "${record.weight} lb"
         val heightStr =
             if (record.heightUnit) "${record.height} cm" else "${record.heightFt}ft ${record.heightIn}in"
-        val genderStr =
-            if (record.gender == 1) context.getString(R.string.male) else context.getString(R.string.female)
+        val genderStrInt =
+            if (record.gender == 1) R.string.male else R.string.female
 
-        val bmiInfo = BmiUtil.getBmiFullInfo(context, record.age, record.gender, record.bmiValue)
-        val isNormal = bmiInfo.levelName == context.getString(R.string.adults_bmi_normal)
+        val bmiInfo = BmiUtil.getBmiFullInfo(record.age, record.gender, record.bmiValue)
+        val isNormal = bmiInfo.levelNameInt == R.string.adults_bmi_normal
 
         // === 2. 评估模块逻辑判定 ===
-        val baseText = context.getString(R.string.result_assessment_weight)
+        val baseTextInt = R.string.result_assessment_weight
         val assessment2Str =
-            if (record.heightUnit) "$baseText ${record.height} cm" else "$baseText (${record.heightFt}ft ${record.heightIn}in):"
+            if (record.heightUnit) " ${record.height} cm" else " (${record.heightFt}ft ${record.heightIn}in):"
 
         // 计算范围
         val normalRange = calculatorNormalRange()
@@ -153,31 +153,33 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
             "(%s%.1f %s)".format(normalRange.sign, normalRange.difference, normalRange.unit)
 
         // === 3. 列表状态处理 ===
-        val gradeList = BmiUtil.getGradeList(context, record.age, record.gender)
-        val levelIndex = if (record.age > 20) BmiUtil.getGradeIndex(context, bmiInfo.levelName) - 1
-        else BmiUtil.getGradeIndex(context, bmiInfo.levelName) - 3
+        val gradeList = BmiUtil.getGradeList(record.age, record.gender)
+        val levelIndex = if (record.age > 20) BmiUtil.getGradeIndex(bmiInfo.levelNameInt) - 1
+        else BmiUtil.getGradeIndex(bmiInfo.levelNameInt) - 3
         if (levelIndex in gradeList.indices) {
             gradeList[levelIndex].isSelect = true
         }
 
         // === 4. 时间与页面布局模式判定 (合并 initChangePage 逻辑) ===
-        val timeText = TimeUtil(context).parseTimeStamp(record.customTime)
-        val timeTagStr =
-            "${timeText.selectMonth} ${timeText.selectDay} ${timeText.selectYear}  ${timeText.selectPeriod}"
+        val timeText = TimeUtil().parseTimeStamp(record.customTime)
 
 
         _uiState.update {
             it.copy(
-                levelName = bmiInfo.levelName,
+                levelNameInt = bmiInfo.levelNameInt,
                 weightText = weightStr,
                 heightText = heightStr,
-                genderText = genderStr,
-                assessment1 = bmiInfo.assessment,
+                genderTextInt = genderStrInt,
+                assessment1Int = bmiInfo.assessmentInt,
+                baseTextInt = baseTextInt,
                 assessment2Text = assessment2Str,
                 isAssessmentNormalHidden = isNormal,
                 normalRangeText = rangeStr,
                 differenceText = diffStr,
-                timeTagText = timeTagStr,
+                timeYear = timeText.selectYear,
+                timeMonthInt = timeText.selectMonthInt,
+                timeDay = timeText.selectDay,
+                timePeriodInt = timeText.selectPeriodInt,
                 gradeList = gradeList
             )
         }
@@ -185,9 +187,6 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
     }
 
 
-    suspend fun countBmiRecord(): Long {
-        return repository.countBmiRecord()
-    }
 
 
     data class NormalBmiRange(
