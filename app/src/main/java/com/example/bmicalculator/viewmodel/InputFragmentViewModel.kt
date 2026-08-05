@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @SuppressLint("DefaultLocale")
-class InputViewModel(private val repository: BmiRepository) : ViewModel() {
+class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel() {
 
     sealed class DataInputIntent {
         data class SetAge(val age: Int) : DataInputIntent()
@@ -386,7 +386,7 @@ class InputViewModel(private val repository: BmiRepository) : ViewModel() {
             repository: BmiRepository,
         ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                InputViewModel(repository)
+                InputFragmentViewModel(repository)
             }
         }
     }

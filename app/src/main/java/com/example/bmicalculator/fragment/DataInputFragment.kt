@@ -12,7 +12,7 @@ import androidx.fragment.app.viewModels
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.FragmentDataInputBinding
-import com.example.bmicalculator.viewmodel.InputViewModel
+import com.example.bmicalculator.viewmodel.InputFragmentViewModel
 
 @SuppressLint("DefaultLocale", "SetTextI18n")
 class DataInputFragment : Fragment() {
@@ -20,9 +20,9 @@ class DataInputFragment : Fragment() {
     private var _binding: FragmentDataInputBinding? = null
     private val binding get() = checkNotNull(_binding)
 
-    private val viewModel: InputViewModel by viewModels {
+    private val viewModel: InputFragmentViewModel by viewModels {
         val db = BmiDatabase.getDatabase(requireContext())
-        InputViewModel.provideFactory(BmiRepository(db.bmiDao()))
+        InputFragmentViewModel.provideFactory(BmiRepository(db.bmiDao()))
     }
 
     override fun onCreateView(
@@ -48,7 +48,6 @@ class DataInputFragment : Fragment() {
                 }
             }
         }
-
     }
 
 

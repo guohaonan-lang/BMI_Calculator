@@ -9,27 +9,73 @@ import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
 import com.github.mikephil.charting.data.Entry
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
 
-    val chartBmiList: Flow<List<BmiEntity>> = repository.getChartBmi()
+
+    sealed class StatisticsIntent {
+        object SwitchDay : StatisticsIntent()
+        object SwitchWeek : StatisticsIntent()
+        object SwitchMonth : StatisticsIntent()
+        object InputPage : StatisticsIntent()
+    }
+
+    fun processIntent(intent: StatisticsIntent) {
+        when (intent) {
+            StatisticsIntent.SwitchDay -> setTimeMode(TimeMode.DAY)
+            StatisticsIntent.SwitchWeek -> setTimeMode(TimeMode.WEEK)
+            StatisticsIntent.SwitchMonth -> setTimeMode(TimeMode.MONTH)
+            StatisticsIntent.InputPage -> setEvent(StatisticsEvent.InputPageEvent)
+        }
+    }
+
+    data class StatisticsUiState(
+        val chartData: ChartProcessResult? = null,
+        val timeMode: TimeMode = TimeMode.DAY
+    )
+
+    private val _state = MutableStateFlow(StatisticsUiState())
+    val state: StateFlow<StatisticsUiState> = _state.asStateFlow()
+
+
+    sealed class StatisticsEvent{
+        object InputPageEvent : StatisticsEvent()
+    }
+    private val _event = MutableSharedFlow<StatisticsEvent?>()
+    val event: SharedFlow<StatisticsEvent?> = _event.asSharedFlow()
+
+    private fun setEvent(event: StatisticsEvent) {
+        viewModelScope.launch {
+            _event.emit(event)
+        }
+    }
+
+
+
+    private val chartBmiList: Flow<List<BmiEntity>> = repository.getChartBmi()
 
     enum class TimeMode { DAY, WEEK, MONTH }
 
-    private val _timeMode = MutableStateFlow<TimeMode>(TimeMode.DAY)
-    val timeMode: StateFlow<TimeMode> = _timeMode.asStateFlow()
 
-    // 使用 combine 将两者融合成一个“图表渲染状态流”
-    val chartUiState: StateFlow<ChartProcessResult?> =
-        combine(chartBmiList, timeMode) { data, mode ->
+    init {
+
+        combine(chartBmiList, state.map { it.timeMode }.distinctUntilChanged()) { data, mode ->
             if (data.isEmpty()) {
                 null // 如果数据为空，返回 null 作为信号
             } else {
@@ -43,12 +89,14 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = null
             )
-
-    private var currentTimeMode = TimeMode.DAY // 默认是天
+            .onEach { chartData ->
+                _state.update { it.copy(chartData = chartData) }
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun setTimeMode(mode: TimeMode) {
-        currentTimeMode = mode
-        _timeMode.value = mode
+        _state.update { it.copy(timeMode = mode) }
     }
 
     // 输出封装好的图表数据

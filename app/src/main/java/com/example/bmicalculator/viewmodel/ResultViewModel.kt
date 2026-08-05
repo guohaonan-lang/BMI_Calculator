@@ -113,7 +113,8 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
         val timeDay: String = "",
         val timePeriodInt: Int = R.string.load,
         val gradeList: List<Grade> = emptyList(),
-        val baseTextInt: Int = R.string.load
+        val baseTextInt: Int = R.string.load,
+        val buttonColor:Int = R.color.blue
     )
 
     private val _uiState = MutableStateFlow(ResultUiState())
@@ -180,7 +181,8 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
                 timeMonthInt = timeText.selectMonthInt,
                 timeDay = timeText.selectDay,
                 timePeriodInt = timeText.selectPeriodInt,
-                gradeList = gradeList
+                gradeList = gradeList,
+                buttonColor = bmiInfo.colorInt
             )
         }
 

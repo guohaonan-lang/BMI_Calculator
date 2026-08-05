@@ -99,11 +99,12 @@ fun ResultScreen(viewModel: ResultViewModel) {
                 heightText = uiState.value.heightText,
                 genderText = stringResource(uiState.value.genderTextInt),
                 ageText = uiState.value.bmiData?.age.toString(),
+                buttonColor = uiState.value.buttonColor,
             ) { bottomShow = true }
             if (uiState.value.isFirst) GradeList(gradeList = uiState.value.gradeList)
             ResultAssessment(
                 assessment1Text = stringResource(uiState.value.assessment1Int),
-                assessment2Text = uiState.value.assessment2Text,
+                assessment2Text = stringResource(uiState.value.baseTextInt)+ uiState.value.assessment2Text,
                 rangeText = uiState.value.normalRangeText,
                 differenceText = uiState.value.differenceText
             )
@@ -223,6 +224,7 @@ fun DescribeText(
     heightText: String,
     genderText: String,
     ageText: String,
+    buttonColor: Int,
     function: () -> Unit
 ) {
     Column(
@@ -243,7 +245,7 @@ fun DescribeText(
         )
         Button(
             onClick = function,
-            colors = ButtonDefaults.buttonColors(Grad4)
+            colors = ButtonDefaults.buttonColors(colorResource(buttonColor))
         ) {
             Text(
                 text = bmiLevel,

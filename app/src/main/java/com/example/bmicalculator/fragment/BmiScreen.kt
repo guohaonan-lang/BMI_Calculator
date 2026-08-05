@@ -47,7 +47,7 @@ fun BmiScreen(viewModel: BmiFragmentViewModel) {
                 .verticalScroll(rememberScrollState())
                 .weight(1f)
                 .clickable(
-                    onClick = {viewModel.processIntent(intent = BmiFragmentViewModel.BmiIntent.NavToInput)}
+                    onClick = { viewModel.processIntent(intent = BmiFragmentViewModel.BmiIntent.NavToInput) }
                 )
         ) {
             ColorWheel(
@@ -62,6 +62,7 @@ fun BmiScreen(viewModel: BmiFragmentViewModel) {
                 heightText = uiState.value.heightStr,
                 genderText = stringResource(uiState.value.genderStrInt),
                 ageText = uiState.value.age.toString(),
+                buttonColor = uiState.value.buttonColor
             ) { }
             GradeList(gradeList = uiState.value.gradeList)
         }

@@ -9,6 +9,7 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.model.Grade
+import com.example.bmicalculator.ui.theme.Blue
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,6 +45,7 @@ class BmiFragmentViewModel(private val repository: BmiRepository) : ViewModel() 
         val timeYear: String = "",
         val timeMonthInt: Int = R.string.load,
         val timeDay: String = "",
+        val buttonColor : Int = R.color.blue,
         var gradeList: List<Grade> = emptyList()
     )
     private val _status = MutableStateFlow(BmiStatus())
@@ -80,6 +82,7 @@ class BmiFragmentViewModel(private val repository: BmiRepository) : ViewModel() 
                 timeYear = timeText.selectYear,
                 timeMonthInt = timeText.selectMonthInt,
                 timeDay = timeText.selectDay,
+                buttonColor = bmiInfo.colorInt,
                 gradeList = gradeList
             ) }
         }

@@ -83,8 +83,8 @@ import com.example.bmicalculator.ui.theme.Gray
 import com.example.bmicalculator.ui.theme.White
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
-import com.example.bmicalculator.viewmodel.InputViewModel
-import com.example.bmicalculator.viewmodel.InputViewModel.DataInputIntent
+import com.example.bmicalculator.viewmodel.InputFragmentViewModel
+import com.example.bmicalculator.viewmodel.InputFragmentViewModel.DataInputIntent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -101,7 +101,7 @@ fun PreviewInputScreen() {
 
 @Composable
 fun InputScreen(
-    viewModel: InputViewModel,
+    viewModel: InputFragmentViewModel,
     modifier: Modifier = Modifier
         .fillMaxSize()
         .background(Background),
@@ -132,13 +132,13 @@ fun InputScreen(
     LaunchedEffect(Unit) {
         eventFlow.collect { event ->
             when (event) {
-                is InputViewModel.CheckEvent.ShowToast ->
+                is InputFragmentViewModel.CheckEvent.ShowToast ->
                     event.msgResId?.let { id ->
                         val str = context.getString(id)
                         Toast.makeText(context, str, Toast.LENGTH_SHORT).show()
                     }
 
-                is InputViewModel.CheckEvent.NavToResult -> {
+                is InputFragmentViewModel.CheckEvent.NavToResult -> {
                     val intent = Intent(context, ResultActivity::class.java)
                     intent.putExtra("BMI", event.bmiEntity)
                     intent.putExtra("FATHER", event.isFirst)
@@ -199,13 +199,13 @@ fun InputScreen(
                         uiState.value.bmiValue
                     )
                 val bmiColor = ContextCompat.getColor(context, bmiLevel.colorInt)
-                val custime = TimeUtil().getCustomTimeStamp(
+                val cusTime = TimeUtil().getCustomTimeStamp(
                     uiState.value.timeYear,
                     uiState.value.timeMonthInt,
                     uiState.value.timeDay,
                     uiState.value.timePeriodInt,
                 )
-                viewModel.processIntent(DataInputIntent.ComputeFullBmi(bmiColor, custime))
+                viewModel.processIntent(DataInputIntent.ComputeFullBmi(bmiColor, cusTime))
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -278,7 +278,7 @@ fun TitleText(context: Context) {
 
 
 @Composable
-fun WeightAndHeightInput(viewModel: InputViewModel, uiState: State<InputViewModel.UserListState>) {
+fun WeightAndHeightInput(viewModel: InputFragmentViewModel, uiState: State<InputFragmentViewModel.UserListState>) {
     // 身高，体重-标题
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
@@ -318,7 +318,7 @@ fun WeightAndHeightInput(viewModel: InputViewModel, uiState: State<InputViewMode
                 // 3. 如果存在小数点，截断小数部分，最多保留2位
                 val dotPosition = temp.indexOf('.')
                 if (dotPosition != -1) {
-                    val integerPart = temp.substring(0, dotPosition)
+                    val integerPart = temp.take(dotPosition)
                     val decimalPart = temp.substring(dotPosition + 1).take(2)
                     temp = "$integerPart.$decimalPart"
                 }
@@ -353,7 +353,7 @@ fun WeightAndHeightInput(viewModel: InputViewModel, uiState: State<InputViewMode
                     // 3. 如果存在小数点，截断小数部分，最多保留2位
                     val dotPosition = temp.indexOf('.')
                     if (dotPosition != -1) {
-                        val integerPart = temp.substring(0, dotPosition)
+                        val integerPart = temp.take(dotPosition)
                         val decimalPart = temp.substring(dotPosition + 1).take(2)
                         temp = "$integerPart.$decimalPart"
                     }
@@ -398,7 +398,7 @@ fun WeightAndHeightInput(viewModel: InputViewModel, uiState: State<InputViewMode
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
                 InputText(
-                    value = uiState.value.heightIn.toString() + "\"",
+                    value = uiState.value.heightIn + "\"",
                     valueBack = { rawText ->
                         val text = rawText.filter { it.isDigit() }.take(2)
                         viewModel.processIntent(DataInputIntent.SetHeightIn(text))
@@ -454,7 +454,7 @@ fun InputText(
 }
 
 @Composable
-fun UnitSwitch(viewModel: InputViewModel, uiState: State<InputViewModel.UserListState>) {
+fun UnitSwitch(viewModel: InputFragmentViewModel, uiState: State<InputFragmentViewModel.UserListState>) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = Modifier
@@ -578,7 +578,7 @@ fun UnitSwitch(viewModel: InputViewModel, uiState: State<InputViewModel.UserList
 fun TimeSelect(
     onFirstBoxClick: () -> Unit,
     onSecondBoxClick: () -> Unit,
-    uiState: State<InputViewModel.UserListState>
+    uiState: State<InputFragmentViewModel.UserListState>
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
@@ -1214,7 +1214,7 @@ fun AgeHorizontalPicker(
 }
 
 @Composable
-fun genderSelect(viewModel: InputViewModel, uiState: State<InputViewModel.UserListState>) {
+fun genderSelect(viewModel: InputFragmentViewModel, uiState: State<InputFragmentViewModel.UserListState>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

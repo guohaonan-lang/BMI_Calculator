@@ -3,20 +3,17 @@ package com.example.bmicalculator.ui
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
-import com.example.bmicalculator.adapter.RecentAdapter
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivityRecentBinding
-import com.example.bmicalculator.viewmodel.BmiViewModel
+import com.example.bmicalculator.viewmodel.RecentViewModel
 import kotlinx.coroutines.launch
 
 class RecentActivity : BaseActivity<ActivityRecentBinding>() {
@@ -24,13 +21,11 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>() {
     override fun inflateBinding(inflater: LayoutInflater): ActivityRecentBinding {
         return ActivityRecentBinding.inflate(inflater)
     }
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: RecentAdapter
 
     //创建viewmodel
-    private val viewModel: BmiViewModel by viewModels {
+    private val viewModel: RecentViewModel by viewModels {
         val db = BmiDatabase.getDatabase(this)
-        BmiViewModel.provideFactory(BmiRepository(db.bmiDao()))
+        RecentViewModel.provideFactory(BmiRepository(db.bmiDao()))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,39 +36,27 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>() {
             insets
         }
 
-        val back = binding.recentBack
-        back.setOnClickListener {
-            finish()
-        }
-        setupRecyclerView()
+        binding.recentCompose.apply {
 
-    }
-
-    //初始化列表
-    private fun setupRecyclerView() {
-        recyclerView = binding.recentRv
-
-        adapter = RecentAdapter(emptyList())
-        lifecycleScope.launch {
-            viewModel.allBmiList.collect { data ->
-                if (data.isEmpty()) {
-                    val intent = Intent(this@RecentActivity, DataInputActivity::class.java)
-                    startActivity(intent)
-                    finishAffinity()
-                    return@collect
-                }
-                adapter.update(data)
+            setContent {
+                RecentScreen(viewModel)
             }
         }
-        adapter.setOnItemClick { item ->
-            val intent = Intent(this, ResultActivity::class.java)
-            intent.putExtra("BMI", item)
-            intent.putExtra("Recent", true)
-            startActivity(intent)
-        }
 
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = adapter
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.event.collect { event ->
+                    when(event){
+                        is RecentViewModel.RecentEvent.NavToBack -> finish()
+                        is RecentViewModel.RecentEvent.NavToResult -> {
+                            val intent = Intent(this@RecentActivity, ResultActivity::class.java)
+                            intent.putExtra("BMI", event.record)
+                            intent.putExtra("Recent", true)
+                            startActivity(intent)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
