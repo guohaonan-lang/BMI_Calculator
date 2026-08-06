@@ -12,12 +12,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.databinding.ActivityLanguageBinding
 import com.example.bmicalculator.util.LangHelper
-import com.example.bmicalculator.viewmodel.LanguageActivityViewModel
+import com.example.bmicalculator.viewmodel.LanguageViewModel
 import kotlinx.coroutines.launch
 
 class LanguageActivity : BaseActivity<ActivityLanguageBinding>() {
-    private val viewModel: LanguageActivityViewModel by viewModels {
-        LanguageActivityViewModel.provideFactory()
+    private val viewModel: LanguageViewModel by viewModels {
+        LanguageViewModel.provideFactory()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -39,3 +39,8 @@ val Band7 = Color(0xFFF67D3C)
 val Band8 = Color(0xFFF04E46)
 
 val Point = Color(0xFF2C2C2E)
+
+val GobleColor = Color(0xFFFFA000)
+val Setting2Color = Color(0xFF607D8B)
+
+val switchTrackColor = Color(0xFFB1BFF7)

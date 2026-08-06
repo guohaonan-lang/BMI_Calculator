@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class LanguageActivityViewModel : ViewModel() {
+class LanguageViewModel : ViewModel() {
     private val _selectedLanguage = MutableStateFlow("zh")
     val selectedLanguage: StateFlow<String> = _selectedLanguage.asStateFlow()
 
@@ -25,7 +25,7 @@ class LanguageActivityViewModel : ViewModel() {
     companion object {
         fun provideFactory(): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                LanguageActivityViewModel()
+                LanguageViewModel()
             }
         }
     }

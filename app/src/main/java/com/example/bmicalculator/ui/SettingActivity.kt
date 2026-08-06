@@ -10,9 +10,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.viewModels
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
@@ -40,6 +43,37 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        binding.settingCompose.apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+            )
+            setContent {
+                SettingScreen(viewModel)
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.event.collect {event ->
+                    when(event){
+                        is SettingViewModel.SettingEvent.NavToLanguage -> {
+                            val intent = Intent(this@SettingActivity, LanguageActivity::class.java)
+                            startActivity(intent)
+                        }
+                        is SettingViewModel.SettingEvent.NavToFeedback -> {
+                            val intent = Intent(this@SettingActivity, FeedbackActivity::class.java)
+                            startActivity(intent)
+                        }
+                        is SettingViewModel.SettingEvent.NavToBack -> {
+                            finish()
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
+
         initUserDialog()
         initAllClick()
     }
@@ -48,10 +82,6 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
         binding.settingUser.setOnClickListener {
             userBottomSheetDialog.show()
         }
-        binding.settingLanguage.setOnClickListener {
-            val intent = Intent(this, LanguageActivity::class.java)
-            startActivity(intent)
-        }
         binding.settingUserAutorenew.setOnClickListener {
             initAutoDialog()
             lifecycleScope.launch(Dispatchers.IO) {
@@ -59,13 +89,6 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
             }
         }
 
-        binding.settingFeedback.setOnClickListener {
-            val intent = Intent(this, FeedbackActivity::class.java)
-            startActivity(intent)
-        }
-        binding.settingBack.setOnClickListener {
-            finish()
-        }
     }
 
     private fun initUserDialog() {
