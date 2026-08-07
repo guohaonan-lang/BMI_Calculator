@@ -77,7 +77,8 @@ fun SettingScreen(viewModel: SettingViewModel) {
             .background(
                 color = Background
             )
-            .padding(horizontal = 15.dp),
+            .padding(horizontal = 15.dp)
+            .padding(top = 10.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         SettingTitle(backClick = { viewModel.processIntent(SettingViewModel.SettingIntent.NavToBack) })

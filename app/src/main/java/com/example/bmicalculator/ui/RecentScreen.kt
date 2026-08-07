@@ -45,6 +45,7 @@ fun RecentScreen(viewModel: RecentViewModel) {
             .background(
                 color = Background
             )
+            .padding(top = 10.dp)
     ) {
         Title({ viewModel.process(RecentViewModel.RecentIntent.BackPage) })
         BmiRecords(uiState.value.recordUiList, { clickedRecord ->
