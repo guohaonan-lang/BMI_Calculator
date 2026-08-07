@@ -2,7 +2,6 @@ package com.example.bmicalculator.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -28,55 +27,34 @@ class LanguageActivity : BaseActivity<ActivityLanguageBinding>() {
             insets
         }
 
-        initView()
-        initDataFlow()
+        binding.languageCompose.apply {
 
-    }
-
-    private fun initDataFlow() {
+            setContent {
+                LanguageScreen(viewModel)
+            }
+        }
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.selectedLanguage.collect { code ->
-                    switchLanguage(this@LanguageActivity,code)
-                    when (code) {
-                        LangHelper.LANG_EN -> {
-                            binding.chineseCheck.visibility = View.GONE
-                            binding.englishCheck.visibility = View.VISIBLE
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.event.collect {event ->
+                    when(event){
+                        is LanguageViewModel.LanguageEvent.NavToBack -> finish()
+                        is LanguageViewModel.LanguageEvent.SwitchChinese -> {
+                            switchLanguage(this@LanguageActivity, LangHelper.LANG_ZH)
                         }
-
-                        LangHelper.LANG_ZH -> {
-                            binding.englishCheck.visibility = View.GONE
-                            binding.chineseCheck.visibility = View.VISIBLE
+                        is LanguageViewModel.LanguageEvent.SwitchEnglish -> {
+                            switchLanguage(this@LanguageActivity, LangHelper.LANG_EN)
                         }
                     }
                 }
             }
-
         }
+
+
     }
 
     override fun inflateBinding(inflater: LayoutInflater): ActivityLanguageBinding {
         return ActivityLanguageBinding.inflate(inflater)
     }
 
-    private fun initView() {
-        viewModel.loadSavedLang(this)
-        binding.languageEnglish.setOnClickListener {
-            binding.chineseCheck.visibility = View.GONE
-            binding.englishCheck.visibility = View.VISIBLE
-            viewModel.setLanguage(LangHelper.LANG_EN)
-        }
-
-        binding.languageChinese.setOnClickListener {
-            binding.englishCheck.visibility = View.GONE
-            binding.chineseCheck.visibility = View.VISIBLE
-            viewModel.setLanguage(LangHelper.LANG_ZH)
-        }
-
-        binding.languageBack.setOnClickListener {
-            finish()
-        }
-
-    }
 
 }
