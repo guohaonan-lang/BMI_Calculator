@@ -1,14 +1,8 @@
 package com.example.bmicalculator.ui
 
-import android.app.Dialog
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.Button
-import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
@@ -22,7 +16,6 @@ import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySettingBinding
 import com.example.bmicalculator.viewmodel.SettingViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SettingActivity : BaseActivity<ActivitySettingBinding>() {
@@ -54,17 +47,19 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
         }
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
-                    when(effect){
+                    when (effect) {
                         is SettingViewModel.SettingEffect.NavToLanguage -> {
                             val intent = Intent(this@SettingActivity, LanguageActivity::class.java)
                             startActivity(intent)
                         }
+
                         is SettingViewModel.SettingEffect.NavToFeedback -> {
                             val intent = Intent(this@SettingActivity, FeedbackActivity::class.java)
                             startActivity(intent)
                         }
+
                         is SettingViewModel.SettingEffect.NavToBack -> {
                             finish()
                         }
@@ -73,74 +68,5 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
             }
         }
 
-        initUserDialog()
-        initAllClick()
     }
-
-    private fun initAllClick() {
-        binding.settingUser.setOnClickListener {
-            userBottomSheetDialog.show()
-        }
-        binding.settingUserAutorenew.setOnClickListener {
-            initAutoDialog()
-            lifecycleScope.launch(Dispatchers.IO) {
-                viewModel.readTestFile(this@SettingActivity)
-            }
-        }
-
-    }
-
-    private fun initUserDialog() {
-        userBottomSheetDialog = BottomSheetDialog(this)
-        val rootView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_setting_user, null)
-        userBottomSheetDialog.setContentView(rootView)
-        rootView.findViewById<Button>(R.id.user_cancel_bt).setOnClickListener {
-            userBottomSheetDialog.dismiss()
-        }
-        rootView.findViewById<ImageView>(R.id.user_cancel_x).setOnClickListener {
-            userBottomSheetDialog.dismiss()
-        }
-        val loginButton = rootView.findViewById<Button>(R.id.user_login)
-
-        loginButton.setOnClickListener {
-            // 🏆 【核心修复】：加上 .toString()，确保类型 100% 属于纯 String 文本比对
-            val currentText = loginButton.text.toString()
-            val logoutText = getString(R.string.log_out)
-            val loginText = getString(R.string.log_in)
-
-            if (currentText == logoutText) {
-                // 执行登出逻辑
-                loginButton.text = getString(R.string.log_in)
-                loginButton.setTextColor(getColor(R.color.red))
-
-                userBottomSheetDialog.dismiss()
-                binding.userIv.visibility = View.GONE
-                binding.settingUserText1.text = getString(R.string.setting_backup_restore)
-                binding.settingUserText2.text = getString(R.string.setting_synchronize_your_data)
-            } else if (currentText == loginText) {
-                // 执行登录逻辑
-                loginButton.text = getString(R.string.log_out)
-                loginButton.setTextColor(getColor(R.color.red))
-
-                userBottomSheetDialog.dismiss()
-                binding.userIv.visibility = View.VISIBLE
-                binding.settingUserText1.text = "Cassie"
-                binding.settingUserText2.text = "cassiexiao@gmail.com"
-                binding.settingUserText2.alpha = 0.5f
-            }
-        }
-    }
-
-    private fun initAutoDialog() {
-        val autoDialog = Dialog(this)
-        val rootView = LayoutInflater.from(this).inflate(R.layout.dialog_autorenew, null)
-        autoDialog.setContentView(rootView)
-        rootView.findViewById<Button>(R.id.auto_done).setOnClickListener {
-
-            autoDialog.dismiss()
-        }
-        autoDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        autoDialog.show()
-    }
-
 }

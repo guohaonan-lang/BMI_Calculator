@@ -6,12 +6,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
-import kotlinx.coroutines.flow.Flow
 
 class BmiViewModel(private val repository: BmiRepository) :
     ViewModel() {
-
-    val allBmiList : Flow<List<BmiEntity>> = repository.getAllBmiRecords()
 
     suspend fun insertBmiRecord(bmi: BmiEntity) {
         repository.insertBmiRecord(bmi)
