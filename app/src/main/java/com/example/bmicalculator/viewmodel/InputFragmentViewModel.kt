@@ -120,17 +120,17 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
     val state: StateFlow<UserListState> = _state.asStateFlow()
 
 
-    sealed class CheckEvent {
+    sealed class InputEffect {
         // Toast 提示
-        data class ShowToast(val msgResId: Int?) : CheckEvent()
+        data class ShowToast(val msgResId: Int?) : InputEffect()
 
         // 跳转结果页
-        data class NavToResult(val bmiEntity: BmiEntity, val isFirst: Boolean) : CheckEvent()
+        data class NavToResult(val bmiEntity: BmiEntity, val isFirst: Boolean) : InputEffect()
     }
 
     // 一次性事件，SharedFlow 避免重组重复消费
-    private val _event = MutableSharedFlow<CheckEvent>()
-    val event = _event.asSharedFlow()
+    private val _effect = MutableSharedFlow<InputEffect>()
+    val effect = _effect.asSharedFlow()
 
 
     var createTime: Long = 0
@@ -277,9 +277,9 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
         val toastMsgRes: Int?, // 提示文案资源ID
     )
 
-    private fun sendEvent(event: CheckEvent) {
+    private fun sendEvent(event: InputEffect) {
         viewModelScope.launch {
-            _event.emit(event)
+            _effect.emit(event)
         }
     }
 
@@ -290,7 +290,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
             // LB模式
             if (w !in 2f..551f) {
                 _state.update { it.copy(weight = "551.00") }
-                sendEvent(CheckEvent.ShowToast(msgResId = R.string.weight_out_of_range_2_551_lb))
+                sendEvent(InputEffect.ShowToast(msgResId = R.string.weight_out_of_range_2_551_lb))
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.weight_out_of_range_2_551_lb,
@@ -300,7 +300,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
             // KG模式
             if (w !in 1f..250f) {
                 _state.update { it.copy(weight = "250.00") }
-                sendEvent(CheckEvent.ShowToast(msgResId = R.string.weight_out_of_range_2_250_kg))
+                sendEvent(InputEffect.ShowToast(msgResId = R.string.weight_out_of_range_2_250_kg))
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.weight_out_of_range_2_250_kg,
@@ -315,7 +315,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
             // 英制 ft/in
             if (hft !in 1..8) {
                 _state.update { it.copy(heightFt = "8") }
-                sendEvent(CheckEvent.ShowToast(R.string.height_out_of_range_1_8_ft))
+                sendEvent(InputEffect.ShowToast(R.string.height_out_of_range_1_8_ft))
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_8_ft,
@@ -323,7 +323,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
             }
             if (hin !in 0..11) {
                 _state.update { it.copy(heightIn = "11") }
-                sendEvent(CheckEvent.ShowToast(R.string.height_out_of_range_1_11_in))
+                sendEvent(InputEffect.ShowToast(R.string.height_out_of_range_1_11_in))
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_11_in,
@@ -333,7 +333,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
             // 公制 cm
             if (_state.value.height.toFloat() !in 1f..250f) {
                 _state.update { it.copy(height = "170.0") }
-                sendEvent(CheckEvent.ShowToast(R.string.height_out_of_range_1_250_cm))
+                sendEvent(InputEffect.ShowToast(R.string.height_out_of_range_1_250_cm))
                 return CheckResult(
                     pass = false,
                     toastMsgRes = R.string.height_out_of_range_1_250_cm,
@@ -364,7 +364,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
                 createTime = System.currentTimeMillis(),
                 customTime = customTime
             )
-        sendEvent(CheckEvent.NavToResult(bmiData, _state.value.isFirstData))
+        sendEvent(InputEffect.NavToResult(bmiData, _state.value.isFirstData))
     }
 
     init {

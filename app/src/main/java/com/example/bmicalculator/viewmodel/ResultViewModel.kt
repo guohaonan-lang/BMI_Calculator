@@ -42,6 +42,40 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
         }
     }
 
+    data class ResultUiState(
+        val bmiData: BmiEntity? = null,
+        val isRecent: Boolean = false,
+        val isFirst: Boolean = false,
+        val levelNameInt: Int = R.string.load,
+        val weightText: String = "",
+        val heightText: String = "",
+        val genderTextInt: Int = R.string.load,
+        val ageText: String = "",
+        val assessment1Int: Int = R.string.load,
+        val assessment2Text: String = "",
+        val isAssessmentNormalHidden: Boolean = false, // 正常状态下隐藏部分UI
+        val normalRangeText: String = "",
+        val differenceText: String = "",
+        val timeYear: String = "",
+        val timeMonthInt: Int = R.string.load,
+        val timeDay: String = "",
+        val timePeriodInt: Int = R.string.load,
+        val gradeList: List<Grade> = emptyList(),
+        val baseTextInt: Int = R.string.load,
+        val buttonColor:Int = R.color.blue
+    )
+
+    sealed class ResultEvent {
+        object NavToBack : ResultEvent()
+        object NavToStart : ResultEvent()
+        object NavToMain : ResultEvent()
+    }
+
+    private val _effect = MutableSharedFlow<ResultEvent>()
+    val effect = _effect.asSharedFlow()
+
+    private val _uiState = MutableStateFlow(ResultUiState())
+    val uiState = _uiState.asStateFlow()
 
     private fun updateRecord(newRecord: BmiEntity) {
         _uiState.update { it.copy(bmiData = newRecord) }
@@ -79,46 +113,13 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
     }
 
 
-    sealed class ResultEvent {
-        object NavToBack : ResultEvent()
-        object NavToStart : ResultEvent()
-        object NavToMain : ResultEvent()
-    }
 
-    private val _event = MutableSharedFlow<ResultEvent>()
-    val event = _event.asSharedFlow()
     private fun emitEvent(event: ResultEvent) {
         viewModelScope.launch {
-            _event.emit(event)
+            _effect.emit(event)
         }
     }
 
-
-    data class ResultUiState(
-        val bmiData: BmiEntity? = null,
-        val isRecent: Boolean = false,
-        val isFirst: Boolean = false,
-        val levelNameInt: Int = R.string.load,
-        val weightText: String = "",
-        val heightText: String = "",
-        val genderTextInt: Int = R.string.load,
-        val ageText: String = "",
-        val assessment1Int: Int = R.string.load,
-        val assessment2Text: String = "",
-        val isAssessmentNormalHidden: Boolean = false, // 正常状态下隐藏部分UI
-        val normalRangeText: String = "",
-        val differenceText: String = "",
-        val timeYear: String = "",
-        val timeMonthInt: Int = R.string.load,
-        val timeDay: String = "",
-        val timePeriodInt: Int = R.string.load,
-        val gradeList: List<Grade> = emptyList(),
-        val baseTextInt: Int = R.string.load,
-        val buttonColor:Int = R.color.blue
-    )
-
-    private val _uiState = MutableStateFlow(ResultUiState())
-    val uiState = _uiState.asStateFlow()
 
     fun initDataFromIntent(
         record: BmiEntity?,
@@ -187,9 +188,6 @@ class ResultViewModel(private val repository: BmiRepository) : ViewModel() {
         }
 
     }
-
-
-
 
     data class NormalBmiRange(
         val max: Float,

@@ -3,12 +3,12 @@ package com.example.bmicalculator.fragment
 import android.content.Context
 import android.content.Intent
 import android.view.MotionEvent
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -73,7 +73,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bigkoo.pickerview.adapter.ArrayWheelAdapter
 import com.contrarywind.view.WheelView
 import com.example.bmicalculator.R
-import com.example.bmicalculator.ui.ResultActivity
 import com.example.bmicalculator.ui.SettingActivity
 import com.example.bmicalculator.ui.theme.BMIComposeTheme
 import com.example.bmicalculator.ui.theme.Background
@@ -109,7 +108,6 @@ fun InputScreen(
     val context = LocalContext.current
 
     val uiState = viewModel.state.collectAsStateWithLifecycle()
-    val eventFlow = viewModel.event
     var showDateBottomSheet by remember { mutableStateOf(false) }
     var showDate2BottomSheet by remember { mutableStateOf(false) }
 
@@ -127,25 +125,6 @@ fun InputScreen(
             )
         )
         viewModel.processIntent(DataInputIntent.SetTime2(timeStr.selectPeriodInt))
-    }
-
-    LaunchedEffect(Unit) {
-        eventFlow.collect { event ->
-            when (event) {
-                is InputFragmentViewModel.CheckEvent.ShowToast ->
-                    event.msgResId?.let { id ->
-                        val str = context.getString(id)
-                        Toast.makeText(context, str, Toast.LENGTH_SHORT).show()
-                    }
-
-                is InputFragmentViewModel.CheckEvent.NavToResult -> {
-                    val intent = Intent(context, ResultActivity::class.java)
-                    intent.putExtra("BMI", event.bmiEntity)
-                    intent.putExtra("FATHER", event.isFirst)
-                    context.startActivity(intent)
-                }
-            }
-        }
     }
 
     Column(
@@ -270,7 +249,9 @@ fun TitleText(context: Context) {
                     onClick = {
                         val intent = Intent(context, SettingActivity::class.java)
                         context.startActivity(intent)
-                    }
+                    },
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
                 )
         )
     }
@@ -278,7 +259,10 @@ fun TitleText(context: Context) {
 
 
 @Composable
-fun WeightAndHeightInput(viewModel: InputFragmentViewModel, uiState: State<InputFragmentViewModel.UserListState>) {
+fun WeightAndHeightInput(
+    viewModel: InputFragmentViewModel,
+    uiState: State<InputFragmentViewModel.UserListState>
+) {
     // 身高，体重-标题
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
@@ -454,7 +438,10 @@ fun InputText(
 }
 
 @Composable
-fun UnitSwitch(viewModel: InputFragmentViewModel, uiState: State<InputFragmentViewModel.UserListState>) {
+fun UnitSwitch(
+    viewModel: InputFragmentViewModel,
+    uiState: State<InputFragmentViewModel.UserListState>
+) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = Modifier
@@ -721,6 +708,7 @@ fun DatePickerBottomSheet(
         wheelDay.adapter = ArrayWheelAdapter(newDayList)
         wheelDay.invalidate()
     }
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = {
@@ -1214,7 +1202,10 @@ fun AgeHorizontalPicker(
 }
 
 @Composable
-fun genderSelect(viewModel: InputFragmentViewModel, uiState: State<InputFragmentViewModel.UserListState>) {
+fun genderSelect(
+    viewModel: InputFragmentViewModel,
+    uiState: State<InputFragmentViewModel.UserListState>
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

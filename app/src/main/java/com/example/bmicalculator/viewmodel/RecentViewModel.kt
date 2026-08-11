@@ -30,10 +30,43 @@ class RecentViewModel(repository: BmiRepository) :
     }
     fun process(intent: RecentIntent){
         when(intent){
-            is RecentIntent.BackPage -> emitEvent( RecentEvent.NavToBack)
-            is RecentIntent.ResultPage -> emitEvent( RecentEvent.NavToResult(intent.record))
+            is RecentIntent.BackPage -> emitEvent( RecentEffect.NavToBack)
+            is RecentIntent.ResultPage -> emitEvent( RecentEffect.NavToResult(intent.record))
         }
 
+    }
+
+
+    // UI展示模型
+    data class BmiRecordUi(
+        val id: Long,
+        val bmiDisplayText: String,
+        val levelTextInt: Int,
+        val colorResId: Int,
+        val timeDisplayText: TimeParseResult,
+        val bmiRecord: BmiEntity
+    )
+
+    data class BmiUiState(
+        val recordUiList: List<BmiRecordUi> = emptyList(),
+    )
+
+    sealed class RecentEffect{
+        object NavToBack : RecentEffect()
+        data class NavToResult(val record: BmiEntity) : RecentEffect()
+    }
+    // UI状态，存放处理完成后的UI展示列表
+    private val _uiState = MutableStateFlow(BmiUiState())
+    val uiState: StateFlow<BmiUiState> = _uiState
+
+    private val _effect = MutableSharedFlow<RecentEffect>()
+    val effect = _effect.asSharedFlow()
+
+
+    private fun emitEvent(event: RecentEffect) {
+        viewModelScope.launch {
+            _effect.emit(event)
+        }
     }
 
     val allBmiList : Flow<List<BmiEntity>> = repository.getAllBmiRecords()
@@ -66,37 +99,6 @@ class RecentViewModel(repository: BmiRepository) :
             }
             .launchIn(viewModelScope) // 使用viewModelScope，ViewModel销毁自动取消订阅
     }
-    // UI展示模型
-    data class BmiRecordUi(
-        val id: Long,
-        val bmiDisplayText: String,
-        val levelTextInt: Int,
-        val colorResId: Int,
-        val timeDisplayText: TimeParseResult,
-        val bmiRecord: BmiEntity
-    )
-
-    data class BmiUiState(
-        val recordUiList: List<BmiRecordUi> = emptyList(),
-    )
-    // UI状态，存放处理完成后的UI展示列表
-    private val _uiState = MutableStateFlow(BmiUiState())
-    val uiState: StateFlow<BmiUiState> = _uiState
-
-
-    sealed class RecentEvent{
-        object NavToBack : RecentEvent()
-        data class NavToResult(val record: BmiEntity) : RecentEvent()
-    }
-    private val _event = MutableSharedFlow<RecentEvent>()
-    val event = _event.asSharedFlow()
-
-    private fun emitEvent(event: RecentEvent) {
-        viewModelScope.launch {
-            _event.emit(event)
-        }
-    }
-
     companion object {
         fun provideFactory(
             repository: BmiRepository,

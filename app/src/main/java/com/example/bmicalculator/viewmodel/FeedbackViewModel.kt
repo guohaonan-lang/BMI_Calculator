@@ -19,22 +19,22 @@ class FeedbackViewModel : ViewModel() {
 
     fun processIntent(intent: FeedbackIntent) {
         when (intent) {
-            is FeedbackIntent.CommitFeedback -> emitEvent(FeedbackEvent.NavToCommit)
-            is FeedbackIntent.NavToBack -> emitEvent(FeedbackEvent.NavToBack)
+            is FeedbackIntent.CommitFeedback -> emitEvent(FeedbackEffect.NavToCommit)
+            is FeedbackIntent.NavToBack -> emitEvent(FeedbackEffect.NavToBack)
         }
     }
 
-    sealed class FeedbackEvent {
-        object NavToBack : FeedbackEvent()
-        object NavToCommit : FeedbackEvent()
+    sealed class FeedbackEffect {
+        object NavToBack : FeedbackEffect()
+        object NavToCommit : FeedbackEffect()
     }
 
-    private val _event = MutableSharedFlow<FeedbackEvent>()
-    val event: SharedFlow<FeedbackEvent> = _event.asSharedFlow()
+    private val _effect = MutableSharedFlow<FeedbackEffect>()
+    val effect: SharedFlow<FeedbackEffect> = _effect.asSharedFlow()
 
-    private fun emitEvent(newEvent: FeedbackEvent) {
+    private fun emitEvent(newEvent: FeedbackEffect) {
         viewModelScope.launch {
-            _event.emit(newEvent)
+            _effect.emit(newEvent)
         }
     }
 

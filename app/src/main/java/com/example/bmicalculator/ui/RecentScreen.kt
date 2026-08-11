@@ -3,6 +3,7 @@ package com.example.bmicalculator.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
@@ -47,10 +49,10 @@ fun RecentScreen(viewModel: RecentViewModel) {
             )
             .padding(top = 10.dp)
     ) {
-        Title({ viewModel.process(RecentViewModel.RecentIntent.BackPage) })
-        BmiRecords(uiState.value.recordUiList, { clickedRecord ->
+        Title { viewModel.process(RecentViewModel.RecentIntent.BackPage) }
+        BmiRecords(uiState.value.recordUiList) { clickedRecord ->
             viewModel.process(RecentViewModel.RecentIntent.ResultPage(record = clickedRecord))
-        })
+        }
     }
 }
 
@@ -64,7 +66,10 @@ fun Title(backPage: () -> Unit) {
             contentDescription = "back",
             modifier = Modifier
                 .size(24.dp)
-                .clickable(onClick = backPage)
+                .clickable(
+                    onClick = backPage,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() })
         )
         Text(
             stringResource(R.string.recent),
@@ -83,7 +88,7 @@ fun BmiRecords(records: List<RecentViewModel.BmiRecordUi>, resultPageClick: (Bmi
             .padding(top = 10.dp)
     ) {
         items(items = records) { item ->
-            BmiRecord(item,resultPageClick)
+            BmiRecord(item, resultPageClick)
         }
     }
 }
@@ -98,6 +103,7 @@ fun BmiRecord(record: RecentViewModel.BmiRecordUi, resultPageClick: (BmiEntity) 
                 color = White,
                 shape = RoundedCornerShape(15.dp)
             )
+            .clip(RoundedCornerShape(15.dp))
             .clickable(onClick = { resultPageClick(record.bmiRecord) }),
     ) {
         val (bmiValue, bmiColor, bmiLevel, bmiTime, rightIv) = createRefs()

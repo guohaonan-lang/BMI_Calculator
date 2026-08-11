@@ -45,12 +45,12 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.event.collect { event ->
-                    when(event){
-                        is RecentViewModel.RecentEvent.NavToBack -> finish()
-                        is RecentViewModel.RecentEvent.NavToResult -> {
+                viewModel.effect.collect { effect ->
+                    when(effect){
+                        is RecentViewModel.RecentEffect.NavToBack -> finish()
+                        is RecentViewModel.RecentEffect.NavToResult -> {
                             val intent = Intent(this@RecentActivity, ResultActivity::class.java)
-                            intent.putExtra("BMI", event.record)
+                            intent.putExtra("BMI", effect.record)
                             intent.putExtra("Recent", true)
                             startActivity(intent)
                         }

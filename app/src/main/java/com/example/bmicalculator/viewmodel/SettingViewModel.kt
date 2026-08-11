@@ -1,7 +1,6 @@
 package com.example.bmicalculator.viewmodel
 
 import android.content.Context
-import androidx.compose.ui.graphics.Shape
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -34,11 +33,11 @@ class SettingViewModel(private val repository: BmiRepository) : ViewModel() {
     fun processIntent(intent: SettingIntent) {
         when (intent) {
             is SettingIntent.ReadTestData -> readTestFile(intent.context)
-            is SettingIntent.NavToLanguage -> emitEvent(SettingEvent.NavToLanguage)
-            is SettingIntent.NavToFeedback -> emitEvent(SettingEvent.NavToFeedback)
-            is SettingIntent.UserLoad -> LoadUser(true)
-            is SettingIntent.UserUnload -> LoadUser(false)
-            is SettingIntent.NavToBack -> emitEvent(SettingEvent.NavToBack)
+            is SettingIntent.NavToLanguage -> emitEvent(SettingEffect.NavToLanguage)
+            is SettingIntent.NavToFeedback -> emitEvent(SettingEffect.NavToFeedback)
+            is SettingIntent.UserLoad -> loadUser(true)
+            is SettingIntent.UserUnload -> loadUser(false)
+            is SettingIntent.NavToBack -> emitEvent(SettingEffect.NavToBack)
         }
     }
 
@@ -48,29 +47,28 @@ class SettingViewModel(private val repository: BmiRepository) : ViewModel() {
         var userEmail: String = "cassiexiao@gmail.com",
     )
 
+    sealed class SettingEffect {
+        object NavToLanguage : SettingEffect()
+        object NavToFeedback : SettingEffect()
+        object NavToBack : SettingEffect()
+    }
+
+    private val _effect = MutableSharedFlow<SettingEffect>()
+    val effect: SharedFlow<SettingEffect> = _effect.asSharedFlow()
     private val _state = MutableStateFlow(SettingState())
     val state: StateFlow<SettingState> = _state.asStateFlow()
 
 
-    private fun LoadUser(load: Boolean) {
+    private fun loadUser(load: Boolean) {
         _state.value = _state.value.copy(
             userLoading = load
         )
 
     }
 
-    sealed class SettingEvent {
-        object NavToLanguage : SettingEvent()
-        object NavToFeedback : SettingEvent()
-        object NavToBack : SettingEvent()
-    }
-
-    private val _event = MutableSharedFlow<SettingEvent>()
-    val event: SharedFlow<SettingEvent?> = _event.asSharedFlow()
-
-    private fun emitEvent(event: SettingEvent) {
+    private fun emitEvent(event: SettingEffect) {
         viewModelScope.launch {
-            _event.emit(event)
+            _effect.emit(event)
         }
     }
 

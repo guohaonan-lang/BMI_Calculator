@@ -3,6 +3,7 @@ package com.example.bmicalculator.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -133,7 +134,10 @@ fun SettingTitle(backClick: () -> Unit) {
             contentDescription = "back",
             modifier = Modifier
                 .size(24.dp)
-                .clickable(onClick = backClick),
+                .clickable(
+                    onClick = backClick,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }),
         )
         Text(
             text = stringResource(R.string.setting_me),
@@ -156,8 +160,9 @@ fun UserMessage(
             .padding(top = 15.dp)
             .background(
                 color = White,
-                shape = RoundedCornerShape(15.dp)
+                RoundedCornerShape(15.dp)
             )
+            .clip(RoundedCornerShape(15.dp))
             .clickable(onClick = userBottomDialog)
     ) {
         val (userImage, userName, userEmail, userAutoRenew, userGoogle) = createRefs()
@@ -305,7 +310,11 @@ fun SettingMessage(
             .height(60.dp)
             .padding(horizontal = 15.dp)
             .wrapContentHeight()
-            .clickable(onClick = click),
+            .clickable(
+                onClick = click,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -387,9 +396,7 @@ fun UserBottomDialog(
         shape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp),
         containerColor = Background,
     ) {
-        ConstraintLayout(
-
-        ) {
+        ConstraintLayout {
             val (userIv, userName, userEmail, googleIv, closeIv, logButton, cancelButton) = createRefs()
             Image(
                 painter = painterResource(R.drawable.user),
@@ -443,7 +450,11 @@ fun UserBottomDialog(
                         end.linkTo(parent.end, 15.dp)
                         top.linkTo(parent.top, 15.dp)
                     }
-                    .clickable(onClick = cancelClick)
+                    .clickable(
+                        onClick = cancelClick,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
             )
 
             Button(

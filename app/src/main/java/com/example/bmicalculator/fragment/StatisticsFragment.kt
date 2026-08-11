@@ -44,13 +44,12 @@ class StatisticsFragment : Fragment() {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.event.collect { event ->
-                    when (event) {
-                        is StatisticsFragmentViewModel.StatisticsEvent.InputPageEvent -> {
+                viewModel.effect.collect { effect ->
+                    when (effect) {
+                        is StatisticsFragmentViewModel.StatisticsEffect.InputPageEffect -> {
                             val mainActivity = requireActivity() as MainActivity
                             mainActivity.binding.mainViewpage2.currentItem = 0
                         }
-                        else -> {}
                     }
                 }
             }

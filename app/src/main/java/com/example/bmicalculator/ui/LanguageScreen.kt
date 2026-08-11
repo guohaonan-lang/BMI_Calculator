@@ -46,7 +46,7 @@ fun LanguageScreen(viewModel: LanguageViewModel) {
             .background(Background)
             .padding(top = 10.dp, start = 15.dp, end = 15.dp)
     ) {
-        LanguageTitle({ viewModel.processIntent(LanguageViewModel.LanguageIntent.NavToBack) })
+        LanguageTitle{ viewModel.processIntent(LanguageViewModel.LanguageIntent.NavToBack) }
         Column(
             modifier = Modifier
                 .padding(top = 30.dp)
@@ -58,14 +58,12 @@ fun LanguageScreen(viewModel: LanguageViewModel) {
         ) {
             LanguageItem(
                 "Chinese",
-                uiState.value == LangHelper.LANG_ZH,
-                { viewModel.processIntent(LanguageViewModel.LanguageIntent.SwitchChinese) }
-            )
+                uiState.value == LangHelper.LANG_ZH
+            ){ viewModel.processIntent(LanguageViewModel.LanguageIntent.SwitchChinese) }
             LanguageItem(
                 "English",
-                uiState.value == LangHelper.LANG_EN,
-                { viewModel.processIntent(LanguageViewModel.LanguageIntent.SwitchEnglish) }
-            )
+                uiState.value == LangHelper.LANG_EN
+            ){ viewModel.processIntent(LanguageViewModel.LanguageIntent.SwitchEnglish) }
         }
     }
 }

@@ -55,20 +55,19 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.event.collect {event ->
-                    when(event){
-                        is SettingViewModel.SettingEvent.NavToLanguage -> {
+                viewModel.effect.collect { effect ->
+                    when(effect){
+                        is SettingViewModel.SettingEffect.NavToLanguage -> {
                             val intent = Intent(this@SettingActivity, LanguageActivity::class.java)
                             startActivity(intent)
                         }
-                        is SettingViewModel.SettingEvent.NavToFeedback -> {
+                        is SettingViewModel.SettingEffect.NavToFeedback -> {
                             val intent = Intent(this@SettingActivity, FeedbackActivity::class.java)
                             startActivity(intent)
                         }
-                        is SettingViewModel.SettingEvent.NavToBack -> {
+                        is SettingViewModel.SettingEffect.NavToBack -> {
                             finish()
                         }
-                        else -> {}
                     }
                 }
             }

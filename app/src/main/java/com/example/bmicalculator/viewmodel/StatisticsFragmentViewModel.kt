@@ -41,7 +41,7 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
             StatisticsIntent.SwitchDay -> setTimeMode(TimeMode.DAY)
             StatisticsIntent.SwitchWeek -> setTimeMode(TimeMode.WEEK)
             StatisticsIntent.SwitchMonth -> setTimeMode(TimeMode.MONTH)
-            StatisticsIntent.InputPage -> setEvent(StatisticsEvent.InputPageEvent)
+            StatisticsIntent.InputPage -> setEvent(StatisticsEffect.InputPageEffect)
         }
     }
 
@@ -50,19 +50,19 @@ class StatisticsFragmentViewModel(repository: BmiRepository) : ViewModel() {
         val timeMode: TimeMode = TimeMode.DAY
     )
 
+    sealed class StatisticsEffect{
+        object InputPageEffect : StatisticsEffect()
+    }
+
     private val _state = MutableStateFlow(StatisticsUiState())
     val state: StateFlow<StatisticsUiState> = _state.asStateFlow()
 
+    private val _effect = MutableSharedFlow<StatisticsEffect>()
+    val effect: SharedFlow<StatisticsEffect> = _effect.asSharedFlow()
 
-    sealed class StatisticsEvent{
-        object InputPageEvent : StatisticsEvent()
-    }
-    private val _event = MutableSharedFlow<StatisticsEvent?>()
-    val event: SharedFlow<StatisticsEvent?> = _event.asSharedFlow()
-
-    private fun setEvent(event: StatisticsEvent) {
+    private fun setEvent(event: StatisticsEffect) {
         viewModelScope.launch {
-            _event.emit(event)
+            _effect.emit(event)
         }
     }
 

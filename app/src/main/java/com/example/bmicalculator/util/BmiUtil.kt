@@ -238,42 +238,50 @@ object BmiUtil {
             Grade(
                 R.color.grad1,
                 R.string.adults_bmi_very_severely_underweight,
-                R.string.adults_bmi_range_VerySeverelyUnderweight
+                R.string.adults_bmi_range_VerySeverelyUnderweight,
+                "<16.0"
             ),
             Grade(
                 R.color.grad2,
                 R.string.adults_bmi_severely_underweight,
-                R.string.adults_bmi_range_SeverelyUnderweight
+                R.string.adults_bmi_range_SeverelyUnderweight,
+                "16.0-16.9"
             ),
             Grade(
                 R.color.grad3,
                 R.string.adults_bmi_underweight,
-                R.string.adults_bmi_range_overweight
+                R.string.adults_bmi_range_overweight,
+                "25.0-29.9"
             ),
             Grade(
                 R.color.grad4,
                 R.string.adults_bmi_normal,
-                R.string.adults_bmi_range_normal
+                R.string.adults_bmi_range_normal,
+                "18.5-24.9"
             ),
             Grade(
                 R.color.grad5,
                 R.string.adults_bmi_overweight,
-                R.string.adults_bmi_range_overweight
+                R.string.adults_bmi_range_overweight,
+                "25.0-29.9"
             ),
             Grade(
                 R.color.grad6,
                 R.string.adults_bmi_obese_class_i,
-                R.string.adults_bmi_range_obese_class_i
+                R.string.adults_bmi_range_obese_class_i,
+                "30.0-34.9"
             ),
             Grade(
                 R.color.grad7,
                 R.string.adults_bmi_obese_class_ii,
-                R.string.adults_bmi_range_obese_class_ii
+                R.string.adults_bmi_range_obese_class_ii,
+                "35.0-39.9"
             ),
             Grade(
                 R.color.grad8,
                 R.string.adults_bmi_obese_class_iii,
-                R.string.adults_bmi_range_obese_class_iii
+                R.string.adults_bmi_range_obese_class_iii,
+                " ≥ 40"
             )
         )
         return gradeList

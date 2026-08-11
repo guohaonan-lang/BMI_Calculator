@@ -1,7 +1,6 @@
 package com.example.bmicalculator.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -106,6 +105,7 @@ fun ResultScreen(viewModel: ResultViewModel) {
                 genderText = stringResource(uiState.value.genderTextInt),
                 ageText = uiState.value.bmiData?.age.toString(),
                 buttonColor = uiState.value.buttonColor,
+                true
             ) { bottomShow = true }
             if (uiState.value.isFirst) GradeList(gradeList = uiState.value.gradeList)
             ResultAssessment(
@@ -201,29 +201,6 @@ fun ResultTitle(isRecent: Boolean, function: () -> Unit, function1: () -> Unit) 
 }
 
 
-// 旧的色轮图
-@Composable
-fun ColorWheel(newAge: Int, newGender: Int, bmiValue: Float) {
-    AndroidView(
-        factory = { context ->
-            // 初始化原生自定义View，等价于XML inflate
-            BmiColorWheelView(context).apply {
-                age = newAge
-                gender = newGender
-                currentBmi = bmiValue
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth(),
-        update = { view ->
-            // 【重要】状态变更时回调，刷新控件
-            view.age = newAge
-            view.gender = newGender
-            view.currentBmi = bmiValue
-        }
-    )
-}
-
 @Composable
 fun DescribeText(
     bmiValue: Float,
@@ -233,6 +210,7 @@ fun DescribeText(
     genderText: String,
     ageText: String,
     buttonColor: Int,
+    buttonIv: Boolean,
     function: () -> Unit
 ) {
     Column(
@@ -279,11 +257,14 @@ fun DescribeText(
                 fontFamily = FontFamily(Font(R.font.font_extrabold)),
                 fontSize = 18.sp
             )
-            Image(
-                painter = painterResource(R.drawable.help_circle),
-                modifier = Modifier.size(18.dp),
-                contentDescription = ""
-            )
+            if(buttonIv){
+                Image(
+                    painter = painterResource(R.drawable.help_circle),
+                    modifier = Modifier.size(18.dp),
+                    contentDescription = ""
+                )
+            }
+
         }
         Row(
             modifier = Modifier

@@ -2,6 +2,7 @@ package com.example.bmicalculator.fragment
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -40,19 +42,24 @@ fun BmiScreen(viewModel: BmiFragmentViewModel) {
                 color = White
             )
     ) {
-        Title("${stringResource(uiState.value.timeMonthInt)} ${uiState.value.timeDay}, ${uiState.value.timeYear}",
-            {viewModel.processIntent(intent = BmiFragmentViewModel.BmiIntent.NavToRecent)})
+        Title(
+            "${stringResource(uiState.value.timeMonthInt)} ${uiState.value.timeDay}, ${uiState.value.timeYear}"
+        ) { viewModel.processIntent(intent = BmiFragmentViewModel.BmiIntent.NavToRecent) }
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .weight(1f)
                 .clickable(
-                    onClick = { viewModel.processIntent(intent = BmiFragmentViewModel.BmiIntent.NavToInput) }
+                    onClick = { viewModel.processIntent(intent = BmiFragmentViewModel.BmiIntent.NavToInput) },
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
                 )
         ) {
-            BmiColorWheelScreen(uiState.value.age,
+            BmiColorWheelScreen(
+                uiState.value.age,
                 uiState.value.gender,
-                uiState.value.bmiValue)
+                uiState.value.bmiValue
+            )
             DescribeText(
                 bmiValue = uiState.value.bmiValue,
                 bmiLevel = stringResource(uiState.value.bmiLevelStrInt),
@@ -60,7 +67,8 @@ fun BmiScreen(viewModel: BmiFragmentViewModel) {
                 heightText = uiState.value.heightStr,
                 genderText = stringResource(uiState.value.genderStrInt),
                 ageText = uiState.value.age.toString(),
-                buttonColor = uiState.value.buttonColor
+                buttonColor = uiState.value.buttonColor,
+                false
             ) { }
             GradeList(gradeList = uiState.value.gradeList)
         }
@@ -85,7 +93,10 @@ fun Title(timeStr: String, navToRecent: () -> Unit) {
                 stringResource(R.string.recent),
                 fontFamily = FontFamily(Font(R.font.font_regular)),
                 fontSize = 16.sp,
-                modifier = Modifier.clickable(onClick = navToRecent),
+                modifier = Modifier.clickable(
+                    onClick = navToRecent,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }),
                 color = Blue
             )
         }

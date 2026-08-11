@@ -31,31 +31,31 @@ class LanguageViewModel : ViewModel() {
         when (intent) {
             is LanguageIntent.SwitchEnglish -> {
                 setLanguage(LangHelper.LANG_EN)
-                emitEvent(LanguageEvent.SwitchEnglish)
+                emitEvent(LanguageEffect.SwitchEnglish)
             }
 
             is LanguageIntent.SwitchChinese -> {
                 setLanguage(LangHelper.LANG_ZH)
-                emitEvent(LanguageEvent.SwitchChinese)
+                emitEvent(LanguageEffect.SwitchChinese)
             }
 
-            is LanguageIntent.NavToBack -> emitEvent(LanguageEvent.NavToBack)
+            is LanguageIntent.NavToBack -> emitEvent(LanguageEffect.NavToBack)
             is LanguageIntent.LoadLanguage -> loadSavedLang(intent.context)
         }
     }
 
-    sealed class LanguageEvent {
-        object NavToBack : LanguageEvent()
-        object SwitchChinese : LanguageEvent()
-        object SwitchEnglish : LanguageEvent()
+    sealed class LanguageEffect {
+        object NavToBack : LanguageEffect()
+        object SwitchChinese : LanguageEffect()
+        object SwitchEnglish : LanguageEffect()
     }
 
-    private val _event = MutableSharedFlow<LanguageEvent>()
-    val event: SharedFlow<LanguageEvent> = _event.asSharedFlow()
+    private val _effect = MutableSharedFlow<LanguageEffect>()
+    val effect: SharedFlow<LanguageEffect> = _effect.asSharedFlow()
 
-    private fun emitEvent(newEvent: LanguageEvent) {
+    private fun emitEvent(newEvent: LanguageEffect) {
         viewModelScope.launch {
-            _event.emit(newEvent)
+            _effect.emit(newEvent)
         }
     }
 

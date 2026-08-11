@@ -9,7 +9,6 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.model.BmiEntity
 import com.example.bmicalculator.model.Grade
-import com.example.bmicalculator.ui.theme.Blue
 import com.example.bmicalculator.util.BmiUtil
 import com.example.bmicalculator.util.TimeUtil
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,8 +28,8 @@ class BmiFragmentViewModel(private val repository: BmiRepository) : ViewModel() 
     }
     fun processIntent(intent: BmiIntent){
         when(intent){
-            is BmiIntent.NavToInput -> emitEvent(BmiEvent.NavToInput)
-            is BmiIntent.NavToRecent -> emitEvent(BmiEvent.NavToRecent)
+            is BmiIntent.NavToInput -> emitEvent(BmiEffect.NavToInput)
+            is BmiIntent.NavToRecent -> emitEvent(BmiEffect.NavToRecent)
         }
     }
 
@@ -88,17 +87,17 @@ class BmiFragmentViewModel(private val repository: BmiRepository) : ViewModel() 
         }
     }
 
-    sealed class BmiEvent{
-        object NavToInput : BmiEvent()
-        object NavToRecent : BmiEvent()
+    sealed class BmiEffect{
+        object NavToInput : BmiEffect()
+        object NavToRecent : BmiEffect()
     }
 
-    private val _event = MutableSharedFlow<BmiEvent>()
-    val event: SharedFlow<BmiEvent> = _event.asSharedFlow()
+    private val _effect = MutableSharedFlow<BmiEffect>()
+    val effect: SharedFlow<BmiEffect> = _effect.asSharedFlow()
 
-    private fun emitEvent(event: BmiEvent){
+    private fun emitEvent(event: BmiEffect){
         viewModelScope.launch {
-            _event.emit(event)
+            _effect.emit(event)
         }
     }
 

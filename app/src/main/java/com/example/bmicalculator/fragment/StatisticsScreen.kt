@@ -4,7 +4,7 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -78,9 +78,9 @@ fun StatisticsScreen(viewModel: StatisticsFragmentViewModel) {
                 { viewModel.processIntent(StatisticsFragmentViewModel.StatisticsIntent.SwitchWeek) },
                 { viewModel.processIntent(StatisticsFragmentViewModel.StatisticsIntent.SwitchMonth) }
             )
-            BmiChartTitle({ viewModel.processIntent(StatisticsFragmentViewModel.StatisticsIntent.InputPage) })
+            BmiChartTitle { viewModel.processIntent(StatisticsFragmentViewModel.StatisticsIntent.InputPage) }
             LineChart(uiState.value.chartData, uiState.value.timeMode)
-            WeightChartTitle({ viewModel.processIntent(StatisticsFragmentViewModel.StatisticsIntent.InputPage) })
+            WeightChartTitle { viewModel.processIntent(StatisticsFragmentViewModel.StatisticsIntent.InputPage) }
             LineChart(uiState.value.chartData, uiState.value.timeMode, false)
         }
 
@@ -114,7 +114,10 @@ fun TimeSwitch(
                 )
                 .wrapContentHeight()
                 .alpha(if (tm == StatisticsFragmentViewModel.TimeMode.DAY) 1f else 0.3f)
-                .clickable(onClick = dayClick),
+                .clickable(
+                    onClick = dayClick,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }),
             fontFamily = FontFamily(Font(R.font.font_extrabold)),
             fontSize = 16.sp,
             textAlign = TextAlign.Center
@@ -130,7 +133,10 @@ fun TimeSwitch(
                 )
                 .wrapContentHeight()
                 .alpha(if (tm == StatisticsFragmentViewModel.TimeMode.WEEK) 1f else 0.3f)
-                .clickable(onClick = weekClick),
+                .clickable(
+                    onClick = weekClick,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }),
             fontFamily = FontFamily(Font(R.font.font_extrabold)),
             fontSize = 16.sp,
             textAlign = TextAlign.Center
@@ -146,7 +152,10 @@ fun TimeSwitch(
                 )
                 .wrapContentHeight()
                 .alpha(if (tm == StatisticsFragmentViewModel.TimeMode.MONTH) 1f else 0.3f)
-                .clickable(onClick = monthClick),
+                .clickable(
+                    onClick = monthClick,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }),
             fontFamily = FontFamily(Font(R.font.font_extrabold)),
             fontSize = 16.sp,
             textAlign = TextAlign.Center
@@ -170,7 +179,10 @@ fun BmiChartTitle(updateClick: () -> Unit) {
         Text(
             stringResource(R.string.update),
             modifier = Modifier
-                .clickable(onClick = updateClick),
+                .clickable(
+                    onClick = updateClick,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }),
             fontFamily = FontFamily(Font(R.font.font_regular)),
             fontSize = 16.sp,
             color = Blue,
@@ -194,7 +206,10 @@ fun WeightChartTitle(updateClick: () -> Unit) {
         Text(
             stringResource(R.string.update),
             modifier = Modifier
-                .clickable(onClick = updateClick),
+                .clickable(
+                    onClick = updateClick,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }),
             fontFamily = FontFamily(Font(R.font.font_regular)),
             fontSize = 16.sp,
             color = Blue,
@@ -221,9 +236,9 @@ fun LineChart(
         // factory：仅初始化执行1次，创建LineChart + 全局样式
         factory = { context ->
             LineChart(context).apply {
-                if (isBmiChart) background =
-                    ContextCompat.getDrawable(context, R.drawable.chart_bmi_bg)
-                else background = ContextCompat.getDrawable(context, R.drawable.chart_weight_bg)
+                background =
+                    if (isBmiChart) ContextCompat.getDrawable(context, R.drawable.chart_bmi_bg)
+                    else ContextCompat.getDrawable(context, R.drawable.chart_weight_bg)
                 // 等价 initChartStyle()
                 val chartFont = ResourcesCompat.getFont(context, R.font.font_extrabold)
                 description.isEnabled = false
@@ -266,9 +281,8 @@ fun LineChart(
         },
         // update：Composable重组就执行，在这里更新数据、刷新图表
         update = { lineChart ->
-            val data = chartData
             // 空数据清空图表
-            if (data == null) {
+            if (chartData == null) {
                 lineChart.clear()
                 lineChart.invalidate()
                 lastData.value = null
@@ -276,22 +290,22 @@ fun LineChart(
             }
 
             // 数据完全没变化，直接跳过渲染，避免重复绘制
-            if (lastData.value == data.bmiEntries) return@AndroidView
+            if (lastData.value == chartData.bmiEntries) return@AndroidView
 
             // 更新缓存标记
-            lastData.value = data.bmiEntries
+            lastData.value = chartData.bmiEntries
             xLabelList.clear()
-            xLabelList.addAll(data.xLabels)
-            baseTimeZero = data.baseTimeZero
+            xLabelList.addAll(chartData.xLabels)
+            baseTimeZero = chartData.baseTimeZero
 
             // 渲染曲线（对应 renderBmiChart）
             renderChart(
                 chart = lineChart,
-                entries = if (isBmiChart) data.bmiEntries else data.weightEntries,
+                entries = if (isBmiChart) chartData.bmiEntries else chartData.weightEntries,
                 timeMode = timeMode,
                 xLabels = xLabelList,
                 baseTimeZero = baseTimeZero,
-                totalCount = data.totalCount
+                totalCount = chartData.totalCount
             )
         }
     )

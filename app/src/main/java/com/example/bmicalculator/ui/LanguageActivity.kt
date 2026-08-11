@@ -35,13 +35,13 @@ class LanguageActivity : BaseActivity<ActivityLanguageBinding>() {
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.event.collect {event ->
-                    when(event){
-                        is LanguageViewModel.LanguageEvent.NavToBack -> finish()
-                        is LanguageViewModel.LanguageEvent.SwitchChinese -> {
+                viewModel.effect.collect { effect ->
+                    when(effect){
+                        is LanguageViewModel.LanguageEffect.NavToBack -> finish()
+                        is LanguageViewModel.LanguageEffect.SwitchChinese -> {
                             switchLanguage(this@LanguageActivity, LangHelper.LANG_ZH)
                         }
-                        is LanguageViewModel.LanguageEvent.SwitchEnglish -> {
+                        is LanguageViewModel.LanguageEffect.SwitchEnglish -> {
                             switchLanguage(this@LanguageActivity, LangHelper.LANG_EN)
                         }
                     }

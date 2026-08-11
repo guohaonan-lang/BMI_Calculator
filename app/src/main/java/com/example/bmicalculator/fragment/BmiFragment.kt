@@ -56,14 +56,14 @@ class BmiFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.event.collect { event ->
-                    when (event) {
-                        is BmiFragmentViewModel.BmiEvent.NavToInput -> {
+                viewModel.effect.collect { effect ->
+                    when (effect) {
+                        is BmiFragmentViewModel.BmiEffect.NavToInput -> {
                             val mainActivity = requireActivity() as MainActivity
                             mainActivity.binding.mainViewpage2.currentItem = 0
                         }
 
-                        is BmiFragmentViewModel.BmiEvent.NavToRecent -> {
+                        is BmiFragmentViewModel.BmiEffect.NavToRecent -> {
                             val intent = Intent(requireContext(), RecentActivity::class.java)
                             startActivity(intent)
                         }

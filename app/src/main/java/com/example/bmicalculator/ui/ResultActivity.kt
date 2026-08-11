@@ -59,8 +59,8 @@ class ResultActivity : BaseActivity<ActivityResultBinding>() {
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.event.collect { event ->
-                    when (event) {
+                viewModel.effect.collect { effect ->
+                    when (effect) {
                         is ResultViewModel.ResultEvent.NavToBack -> {
                             finish()
                         }

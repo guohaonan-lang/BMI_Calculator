@@ -40,9 +40,9 @@ class FeedbackActivity : BaseActivity<ActivityFeedbackBinding>() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewmodel.event.collect { event ->
-                    when(event){
-                        is FeedbackViewModel.FeedbackEvent.NavToCommit -> {
+                viewmodel.effect.collect { effect ->
+                    when(effect){
+                        is FeedbackViewModel.FeedbackEffect.NavToCommit -> {
                             finish()
                             Toast.makeText(
                                 this@FeedbackActivity,
@@ -51,7 +51,7 @@ class FeedbackActivity : BaseActivity<ActivityFeedbackBinding>() {
                             ).show()
 
                         }
-                        is FeedbackViewModel.FeedbackEvent.NavToBack ->{
+                        is FeedbackViewModel.FeedbackEffect.NavToBack ->{
                             finish()
                         }
                     }
