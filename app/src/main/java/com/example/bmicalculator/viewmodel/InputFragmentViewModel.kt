@@ -207,6 +207,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
 
     // 1. 体重单位切换逻辑：lb <-> kg
     private fun switchWeightUnitToKg() {
+        if (!checkInputValid().pass) return
 
         if (_state.value.weightUnit) return
         var weight = _state.value.weight.toFloat()
@@ -222,6 +223,8 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
 
 
     private fun switchWeightUnitToLb() {
+        if (!checkInputValid().pass) return
+
         if (!_state.value.weightUnit) return
         var weight = _state.value.weight.toFloat()
         if (_state.value.weight != weightPair.second) {
@@ -238,6 +241,8 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
     // 2. 身高单位切换逻辑：cm <-> ft·in
     private fun switchHeightUnitToFtIn() {
 
+        if (!checkInputValid().pass) return
+
         if (!_state.value.heightUnit) return
         val showText = _state.value.height
         if (showText != heightPair.second) {
@@ -253,6 +258,9 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
 
 
     private fun switchHeightUnitToCm() {
+
+        if (!checkInputValid().pass) return
+
         if (_state.value.heightUnit) return
         var showText: String
         val hft = (_state.value.heightFt.toIntOrNull() ?: 1)
@@ -283,7 +291,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
         }
     }
 
-    fun checkInputValid(): CheckResult {
+    private fun checkInputValid(): CheckResult {
         // 校验体重
         val w = (_state.value.weight.toFloatOrNull() ?: 0f)
         if (!_state.value.weightUnit) {
