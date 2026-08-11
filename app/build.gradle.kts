@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.compose.ui.text)
+    implementation(libs.ui)
+    implementation(libs.androidx.runtime)
     debugImplementation(libs.androidx.compose.ui.tooling)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)

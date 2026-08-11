@@ -20,11 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmicalculator.R
-import com.example.bmicalculator.ui.ColorWheel
 import com.example.bmicalculator.ui.DescribeText
 import com.example.bmicalculator.ui.GradeList
 import com.example.bmicalculator.ui.theme.Blue
 import com.example.bmicalculator.ui.theme.White
+import com.example.bmicalculator.util.BmiColorWheelScreen
 import com.example.bmicalculator.viewmodel.BmiFragmentViewModel
 
 
@@ -50,11 +50,9 @@ fun BmiScreen(viewModel: BmiFragmentViewModel) {
                     onClick = { viewModel.processIntent(intent = BmiFragmentViewModel.BmiIntent.NavToInput) }
                 )
         ) {
-            ColorWheel(
-                uiState.value.age,
+            BmiColorWheelScreen(uiState.value.age,
                 uiState.value.gender,
-                uiState.value.bmiValue
-            )
+                uiState.value.bmiValue)
             DescribeText(
                 bmiValue = uiState.value.bmiValue,
                 bmiLevel = stringResource(uiState.value.bmiLevelStrInt),

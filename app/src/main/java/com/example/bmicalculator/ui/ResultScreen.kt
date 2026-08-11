@@ -1,6 +1,10 @@
 package com.example.bmicalculator.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +63,7 @@ import com.example.bmicalculator.ui.theme.Grad4
 import com.example.bmicalculator.ui.theme.Gray
 import com.example.bmicalculator.ui.theme.Red
 import com.example.bmicalculator.ui.theme.White
+import com.example.bmicalculator.util.BmiColorWheelScreen
 import com.example.bmicalculator.util.BmiColorWheelView
 import com.example.bmicalculator.viewmodel.ResultViewModel
 
@@ -87,7 +93,7 @@ fun ResultScreen(viewModel: ResultViewModel) {
                 .verticalScroll(rememberScrollState())
                 .weight(1f)
         ) {
-            ColorWheel(
+            BmiColorWheelScreen(
                 uiState.value.bmiData?.age ?: 25,
                 uiState.value.bmiData?.gender ?: 1,
                 uiState.value.bmiData?.bmiValue ?: 1f
@@ -194,6 +200,8 @@ fun ResultTitle(isRecent: Boolean, function: () -> Unit, function1: () -> Unit) 
     }
 }
 
+
+// 旧的色轮图
 @Composable
 fun ColorWheel(newAge: Int, newGender: Int, bmiValue: Float) {
     AndroidView(
@@ -238,8 +246,26 @@ fun DescribeText(
             fontFamily = FontFamily(Font(R.font.font_extrabold)),
             fontSize = 18.sp
         )
+
+        val animatedBmi = remember { Animatable(1f) }
+
+        // 2. 在 LaunchedEffect 中控制动画播放
+        LaunchedEffect(bmiValue) {
+            // 先重置指针到起点
+            animatedBmi.snapTo(0f)
+
+            // 播放动画平滑过渡到目标值
+            animatedBmi.animateTo(
+                targetValue = bmiValue,
+                animationSpec = tween(
+                    durationMillis = 1500,
+                    easing = FastOutSlowInEasing
+                )
+            )
+        }
+
         Text(
-            String.format("%.1f", bmiValue),
+            String.format("%.1f", animatedBmi.value),
             fontFamily = FontFamily(Font(R.font.font_extrabold)),
             fontSize = 64.sp
         )
@@ -704,10 +730,11 @@ fun BmiLevelBottom(
                 fontSize = 20.sp,
                 modifier = Modifier.padding(top = 15.dp, bottom = 10.dp, start = 15.dp)
             )
-            ColorWheel(
+            BmiColorWheelScreen(
                 uiState.value.bmiData?.age ?: 25,
                 uiState.value.bmiData?.gender ?: 1,
-                uiState.value.bmiData?.bmiValue ?: 1f
+                uiState.value.bmiData?.bmiValue ?: 1f,
+                false
             )
             GradeList(gradeList = uiState.value.gradeList)
             Button(
