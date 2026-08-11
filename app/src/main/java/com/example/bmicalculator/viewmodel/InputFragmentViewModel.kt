@@ -90,7 +90,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
             get() {
                 // 1. 统一转换成 kg
                 val weightKg = if (!weightUnit) {
-                    weight.toFloat() * 0.45359237f // 磅转kg
+                    weight.toFloat() * 0.45359236f // 磅转kg
                 } else {
                     weight.toFloat()
                 }
@@ -98,7 +98,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
                 // 2. 统一转换成 m
                 val heightM = if (!heightUnit) {
                     // ft + in → cm → m
-                    val cm = (heightFt.toIntOrNull() ?: 1) * 30.48f + (heightFt.toIntOrNull()
+                    val cm = (heightFt.toIntOrNull() ?: 1) * 30.48f + (heightIn.toIntOrNull()
                         ?: 0) * 2.54f
                     cm / 100f
                 } else {
@@ -329,9 +329,11 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
                     toastMsgRes = R.string.height_out_of_range_1_11_in,
                 )
             }
+            if (hin == 0) _state.update { it.copy(heightIn = "0") }
         } else {
             // 公制 cm
-            if (_state.value.height.toFloat() !in 1f..250f) {
+            val h = (_state.value.height.toFloatOrNull() ?: 0f)
+            if (h !in 1f..250f) {
                 _state.update { it.copy(height = "170.0") }
                 sendEvent(InputEffect.ShowToast(R.string.height_out_of_range_1_250_cm))
                 return CheckResult(
@@ -346,7 +348,7 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
     // 4. 完整计算BMI、填充实体信息
     private fun computeFullBmi(bmiColor: Int, customTime: Long) {
         val bmi = _state.value.bmiValue
-
+        if (!checkInputValid().pass) return
 
         val bmiData =
             BmiEntity(
@@ -354,8 +356,8 @@ class InputFragmentViewModel(private val repository: BmiRepository) : ViewModel(
                 weight = _state.value.weight.toFloat(),
                 weightUnit = _state.value.weightUnit,
                 height = _state.value.height.toFloat(),
-                heightFt = _state.value.heightFt.toIntOrNull()?:1,
-                heightIn = _state.value.heightIn.toIntOrNull()?:0,
+                heightFt = _state.value.heightFt.toIntOrNull() ?: 1,
+                heightIn = _state.value.heightIn.toIntOrNull() ?: 0,
                 heightUnit = _state.value.heightUnit,
                 bmiValue = bmi,
                 bmiColor = bmiColor,

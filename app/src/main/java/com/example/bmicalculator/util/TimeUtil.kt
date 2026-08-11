@@ -81,9 +81,9 @@ class TimeUtil() {
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
 
         val period = when (hour) {
-            9 -> R.string.morning
-            14 -> R.string.afternoon
-            19 -> R.string.evening
+            in 6..11 -> R.string.morning
+            in 12..17 -> R.string.afternoon
+            in 18..22 -> R.string.evening
             else -> R.string.night
         }
         return TimeParseResult(year, month, day, period)

@@ -115,8 +115,8 @@ fun InputScreen(
     val focusManager = LocalFocusManager.current
     val keyboardCtrl = LocalSoftwareKeyboardController.current
 
-    LaunchedEffect(uiState.value.customTime) {
-        val timeStr = TimeUtil().parseTimeStamp(uiState.value.customTime)
+    LaunchedEffect(Unit) {
+        val timeStr = TimeUtil().parseTimeStamp(System.currentTimeMillis())
         viewModel.processIntent(
             DataInputIntent.SetTime1(
                 timeStr.selectYear,
@@ -340,7 +340,7 @@ fun WeightAndHeightInput(
                         val integerPart = temp.take(dotPosition)
                         val decimalPart = temp.substring(dotPosition + 1).take(2)
                         temp = "$integerPart.$decimalPart"
-                    }
+                    }else
                     viewModel.processIntent(DataInputIntent.SetHeight(temp))
                 },
                 modifier = Modifier
@@ -591,6 +591,8 @@ fun TimeSelect(
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
+
+        //  日期
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -611,6 +613,8 @@ fun TimeSelect(
 
                 )
         }
+
+        // 时段
         Box(
             modifier = Modifier
                 .weight(1f)
