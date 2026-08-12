@@ -47,10 +47,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,7 +63,6 @@ import com.example.bmicalculator.ui.theme.Gray
 import com.example.bmicalculator.ui.theme.Red
 import com.example.bmicalculator.ui.theme.White
 import com.example.bmicalculator.util.BmiColorWheelScreen
-import com.example.bmicalculator.util.BmiColorWheelView
 import com.example.bmicalculator.viewmodel.ResultViewModel
 
 //@Preview(showBackground = true, widthDp = 441, heightDp = 891)
@@ -112,7 +111,8 @@ fun ResultScreen(viewModel: ResultViewModel) {
                 assessment1Text = stringResource(uiState.value.assessment1Int),
                 assessment2Text = stringResource(uiState.value.baseTextInt)+ uiState.value.assessment2Text,
                 rangeText = uiState.value.normalRangeText,
-                differenceText = uiState.value.differenceText
+                differenceText = uiState.value.differenceText,
+                isNormal = uiState.value.isAssessmentNormalHidden
             )
             val timeTagText =
                 "${stringResource(uiState.value.timeMonthInt)} ${uiState.value.timeDay}, ${uiState.value.timeYear} ${
@@ -137,7 +137,7 @@ fun ResultScreen(viewModel: ResultViewModel) {
                 stringResource(R.string.result_save),
                 textAlign = TextAlign.Center,
                 fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 color = White
             )
         }
@@ -221,8 +221,8 @@ fun DescribeText(
     ) {
         Text(
             "Your BMI is...",
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
-            fontSize = 18.sp
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
+            fontSize = 18.sp,
         )
 
         val animatedBmi = remember { Animatable(1f) }
@@ -244,7 +244,7 @@ fun DescribeText(
 
         Text(
             String.format("%.1f", animatedBmi.value),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 64.sp
         )
         Button(
@@ -254,8 +254,9 @@ fun DescribeText(
             Text(
                 text = bmiLevel,
                 modifier = Modifier.padding(end = 5.dp),
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
-                fontSize = 18.sp
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
+                fontSize = 18.sp,
+                fontWeight = FontWeight(800)
             )
             if(buttonIv){
                 Image(
@@ -341,7 +342,7 @@ fun GradeItem(
                 text = stringResource(grade.gradeNameInt),
                 fontFamily = FontFamily(
                     Font(
-                        if (grade.isSelect) R.font.font_extrabold
+                        if (grade.isSelect) R.font.font_bold_extrabold
                         else R.font.font_regular
                     )
                 ),
@@ -353,7 +354,7 @@ fun GradeItem(
                 text = grade.gradeRange,
                 fontFamily = FontFamily(
                     Font(
-                        if (grade.isSelect) R.font.font_extrabold
+                        if (grade.isSelect) R.font.font_bold_extrabold
                         else R.font.font_regular
                     )
                 ),
@@ -370,7 +371,8 @@ fun ResultAssessment(
     assessment1Text: String,
     assessment2Text: String,
     rangeText: String,
-    differenceText: String
+    differenceText: String,
+    isNormal: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -384,30 +386,33 @@ fun ResultAssessment(
             fontSize = 14.sp,
             color = Black
         )
-        Text(
-            text = assessment2Text,
-            modifier = Modifier.padding(top = 20.dp),
-            fontFamily = FontFamily(Font(R.font.font_regular)),
-            fontSize = 14.sp,
-            color = Black
-        )
-        Row(
-            modifier = Modifier.padding(top = 3.dp)
-        ) {
+        if(!isNormal){
             Text(
-                text = rangeText,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                text = assessment2Text,
+                modifier = Modifier.padding(top = 20.dp),
+                fontFamily = FontFamily(Font(R.font.font_regular)),
                 fontSize = 14.sp,
                 color = Black
             )
-            Text(
-                text = differenceText,
-                modifier = Modifier.padding(start = 5.dp),
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
-                fontSize = 14.sp,
-                color = Red
-            )
+            Row(
+                modifier = Modifier.padding(top = 3.dp)
+            ) {
+                Text(
+                    text = rangeText,
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
+                    fontSize = 14.sp,
+                    color = Black
+                )
+                Text(
+                    text = differenceText,
+                    modifier = Modifier.padding(start = 5.dp),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
+                    fontSize = 14.sp,
+                    color = Red
+                )
+            }
         }
+
     }
 }
 
@@ -432,7 +437,7 @@ fun TimeLine(timeTagText: String) {
             modifier = Modifier.padding(horizontal = 10.dp),
             fontSize = 12.sp,
             color = Color.Black.copy(alpha = 0.5f),
-            fontFamily = FontFamily(Font(R.font.font_extrabold))
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold))
         )
 
         // 右侧分割线
@@ -454,7 +459,7 @@ fun AdText() {
             .padding(start = 15.dp, top = 10.dp),
         fontSize = 16.sp,
         color = Black,
-        fontFamily = FontFamily(Font(R.font.font_extrabold))
+        fontFamily = FontFamily(Font(R.font.font_bold_extrabold))
     )
 
     // ====== 广告卡片 ad1
@@ -707,7 +712,7 @@ fun BmiLevelBottom(
         Column {
             Text(
                 stringResource(R.string.bottot_grade_bmi_wheel),
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 fontSize = 20.sp,
                 modifier = Modifier.padding(top = 15.dp, bottom = 10.dp, start = 15.dp)
             )
@@ -730,7 +735,7 @@ fun BmiLevelBottom(
                     stringResource(R.string.bottomsheet_got_it),
                     textAlign = TextAlign.Center,
                     fontSize = 20.sp,
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     color = White
                 )
             }
@@ -759,7 +764,7 @@ fun ShowDeleteDialog(function: () -> Unit, deleteFun: () -> Unit) {
             Column(Modifier.padding(24.dp)) {
                 Text(
                     text = stringResource(R.string.dialog_delete_confirm),
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     fontSize = 16.sp
                 )
                 Text(

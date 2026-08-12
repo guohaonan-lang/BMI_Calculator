@@ -65,7 +65,7 @@ fun StatisticsScreen(viewModel: StatisticsFragmentViewModel) {
     ) {
         Text(
             text = stringResource(R.string.statistics),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 24.sp,
             color = Black
         )
@@ -118,7 +118,7 @@ fun TimeSwitch(
                     onClick = dayClick,
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 16.sp,
             textAlign = TextAlign.Center
         )
@@ -137,7 +137,7 @@ fun TimeSwitch(
                     onClick = weekClick,
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 16.sp,
             textAlign = TextAlign.Center
         )
@@ -156,7 +156,7 @@ fun TimeSwitch(
                     onClick = monthClick,
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 16.sp,
             textAlign = TextAlign.Center
         )
@@ -173,7 +173,7 @@ fun BmiChartTitle(updateClick: () -> Unit) {
     ) {
         Text(
             "BMI",
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 18.sp
         )
         Text(
@@ -200,7 +200,7 @@ fun WeightChartTitle(updateClick: () -> Unit) {
     ) {
         Text(
             stringResource(R.string.statistics_weight),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 18.sp
         )
         Text(
@@ -240,7 +240,7 @@ fun LineChart(
                     if (isBmiChart) ContextCompat.getDrawable(context, R.drawable.chart_bmi_bg)
                     else ContextCompat.getDrawable(context, R.drawable.chart_weight_bg)
                 // 等价 initChartStyle()
-                val chartFont = ResourcesCompat.getFont(context, R.font.font_extrabold)
+                val chartFont = ResourcesCompat.getFont(context, R.font.font_bold_extrabold)
                 description.isEnabled = false
                 legend.isEnabled = false
                 setTouchEnabled(true)

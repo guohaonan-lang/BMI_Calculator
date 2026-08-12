@@ -196,7 +196,7 @@ fun InputScreen(
                 stringResource(R.string.input_calculate),
                 textAlign = TextAlign.Center,
                 fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 color = White
             )
         }
@@ -233,7 +233,7 @@ fun TitleText(context: Context) {
     ) {
         Text(
             stringResource(R.string.title_calculate),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 24.sp,
             color = Black,
             modifier = Modifier.padding(start = 15.dp, top = 18.dp)
@@ -478,7 +478,7 @@ fun UnitSwitch(
             ) {
                 Text(
                     "lb",
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     modifier = Modifier.alpha(if (!uiState.value.weightUnit) 1f else 0.3f)
                 )
             }
@@ -498,7 +498,7 @@ fun UnitSwitch(
             ) {
                 Text(
                     "kg",
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     modifier = Modifier.alpha(if (uiState.value.weightUnit) 1f else 0.3f)
                 )
             }
@@ -534,7 +534,7 @@ fun UnitSwitch(
             ) {
                 Text(
                     "ft·in",
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     modifier = Modifier.alpha(if (!uiState.value.heightUnit) 1f else 0.3f)
                 )
             }
@@ -553,7 +553,7 @@ fun UnitSwitch(
             ) {
                 Text(
                     "cm",
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     modifier = Modifier.alpha(if (uiState.value.heightUnit) 1f else 0.3f)
                 )
             }
@@ -607,7 +607,7 @@ fun TimeSelect(
                 text = "${stringResource(uiState.value.timeMonthInt)} ${uiState.value.timeDay}, ${uiState.value.timeYear}",
                 color = Black,
                 fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 softWrap = false,
                 maxLines = 1,
 
@@ -629,7 +629,7 @@ fun TimeSelect(
                 text = stringResource(uiState.value.timePeriodInt),
                 color = Black,
                 fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 softWrap = false,
                 maxLines = 1
             )
@@ -736,7 +736,7 @@ fun DatePickerBottomSheet(
             Text(
                 stringResource(R.string.date_picker_date),
                 fontSize = 28.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 color = Black,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
@@ -750,7 +750,7 @@ fun DatePickerBottomSheet(
                 // ========== 月份滚轮 ==========
                 AndroidView(
                     factory = { context ->
-                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_extrabold)
+                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_bold_extrabold)
                         WheelView(context).apply {
                             adapter = ArrayWheelAdapter(monthData)
                             currentItem = initMonthIdx
@@ -795,7 +795,7 @@ fun DatePickerBottomSheet(
                 // ========== 日期滚轮 ==========
                 AndroidView(
                     factory = { context ->
-                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_extrabold)
+                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_bold_extrabold)
                         val initDays = getDayList(initYearIdx, initMonthIdx)
                         WheelView(context).apply {
                             adapter = ArrayWheelAdapter(initDays)
@@ -835,7 +835,7 @@ fun DatePickerBottomSheet(
                 // ========== 年份滚轮 ==========
                 AndroidView(
                     factory = { context ->
-                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_extrabold)
+                        val boldTypeface = ResourcesCompat.getFont(context, R.font.font_bold_extrabold)
                         WheelView(context).apply {
                             adapter = ArrayWheelAdapter(yearData)
                             currentItem = initYearIdx
@@ -893,7 +893,7 @@ fun DatePickerBottomSheet(
                     Text(
                         stringResource(R.string.data_cancel),
                         fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                         color = Black
                     )
                 }
@@ -919,7 +919,7 @@ fun DatePickerBottomSheet(
                     Text(
                         stringResource(R.string.data_done),
                         fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                         color = White
                     )
                 }
@@ -991,7 +991,7 @@ fun PeriodPickerBottomSheet(
             Text(
                 stringResource(R.string.date_picker_date), // 你自行替换对应标题string
                 fontSize = 28.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 color = Black,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
@@ -1051,7 +1051,7 @@ fun PeriodPickerBottomSheet(
                     Text(
                         stringResource(R.string.data_cancel),
                         fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                         color = Black
                     )
                 }
@@ -1070,7 +1070,7 @@ fun PeriodPickerBottomSheet(
                     Text(
                         stringResource(R.string.data_done),
                         fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                         color = White
                     )
                 }
@@ -1163,7 +1163,7 @@ fun AgeHorizontalPicker(
                     Text(
                         text = ageText,
                         fontSize = 28.sp,
-                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                         color = Black
                     )
                 }
@@ -1275,7 +1275,7 @@ fun GenderSelectCard(
             Text(
                 text = text,
                 fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 color = Black,
                 modifier = Modifier.padding(top = 1.dp)
             )

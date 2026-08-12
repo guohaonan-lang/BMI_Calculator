@@ -73,7 +73,7 @@ fun Title(backPage: () -> Unit) {
         )
         Text(
             stringResource(R.string.recent),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 20.sp,
             color = Black,
             modifier = Modifier.padding(start = 10.dp)

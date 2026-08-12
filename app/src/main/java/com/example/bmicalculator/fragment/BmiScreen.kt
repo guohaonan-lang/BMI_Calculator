@@ -86,7 +86,7 @@ fun Title(timeStr: String, navToRecent: () -> Unit) {
         ) {
             Text(
                 "BMI",
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 fontSize = 24.sp
             )
             Text(

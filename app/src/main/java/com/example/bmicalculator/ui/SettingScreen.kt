@@ -141,7 +141,7 @@ fun SettingTitle(backClick: () -> Unit) {
         )
         Text(
             text = stringResource(R.string.setting_me),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 20.sp,
             modifier = Modifier.padding(start = 10.dp)
         )
@@ -184,7 +184,7 @@ fun UserMessage(
 
         Text(
             text = if (uiState.value.userLoading) uiState.value.userName else stringResource(R.string.setting_backup_restore),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 16.sp,
             modifier = Modifier.constrainAs(userName) {
                 if (uiState.value.userLoading) {
@@ -413,7 +413,7 @@ fun UserBottomDialog(
                 )
             Text(
                 text = "Cassie",
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 fontSize = 16.sp,
                 color = Black,
                 modifier = Modifier.constrainAs(userName) {
@@ -477,7 +477,7 @@ fun UserBottomDialog(
                     if (loading) stringResource(R.string.log_out) else stringResource(
                         R.string.log_in
                     ),
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     fontSize = 20.sp,
                     color = if (loading) Red else Black
                 )
@@ -499,7 +499,7 @@ fun UserBottomDialog(
             ) {
                 Text(
                     stringResource(R.string.dialog_delete_cancel_text),
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     fontSize = 20.sp
                 )
             }
@@ -538,7 +538,7 @@ fun AutoDataDialog(autoShow: Boolean, cancelClick: () -> Unit) {
                 )
                 Text(
                     stringResource(R.string.sorry_for_the_inconvenience),
-                    fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                    fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                     fontSize = 20.sp,
                     modifier = Modifier.padding(horizontal = 0.dp)
                 )
@@ -564,7 +564,7 @@ fun AutoDataDialog(autoShow: Boolean, cancelClick: () -> Unit) {
                 ) {
                     Text(
                         stringResource(R.string.data_done),
-                        fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                        fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                         fontSize = 20.sp
                     )
                 }

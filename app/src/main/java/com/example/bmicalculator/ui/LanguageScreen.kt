@@ -92,7 +92,7 @@ fun LanguageTitle(function: () -> Unit) {
         )
         Text(
             stringResource(R.string.language_options),
-            fontFamily = FontFamily(Font(R.font.font_extrabold)),
+            fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 20.sp,
             modifier = Modifier.padding(start = 10.dp)
         )

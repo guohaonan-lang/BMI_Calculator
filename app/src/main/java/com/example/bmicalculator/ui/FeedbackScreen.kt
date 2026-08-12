@@ -59,7 +59,7 @@ fun FeedbackScreen(viewmodel: FeedbackViewModel) {
             )
             Text(
                 stringResource(R.string.setting_feedback),
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 fontSize = 20.sp,
                 modifier = Modifier.padding(start = 10.dp)
             )
@@ -104,7 +104,7 @@ fun FeedbackScreen(viewmodel: FeedbackViewModel) {
         ) {
             Text(
                 stringResource(R.string.result_save),
-                fontFamily = FontFamily(Font(R.font.font_extrabold)),
+                fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
                 fontSize = 20.sp
             )
         }
