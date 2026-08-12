@@ -10,20 +10,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySplashBinding
 import com.example.bmicalculator.util.LangHelper
-import com.example.bmicalculator.viewmodel.BmiViewModel
+import com.example.bmicalculator.viewmodel.SplashViewModel
 import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
-    private val viewModel: BmiViewModel by viewModels {
+    private val viewModel: SplashViewModel by viewModels {
         val db = BmiDatabase.getDatabase(this)
-        BmiViewModel.provideFactory(BmiRepository(db.bmiDao()))
+        SplashViewModel.provideFactory(BmiRepository(db.bmiDao()))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,70 +44,35 @@ class SplashActivity : AppCompatActivity() {
 
         // 初始化语言
         val savedLang = LangHelper.getSavedLang(this)
-        LangHelper.setLanguage(this,savedLang)
+        LangHelper.setLanguage(this, savedLang)
 
 
         // ========== 方案A：初始化Compose容器 ==========
         binding.composeView.setContent {
             MaterialTheme() {
-                // 这里放Compose页面，目前可以先空着，后续逐步迁移UI
-                // 示例：你后续想要增加Compose文字、加载提示等写在这里
-                // SplashComposeOverlay()
+                SplashScreen(viewModel)
             }
         }
 
-        var isFirst: Long = 0
         lifecycleScope.launch {
-            isFirst = viewModel.countBmiRecord()
-        }
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.effect.collect { effect ->
+                    when (effect) {
 
-        // 确保在布局完全测量并绘制到屏幕后，再触发动画
-        binding.main.post {
-
-            val density = resources.displayMetrics.density
-            val movePx = -(150 * density)
-            val bezierInterpolator = PathInterpolator(0.25f, 0f, 0.1f, 0.1f)
-            val moveDuration = 750L
-
-            listOf(binding.splash2, binding.splash3, binding.splash4).forEach { view ->
-                view.animate()
-                    .translationY(movePx)
-                    .alpha(1f)
-                    .setDuration(moveDuration)
-                    .withLayer()
-                    .start()
-            }
-            val pointer = binding.splash2
-
-            // 设置旋转支点
-            pointer.pivotX = pointer.width / 2f
-            pointer.pivotY = pointer.height.toFloat() * 0.9f
-
-            binding.splash2.animate()
-                .rotation(50f)
-                .setDuration(moveDuration)
-                .setInterpolator(bezierInterpolator)
-                .withLayer()
-                .withEndAction {
-                    // 第二段：1~2s 回弹 -60°，总时长1000ms
-                    binding.splash2.animate()
-                        .rotation(-30f) // 转回初始位置
-                        .setDuration(moveDuration)
-                        .setInterpolator(bezierInterpolator)
-                        .withLayer()
-                        .withEndAction {
-
-                            var intent = Intent(this@SplashActivity, MainActivity::class.java)
-                            if (isFirst.toInt() == 0) {
-                                intent = Intent(this@SplashActivity, DataInputActivity::class.java)
-                            }
+                        is SplashViewModel.SplashEffect.NavInputActEffect -> {
+                            val intent = Intent(this@SplashActivity, DataInputActivity::class.java)
                             startActivity(intent)
                             finish()
                         }
-                        .start()
-                }
-                .start()
 
+                        is SplashViewModel.SplashEffect.NavInputFraEffect -> {
+                            val intent = Intent(this@SplashActivity, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
+                }
+            }
         }
     }
 }
