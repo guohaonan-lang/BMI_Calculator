@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui.Home
+package com.example.bmicalculator.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -41,7 +43,7 @@ fun BmiScreen(viewModel: BmiFragmentViewModel) {
             .background(
                 color = White
             )
-            .padding(top = 25.dp)
+            .statusBarsPadding()
     ) {
         Title(
             "${stringResource(uiState.value.timeMonthInt)} ${uiState.value.timeDay}, ${uiState.value.timeYear}"
@@ -82,7 +84,7 @@ fun Title(timeStr: String, navToRecent: () -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 15.dp, end = 15.dp, top = 15.dp),
+                .padding(start = 15.dp, end = 15.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(

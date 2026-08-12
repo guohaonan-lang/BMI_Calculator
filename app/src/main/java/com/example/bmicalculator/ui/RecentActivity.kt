@@ -2,25 +2,17 @@ package com.example.bmicalculator.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
-import com.example.bmicalculator.databinding.ActivityRecentBinding
 import com.example.bmicalculator.viewmodel.RecentViewModel
 import kotlinx.coroutines.launch
 
-class RecentActivity : BaseActivity<ActivityRecentBinding>() {
-
-    override fun inflateBinding(inflater: LayoutInflater): ActivityRecentBinding {
-        return ActivityRecentBinding.inflate(inflater)
-    }
+class RecentActivity : BaseActivity() {
 
     //创建viewmodel
     private val viewModel: RecentViewModel by viewModels {
@@ -30,23 +22,16 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        setContent {
+            RecentScreen(viewModel)
         }
 
-        binding.recentCompose.apply {
-
-            setContent {
-                RecentScreen(viewModel)
-            }
-        }
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
-                    when(effect){
+                    when (effect) {
                         is RecentViewModel.RecentEffect.NavToBack -> finish()
                         is RecentViewModel.RecentEffect.NavToResult -> {
                             val intent = Intent(this@RecentActivity, ResultActivity::class.java)

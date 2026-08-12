@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -84,7 +85,8 @@ fun SplashScreen(viewModel: SplashViewModel) {
             .background(Blue)
             .onGloballyPositioned { coordinates ->
                 parentHeightPx = coordinates.size.height
-            },
+            }
+            .systemBarsPadding(),
     ) {
         val (colorWheel, pointer, appName, brand) = createRefs()
 

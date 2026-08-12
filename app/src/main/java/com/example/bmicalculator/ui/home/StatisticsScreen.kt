@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui.Home
+package com.example.bmicalculator.ui.home
 
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,7 +65,8 @@ fun StatisticsScreen(viewModel: StatisticsFragmentViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(color = Background)
-            .padding(start = 15.dp, end = 15.dp, top = 40.dp)
+            .padding(start = 15.dp, end = 15.dp)
+            .statusBarsPadding()
     ) {
         Text(
             text = stringResource(R.string.statistics),

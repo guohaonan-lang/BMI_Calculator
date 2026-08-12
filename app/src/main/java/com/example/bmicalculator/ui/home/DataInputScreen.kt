@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui.Home
+package com.example.bmicalculator.ui.home
 
 import android.content.Context
 import android.content.Intent
@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -104,7 +106,7 @@ fun InputScreen(
     modifier: Modifier = Modifier
         .fillMaxSize()
         .background(Background)
-        .padding(top = 25.dp),
+        .statusBarsPadding(),
 ) {
     val context = LocalContext.current
 
@@ -237,13 +239,13 @@ fun TitleText(context: Context) {
             fontFamily = FontFamily(Font(R.font.font_bold_extrabold)),
             fontSize = 24.sp,
             color = Black,
-            modifier = Modifier.padding(start = 15.dp, top = 18.dp)
+            modifier = Modifier.padding(start = 15.dp)
         )
         Image(
             painter = painterResource(R.drawable.settings_user),
             contentDescription = null,
             modifier = Modifier
-                .padding(start = 15.dp, top = 18.dp)
+                .padding(start = 15.dp)
                 .padding(end = 15.dp)
                 .size(30.dp)
                 .clickable(

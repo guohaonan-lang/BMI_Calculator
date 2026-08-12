@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui.Home
+package com.example.bmicalculator.ui.home
 
 import android.content.Intent
 import android.widget.Toast
@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.PrimaryTabRow
@@ -104,6 +106,7 @@ fun MainScreen() {
                         intent.putExtra("FATHER", effect.isFirst)
                         context.startActivity(intent)
                     }
+
                     is InputFragmentViewModel.InputEffect.ShowToast -> {
                         effect.msgResId?.let { id ->
                             val str = context.getString(id)
@@ -117,7 +120,9 @@ fun MainScreen() {
         launch {
             statisticsEffect.collect { effect ->
                 when (effect) {
-                    is StatisticsFragmentViewModel.StatisticsEffect.InputPageEffect -> pageState.animateScrollToPage(0)
+                    is StatisticsFragmentViewModel.StatisticsEffect.InputPageEffect -> pageState.animateScrollToPage(
+                        0
+                    )
                 }
             }
         }
@@ -126,6 +131,8 @@ fun MainScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(White)
+            .navigationBarsPadding()
     ) {
         HorizontalPager(
             state = pageState,
@@ -148,7 +155,7 @@ fun MainScreen() {
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             Color.Black.copy(alpha = 0.1f),
-                            Color.Transparent
+                            Color.White
                         )
                     )
                 )
@@ -156,8 +163,7 @@ fun MainScreen() {
         PrimaryTabRow(
             selectedTabIndex = pageState.currentPage,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp),
+                .fillMaxWidth(),
             indicator = {}
         ) {
             tabItems.forEach { item ->
@@ -169,7 +175,9 @@ fun MainScreen() {
                             pageState.animateScrollToPage(tabItems.indexOf(item))
                         }
                     },
-                    modifier = Modifier.background(White),
+                    modifier = Modifier
+                        .background(White)
+                        .padding(vertical = 10.dp),
                     content = {
                         Column(
                             modifier = Modifier
