@@ -41,6 +41,7 @@ fun BmiScreen(viewModel: BmiFragmentViewModel) {
             .background(
                 color = White
             )
+            .padding(top = 25.dp)
     ) {
         Title(
             "${stringResource(uiState.value.timeMonthInt)} ${uiState.value.timeDay}, ${uiState.value.timeYear}"

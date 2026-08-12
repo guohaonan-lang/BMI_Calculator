@@ -17,10 +17,10 @@
             android:exported="false"
             android:theme="@style/Theme.BMICalculator" />
         <activity
-            android:name=".ui.FeedbackActivity"
+            android:name=".ui.setting.FeedbackActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.LanguageActivity"
+            android:name=".ui.setting.LanguageActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
@@ -28,7 +28,7 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.SettingActivity"
+            android:name=".ui.setting.SettingActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity

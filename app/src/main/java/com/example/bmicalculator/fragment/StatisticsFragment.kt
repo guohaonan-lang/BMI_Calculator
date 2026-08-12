@@ -48,7 +48,7 @@ class StatisticsFragment : Fragment() {
                     when (effect) {
                         is StatisticsFragmentViewModel.StatisticsEffect.InputPageEffect -> {
                             val mainActivity = requireActivity() as MainActivity
-                            mainActivity.binding.mainViewpage2.currentItem = 0
+//                            mainActivity.binding.mainViewpage2.currentItem = 0
                         }
                     }
                 }

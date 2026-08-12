@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui
+package com.example.bmicalculator.ui.setting
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.databinding.ActivityFeedbackBinding
+import com.example.bmicalculator.ui.BaseActivity
 import com.example.bmicalculator.viewmodel.FeedbackViewModel
 import kotlinx.coroutines.launch
 
@@ -19,8 +20,8 @@ class FeedbackActivity : BaseActivity<ActivityFeedbackBinding>() {
         return ActivityFeedbackBinding.inflate(inflater)
     }
 
-    private val viewmodel : FeedbackViewModel by viewModels{
-        FeedbackViewModel.provideFactory()
+    private val viewmodel : FeedbackViewModel by viewModels {
+        FeedbackViewModel.Companion.provideFactory()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

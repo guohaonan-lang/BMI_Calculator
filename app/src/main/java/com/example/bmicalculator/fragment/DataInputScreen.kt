@@ -73,7 +73,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bigkoo.pickerview.adapter.ArrayWheelAdapter
 import com.contrarywind.view.WheelView
 import com.example.bmicalculator.R
-import com.example.bmicalculator.ui.SettingActivity
+import com.example.bmicalculator.ui.setting.SettingActivity
 import com.example.bmicalculator.ui.theme.BMIComposeTheme
 import com.example.bmicalculator.ui.theme.Background
 import com.example.bmicalculator.ui.theme.Black
@@ -103,7 +103,8 @@ fun InputScreen(
     viewModel: InputFragmentViewModel,
     modifier: Modifier = Modifier
         .fillMaxSize()
-        .background(Background),
+        .background(Background)
+        .padding(top = 25.dp),
 ) {
     val context = LocalContext.current
 
@@ -340,7 +341,7 @@ fun WeightAndHeightInput(
                         val integerPart = temp.take(dotPosition)
                         val decimalPart = temp.substring(dotPosition + 1).take(2)
                         temp = "$integerPart.$decimalPart"
-                    }else
+                    }
                     viewModel.processIntent(DataInputIntent.SetHeight(temp))
                 },
                 modifier = Modifier
@@ -1097,7 +1098,7 @@ fun AgeHorizontalPicker(
             fontFamily = FontFamily(Font(R.font.font_regular)),
             fontSize = 14.sp,
             modifier = Modifier
-                .padding(top = 30.dp),
+                .padding(top = 30.dp, bottom = 15.dp),
             color = Black,
         )
     }

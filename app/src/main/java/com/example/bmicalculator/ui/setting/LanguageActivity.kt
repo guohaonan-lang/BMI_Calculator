@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui
+package com.example.bmicalculator.ui.setting
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,13 +10,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.databinding.ActivityLanguageBinding
+import com.example.bmicalculator.ui.BaseActivity
 import com.example.bmicalculator.util.LangHelper
 import com.example.bmicalculator.viewmodel.LanguageViewModel
 import kotlinx.coroutines.launch
 
 class LanguageActivity : BaseActivity<ActivityLanguageBinding>() {
     private val viewModel: LanguageViewModel by viewModels {
-        LanguageViewModel.provideFactory()
+        LanguageViewModel.Companion.provideFactory()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

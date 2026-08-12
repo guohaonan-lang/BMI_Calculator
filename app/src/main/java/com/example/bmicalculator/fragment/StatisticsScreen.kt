@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -60,8 +61,9 @@ fun StatisticsScreen(viewModel: StatisticsFragmentViewModel) {
 
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .background(color = Background)
-            .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+            .padding(start = 15.dp, end = 15.dp, top = 40.dp)
     ) {
         Text(
             text = stringResource(R.string.statistics),

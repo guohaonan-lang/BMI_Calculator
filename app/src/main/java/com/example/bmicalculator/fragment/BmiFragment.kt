@@ -60,7 +60,7 @@ class BmiFragment : Fragment() {
                     when (effect) {
                         is BmiFragmentViewModel.BmiEffect.NavToInput -> {
                             val mainActivity = requireActivity() as MainActivity
-                            mainActivity.binding.mainViewpage2.currentItem = 0
+//                            mainActivity.binding.mainViewpage2.currentItem = 0
                         }
 
                         is BmiFragmentViewModel.BmiEffect.NavToRecent -> {

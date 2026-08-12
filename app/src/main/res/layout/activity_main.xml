@@ -8,21 +8,9 @@
     tools:context=".ui.MainActivity"
     android:background="@color/white">
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/main_viewpage2"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/main_compose"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/main_table"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/main_table"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        app:tabPaddingTop="10dp"
-        android:background="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:tabIndicator="@null" />
+        android:layout_height="match_parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

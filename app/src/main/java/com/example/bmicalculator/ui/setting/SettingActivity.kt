@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui
+package com.example.bmicalculator.ui.setting
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,6 +14,9 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySettingBinding
+import com.example.bmicalculator.ui.BaseActivity
+import com.example.bmicalculator.ui.setting.FeedbackActivity
+import com.example.bmicalculator.ui.setting.LanguageActivity
 import com.example.bmicalculator.viewmodel.SettingViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
@@ -24,8 +27,8 @@ class SettingActivity : BaseActivity<ActivitySettingBinding>() {
     }
 
     private val viewModel: SettingViewModel by viewModels {
-        val db = BmiDatabase.getDatabase(this)
-        SettingViewModel.provideFactory(BmiRepository(db.bmiDao()))
+        val db = BmiDatabase.Companion.getDatabase(this)
+        SettingViewModel.Companion.provideFactory(BmiRepository(db.bmiDao()))
     }
     private lateinit var userBottomSheetDialog: BottomSheetDialog
 

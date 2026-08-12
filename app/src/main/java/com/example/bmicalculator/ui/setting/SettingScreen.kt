@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui
+package com.example.bmicalculator.ui.setting
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
