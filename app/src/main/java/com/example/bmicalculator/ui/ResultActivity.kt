@@ -19,6 +19,7 @@ import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivityResultBinding
 import com.example.bmicalculator.model.BmiEntity
+import com.example.bmicalculator.ui.Home.MainActivity
 import com.example.bmicalculator.viewmodel.ResultViewModel
 import kotlinx.coroutines.launch
 

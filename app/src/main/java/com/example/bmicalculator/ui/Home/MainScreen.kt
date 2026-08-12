@@ -1,4 +1,4 @@
-package com.example.bmicalculator.ui
+package com.example.bmicalculator.ui.Home
 
 import android.content.Intent
 import android.widget.Toast
@@ -34,9 +34,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
-import com.example.bmicalculator.fragment.BmiScreen
-import com.example.bmicalculator.fragment.InputScreen
-import com.example.bmicalculator.fragment.StatisticsScreen
+import com.example.bmicalculator.ui.RecentActivity
+import com.example.bmicalculator.ui.ResultActivity
 import com.example.bmicalculator.ui.theme.Black
 import com.example.bmicalculator.ui.theme.White
 import com.example.bmicalculator.viewmodel.BmiFragmentViewModel

@@ -1,21 +1,14 @@
-package com.example.bmicalculator.ui
+package com.example.bmicalculator.ui.Home
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmicalculator.R
 import com.example.bmicalculator.databinding.ActivityMainBinding
+import com.example.bmicalculator.ui.BaseActivity
 import com.example.bmicalculator.viewmodel.MainViewModel
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun inflateBinding(inflater: LayoutInflater): ActivityMainBinding {
@@ -23,7 +16,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     private val viewModel: MainViewModel by viewModels {
-        MainViewModel.provideFactory()
+        MainViewModel.Companion.provideFactory()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,18 +34,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             }
         }
 
-        initDataFlow()
-
-    }
-
-    private fun initDataFlow() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.bmi.collect { item ->
-
-                }
-            }
-        }
     }
 
 }

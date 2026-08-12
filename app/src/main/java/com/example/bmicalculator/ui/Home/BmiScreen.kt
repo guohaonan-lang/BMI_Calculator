@@ -1,4 +1,4 @@
-package com.example.bmicalculator.fragment
+package com.example.bmicalculator.ui.Home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

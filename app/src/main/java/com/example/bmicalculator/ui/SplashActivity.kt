@@ -17,6 +17,7 @@ import com.example.bmicalculator.R
 import com.example.bmicalculator.data.BmiDatabase
 import com.example.bmicalculator.data.BmiRepository
 import com.example.bmicalculator.databinding.ActivitySplashBinding
+import com.example.bmicalculator.ui.Home.MainActivity
 import com.example.bmicalculator.util.LangHelper
 import com.example.bmicalculator.viewmodel.SplashViewModel
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.example.bmicalculator.fragment
+package com.example.bmicalculator.ui.Home
 
 import android.content.Context
 import android.content.Intent
